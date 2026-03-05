@@ -327,3 +327,6 @@ a:hover { text-decoration: none; }
 .sidebar-nav {
   gap: 14px;
 }
+.priority-low { background: rgba(0, 0, 0, 0.04); }
+.priority-medium { background: rgba(0, 0, 0, 0.06); }
+.priority-high { background: rgba(0, 0, 0, 0.08); }
