@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside>
+    <header class="app-header">
+        <h1 class="app-title">Taskflow - Organiza tus tareas
+        </h1>
+    </header>
+
+    <div class="layout">
+
+     <aside class="sidebar">
+
+         <nav class="sidebar-nav" aria-label="Navegación principal">
+
+        <h2 class="sidebar-heading">Workspace</h2>
+
+        <ul class="sidebar-list">
+            <li><a class= "sidebar-link" href="#">📅 Hoy</a></li>
+            <li><a cñass= "sidebar-link" href="#">📆 Pendientes</a></li>
+            <li><a cñass= "sidebar-link" href="#">📆 Calendario</a></li>
+        </ul>
+
+        <h2>Categorías</h2>
+
+        <ul class="sidebar-list">
+            <li><a class="sidebar-link" href="#">Trabajo</a></li>
+            <li><a class="sidebar-link" href="#">Personal</a></li>
+            <li><a class="sidebar-link" href="#">Estudio</a></li>
+        </ul>
+
+         </nav>
+
+    </aside>
+
+        <main class="content">
+
+            <section class="panel">
+               <h2 class="panel-title">Añadir nueva tarea</h2>
+
+                 <form id="task-form" class="task-form">
+
+                 <input autocomplete="off"
+                 class="task-input"
+                 id="task-input"
+                 type="text" 
+                 placeholder="Escribe una tarea">
+                 <button class="task-submit">Añadir</button>
+
+                </form>
+                
+            </section>
+
+            <section class="panel">
+                
+
+             <h2 class="panel-title">Mis tareas</h2>
+
+             <ul class="task-list" id="task-list"> 
+
+             <li class="task-card">
+                 <span class="task-title">Estudiar JavaScript</span>
+                 <span class="task-category">Estudio</span>
+                 <span class="task-badge">Alta</span>
+             </li>
+             <li class="task-card">
+                 <span class="task-title">Organizar base de datos recetas</span>
+                 <span class="task-category">Personal</span>
+                 <span class="task-badge">Baja</span>
+             </li>
+             <li class="task-card">
+                 <span class="task-title">Ir al gimnasio</span>
+                 <span class="task-category">Personal</span>
+                 <span class="task-badge">Baja</span>
+             </li>
+             <li class="task-card">
+                 <span class="task-title">Pagar factura luz</span>
+                 <span class="task-category">Personal</span>
+                 <span class="task-badge">Alta</span>
+             </li>
+
+             </ul>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
