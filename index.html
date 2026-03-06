@@ -1,93 +1,272 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow</title>
-    <link rel="stylesheet" href="css/output.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaskFlow</title>
+<link rel="stylesheet" href="css/output.css" />
 </head>
+
 <body class="bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-  <header class="sticky top-0 z-20 border-b border-zinc-200/70 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/70">
-    <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-      <h1 class="text-lg font-semibold tracking-tight">TaskFlow — Organiza tus tareas</h1>
+<header class="sticky top-0 z-30 border-b border-zinc-200/70 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/70">
+<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+<h1 class="text-lg font-semibold tracking-tight">TaskFlow — Organiza tus tareas</h1>
 
-      <button
-        id="theme-toggle"
-        type="button"
-        class="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-medium
-               transition hover:bg-zinc-100 focus:outline-none focus:ring-4 focus:ring-zinc-200
-               dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:focus:ring-zinc-800"
-      >
-        🌙/☀️
-      </button>
-    </div>
-  </header>
-
-  <div class="mx-auto flex max-w-5xl gap-6 px-6 py-6">
-    <aside class="w-72 shrink-0 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-      <nav class="space-y-5">
-        <section>
-          <h2 class="mb-2 text-xs font-bold tracking-widest text-zinc-500 dark:text-zinc-400">WORKSPACE</h2>
-          <ul class="space-y-1">
-            <li><a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-800 transition hover:bg-zinc-100 dark:text-zinc-100 dark:hover:bg-zinc-800/60" href="#">📅 Hoy</a></li>
-            <li><a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/60" href="#">📌 Pendientes</a></li>
-            <li><a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/60" href="#">🗓️ Calendario</a></li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 class="mb-2 text-xs font-bold tracking-widest text-zinc-500 dark:text-zinc-400">CATEGORÍAS</h2>
-          <ul class="space-y-1">
-            <li><a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/60" href="#">💼 Trabajo</a></li>
-            <li><a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/60" href="#">🏠 Personal</a></li>
-            <li><a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/60" href="#">📚 Estudio</a></li>
-          </ul>
-        </section>
-      </nav>
-    </aside>
-
-    <main class="flex-1 space-y-6">
-      <section class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
-        <h2 class="mb-3 text-xl font-semibold tracking-tight">Añadir nueva tarea</h2>
-<form id="task-form" class="flex flex-col gap-2 sm:flex-row sm:items-center">
-  <input
-    id="task-input"
-    class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm
-           transition focus:outline-none focus:ring-4 focus:ring-zinc-200
-           dark:border-zinc-800 dark:bg-zinc-950 dark:focus:ring-zinc-800"
-    type="text"
-    placeholder="Escribe una tarea"
-    autocomplete="off"
-  />
-  <button
-    type="submit"
-    class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold
-           transition hover:bg-zinc-100 focus:outline-none focus:ring-4 focus:ring-zinc-200
-           dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:focus:ring-zinc-800"
-  >
-    Añadir
-  </button>
-</form>
-      </section>
-
-      <section class="space-y-3">
-        <h2 class="text-xl font-semibold tracking-tight">Mis tareas</h2>
-
-        <input
-          id="search-input"
-          class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm
-                 transition focus:outline-none focus:ring-4 focus:ring-zinc-200
-                 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:ring-zinc-800"
-          type="text"
-          placeholder="Buscar tareas…"
-          autocomplete="off"
-        />
-
-        <ul id="task-list" class="space-y-2"></ul>
-      </section>
-    </main>
+<button
+id="theme-toggle"
+type="button"
+aria-label="Alternar tema"
+class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-medium shadow-sm
+transition duration-200 ease-out hover:bg-zinc-100 active:scale-[0.98]
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:focus:ring-zinc-800"
+>
+<span id="theme-icon" aria-hidden="true">🌙</span>
+<span id="theme-text">Oscuro</span>
+</button>
 </div>
-<script src="app.js" defer></script>
+</header>
 
+<div class="mx-auto flex max-w-6xl gap-6 px-6 py-6 max-lg:flex-col">
+<aside class="w-72 shrink-0 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40 max-lg:w-full">
+<nav class="space-y-6">
+<section>
+<h2 class="mb-2 text-xs font-bold tracking-widest text-zinc-500 dark:text-zinc-400">
+WORKSPACE
+</h2>
+
+<div class="space-y-1">
+<button
+type="button"
+data-view="all"
+class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
+transition duration-200 ease-out hover:bg-zinc-100
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800"
+>
+<span class="flex items-center gap-2">📅 Hoy</span>
+<span id="all-count" class="w-6 text-right text-xs text-zinc-500 dark:text-zinc-400">0</span>
+</button>
+
+<button
+type="button"
+data-view="pending"
+class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
+transition duration-200 ease-out hover:bg-zinc-100
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800"
+>
+<span class="flex items-center gap-2">📌 Pendientes</span>
+<span id="pending-count" class="w-6 text-right text-xs text-zinc-500 dark:text-zinc-400">0</span>
+</button>
+
+<button
+type="button"
+data-view="completed"
+class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
+transition duration-200 ease-out hover:bg-zinc-100
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800"
+>
+<span class="flex items-center gap-2">✅ Completadas</span>
+<span id="completed-count" class="w-6 text-right text-xs text-zinc-500 dark:text-zinc-400">0</span>
+</button>
+</div>
+</section>
+
+<section>
+<div class="mb-2 flex items-center justify-between">
+<h2 class="text-xs font-bold tracking-widest text-zinc-500 dark:text-zinc-400">
+CATEGORÍAS
+</h2>
+
+<button
+id="clear-category-filter"
+type="button"
+class="inline-flex h-6 items-center rounded-md border border-zinc-200 bg-white px-2 text-[10px] font-medium text-zinc-500 shadow-sm
+transition duration-200 ease-out hover:bg-zinc-100 hover:text-zinc-900
+focus:outline-none focus:ring-2 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus:ring-zinc-800"
+>
+Limpiar
+</button>
+</div>
+
+<div class="space-y-1">
+<button
+type="button"
+data-category-filter="Trabajo"
+class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
+transition duration-200 ease-out hover:bg-zinc-100
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800"
+>
+<span class="flex items-center gap-2">💼 Trabajo</span>
+<span id="count-trabajo" class="w-6 text-right text-xs text-zinc-500 dark:text-zinc-400">0</span>
+</button>
+
+<button
+type="button"
+data-category-filter="Personal"
+class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
+transition duration-200 ease-out hover:bg-zinc-100
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800"
+>
+<span class="flex items-center gap-2">🏠 Personal</span>
+<span id="count-personal" class="w-6 text-right text-xs text-zinc-500 dark:text-zinc-400">0</span>
+</button>
+
+<button
+type="button"
+data-category-filter="Estudio"
+class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
+transition duration-200 ease-out hover:bg-zinc-100
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800"
+>
+<span class="flex items-center gap-2">📚 Estudio</span>
+<span id="count-estudio" class="w-6 text-right text-xs text-zinc-500 dark:text-zinc-400">0</span>
+</button>
+</div>
+</section>
+</nav>
+</aside>
+
+<main class="flex-1 space-y-6">
+<section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+<h2 class="mb-5 text-xl font-semibold tracking-tight">Añadir nueva tarea</h2>
+
+<form id="task-form" class="flex flex-wrap items-center gap-3">
+<input
+id="task-input"
+type="text"
+placeholder="Escribe una tarea"
+autocomplete="off"
+class="min-w-[260px] flex-1 rounded-2xl border border-zinc-200 bg-white px-4 py-3.5 text-sm shadow-sm
+transition duration-200 ease-out hover:border-zinc-300
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:focus:ring-zinc-800"
+/>
+
+<div class="relative w-full sm:w-44">
+<select
+id="task-category"
+class="w-full appearance-none rounded-2xl border border-zinc-200 bg-white px-4 py-3.5 pr-10 text-sm shadow-sm
+transition duration-200 ease-out hover:border-zinc-300
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:focus:ring-zinc-800"
+>
+<option value="Trabajo">Trabajo</option>
+<option value="Personal" selected>Personal</option>
+<option value="Estudio">Estudio</option>
+</select>
+<span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-zinc-400">⌄</span>
+</div>
+
+<div class="relative w-full sm:w-40">
+<select
+id="task-priority"
+class="w-full appearance-none rounded-2xl border border-zinc-200 bg-white px-4 py-3.5 pr-10 text-sm shadow-sm
+transition duration-200 ease-out hover:border-zinc-300
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:focus:ring-zinc-800"
+>
+<option value="Alta">Alta</option>
+<option value="Media" selected>Media</option>
+<option value="Baja">Baja</option>
+</select>
+<span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-zinc-400">⌄</span>
+</div>
+
+<button
+type="submit"
+class="inline-flex h-[52px] min-w-[120px] items-center justify-center rounded-2xl
+border border-zinc-300 bg-zinc-100 px-5 text-sm font-semibold text-zinc-900 shadow-sm
+transition duration-200 ease-out hover:bg-zinc-200 active:scale-[0.98]
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 dark:focus:ring-zinc-800"
+>
+➕ Añadir
+</button>
+</form>
+</section>
+
+<section class="space-y-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<h2 class="text-xl font-semibold tracking-tight">Mis tareas</h2>
+<span id="task-count" class="text-sm font-medium text-zinc-500 dark:text-zinc-400">(0)</span>
+</div>
+
+<div class="flex w-full max-w-md items-center gap-2">
+<div class="relative flex-1">
+<span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">🔎</span>
+<input
+id="search-input"
+placeholder="Buscar tareas..."
+class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 pl-10 text-sm shadow-sm
+transition duration-200 ease-out hover:border-zinc-300
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:focus:ring-zinc-800"
+/>
+</div>
+
+<button
+id="clear-search"
+type="button"
+class="hidden rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-600 shadow-sm
+transition duration-200 ease-out hover:bg-zinc-100 hover:text-zinc-900
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus:ring-zinc-800"
+>
+Limpiar búsqueda
+</button>
+</div>
+</div>
+
+<div class="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/60">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<p id="current-context" class="text-sm text-zinc-600 dark:text-zinc-300">
+Vista: Todas · Categoría: Todas
+</p>
+<span id="progress-text" class="text-sm font-medium text-zinc-500 dark:text-zinc-400">0% completado</span>
+</div>
+
+<div class="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+<div
+id="progress-bar"
+class="h-full w-0 rounded-full bg-zinc-900 transition-all duration-300 ease-out dark:bg-zinc-200"
+></div>
+</div>
+</div>
+
+<section id="pending-section" class="space-y-2">
+<h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Pendientes</h3>
+<ul id="task-list" class="space-y-3"></ul>
+</section>
+
+<section id="completed-section" class="space-y-2">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Tareas completadas</h3>
+
+<button
+id="clear-completed"
+class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium shadow-sm
+transition duration-200 ease-out hover:bg-zinc-100
+focus:outline-none focus:ring-4 focus:ring-zinc-200
+dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 dark:focus:ring-zinc-800"
+>
+Vaciar completadas
+</button>
+</div>
+
+<ul id="completed-list" class="space-y-3"></ul>
+</section>
+</section>
+</main>
+</div>
+
+<script src="app.js" defer></script>
 </body>
 </html>
