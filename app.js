@@ -51,6 +51,62 @@ let currentView = "all";
 let currentCategoryFilter = "all";
 let lastAddedTaskId = null;
 
+const CLASSES = {
+priorityBase:
+"inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
+priority: {
+Alta:
+" border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-200",
+Media:
+" border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200",
+Baja:
+" border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300",
+},
+categoryBadge:
+"inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300",
+taskCard: {
+pending:
+"group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm transition duration-200 ease-out hover:bg-zinc-50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/70",
+completed:
+"group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 shadow-sm transition duration-200 ease-out hover:bg-zinc-100 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/70",
+},
+checkButtonBase:
+"inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[11px] font-bold shadow-sm transition duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:focus:ring-zinc-800",
+checkButton: {
+pending:
+" border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white",
+completed:
+" border-zinc-300 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600",
+},
+deleteButton:
+"rounded-xl px-3 py-2 text-xs font-semibold text-zinc-500 transition duration-200 ease-out hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus:ring-zinc-800",
+emptyState:
+"rounded-2xl border border-dashed border-zinc-300 bg-white px-4 py-6 text-sm text-zinc-600 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300",
+sidebar: {
+workspaceBase:
+"workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out ",
+categoryBase:
+"category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out ",
+active:
+"bg-zinc-100 text-zinc-900 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:ring-zinc-700",
+inactive:
+"text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800",
+},
+};
+
+const VIEW_LABELS = {
+all: "Todas",
+pending: "Pendientes",
+completed: "Completadas",
+};
+
+const CATEGORY_LABELS = {
+all: "Todas",
+Trabajo: "Trabajo",
+Personal: "Personal",
+Estudio: "Estudio",
+};
+
 /* =========================
 Storage
 ========================= */
@@ -80,89 +136,38 @@ tasks = [];
 }
 
 /* =========================
-Utilidades UI
+Utilidades
 ========================= */
+
 function safeTrim(value) {
 return (value ?? "").toString().trim();
 }
 
+function getSearchQuery() {
+return safeTrim(searchInput?.value);
+}
+
 function getPriorityClasses(priority) {
-const base =
-"inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold";
-
-if (priority === "Alta") {
-return (
-base +
-" border-red-200 bg-red-50 text-red-700 " +
-"dark:border-red-800 dark:bg-red-950/60 dark:text-red-200"
-);
-}
-
-if (priority === "Media") {
-return (
-base +
-" border-zinc-200 bg-zinc-100 text-zinc-700 " +
-"dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
-);
-}
-
-return (
-base +
-" border-zinc-200 bg-white text-zinc-600 " +
-"dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
-);
+return CLASSES.priorityBase + (CLASSES.priority[priority] ?? CLASSES.priority.Baja);
 }
 
 function getCategoryClasses() {
-return (
-"inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 " +
-"dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
-);
+return CLASSES.categoryBadge;
 }
 
-function getTaskCardClasses() {
-return (
-"group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm " +
-"transition duration-200 ease-out hover:bg-zinc-50 hover:shadow-md " +
-"dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/70"
-);
-}
-
-function getCompletedTaskCardClasses() {
-return (
-"group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 shadow-sm " +
-"transition duration-200 ease-out hover:bg-zinc-100 hover:shadow-md " +
-"dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/70"
-);
+function getTaskCardClasses(completed = false) {
+return completed ? CLASSES.taskCard.completed : CLASSES.taskCard.pending;
 }
 
 function getCheckButtonClasses(completed = false) {
-const base =
-"inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[11px] font-bold shadow-sm " +
-"transition duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:focus:ring-zinc-800";
-
-if (completed) {
 return (
-base +
-" border-zinc-300 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 " +
-"dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600"
-);
-}
-
-return (
-base +
-" border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 " +
-"dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+CLASSES.checkButtonBase +
+(completed ? CLASSES.checkButton.completed : CLASSES.checkButton.pending)
 );
 }
 
 function getDeleteButtonClasses() {
-return (
-"rounded-xl px-3 py-2 text-xs font-semibold text-zinc-500 " +
-"transition duration-200 ease-out hover:bg-zinc-100 hover:text-zinc-900 " +
-"focus:outline-none focus:ring-4 focus:ring-zinc-200 " +
-"dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus:ring-zinc-800"
-);
+return CLASSES.deleteButton;
 }
 
 /* =========================
@@ -211,7 +216,7 @@ return task.category === currentCategoryFilter;
 }
 
 function getVisibleTasks() {
-const query = safeTrim(searchInput?.value);
+const query = getSearchQuery();
 
 const filtered = tasks.filter((task) => {
 const searchOk = query ? matchesSearch(task, query) : true;
@@ -225,23 +230,22 @@ completed: filtered.filter((task) => task.completed),
 };
 }
 
-function updateSidebarState() {
-workspaceButtons.forEach((btn) => {
-const isActive = btn.dataset.view === currentView;
+function setActiveButtonClasses(buttons, { baseClass, isActive }) {
+buttons.forEach((btn) => {
 btn.className =
-"workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out " +
-(isActive
-? "bg-zinc-100 text-zinc-900 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:ring-zinc-700"
-: "text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800");
+baseClass + (isActive(btn) ? CLASSES.sidebar.active : CLASSES.sidebar.inactive);
+});
+}
+
+function updateSidebarState() {
+setActiveButtonClasses(workspaceButtons, {
+baseClass: CLASSES.sidebar.workspaceBase,
+isActive: (btn) => btn.dataset.view === currentView,
 });
 
-categoryFilterButtons.forEach((btn) => {
-const isActive = btn.dataset.categoryFilter === currentCategoryFilter;
-btn.className =
-"category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out " +
-(isActive
-? "bg-zinc-100 text-zinc-900 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:ring-zinc-700"
-: "text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800");
+setActiveButtonClasses(categoryFilterButtons, {
+baseClass: CLASSES.sidebar.categoryBase,
+isActive: (btn) => btn.dataset.categoryFilter === currentCategoryFilter,
 });
 }
 
@@ -250,9 +254,7 @@ Empty state
 ========================= */
 function createEmptyState(message) {
 const li = document.createElement("li");
-li.className =
-"rounded-2xl border border-dashed border-zinc-300 bg-white px-4 py-6 text-sm text-zinc-600 shadow-sm " +
-"dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300";
+li.className = CLASSES.emptyState;
 li.textContent = message;
 return li;
 }
@@ -261,52 +263,33 @@ return li;
 Estado extra UI
 ========================= */
 function updateCounters() {
-const total = tasks.length;
-const pending = tasks.filter((task) => !task.completed).length;
-const completed = tasks.filter((task) => task.completed).length;
-
-const trabajo = tasks.filter((task) => task.category === "Trabajo").length;
-const personal = tasks.filter((task) => task.category === "Personal").length;
-const estudio = tasks.filter((task) => task.category === "Estudio").length;
+const stats = computeStats(tasks);
+const { total, pending, completed, byCategory } = stats;
 
 if (allCount) allCount.textContent = total;
 if (pendingCount) pendingCount.textContent = pending;
 if (completedCount) completedCount.textContent = completed;
 if (taskCount) taskCount.textContent = `(${total})`;
 
-if (trabajoCount) trabajoCount.textContent = trabajo;
-if (personalCount) personalCount.textContent = personal;
-if (estudioCount) estudioCount.textContent = estudio;
+if (trabajoCount) trabajoCount.textContent = byCategory.Trabajo;
+if (personalCount) personalCount.textContent = byCategory.Personal;
+if (estudioCount) estudioCount.textContent = byCategory.Estudio;
 }
 
 function updateCurrentContext() {
-const viewMap = {
-all: "Todas",
-pending: "Pendientes",
-completed: "Completadas",
-};
-
-const categoryMap = {
-all: "Todas",
-Trabajo: "Trabajo",
-Personal: "Personal",
-Estudio: "Estudio",
-};
-
 const parts = [
-`Vista: ${viewMap[currentView]}`,
-`Categoría: ${categoryMap[currentCategoryFilter]}`,
+`Vista: ${VIEW_LABELS[currentView]}`,
+`Categoría: ${CATEGORY_LABELS[currentCategoryFilter]}`,
 ];
 
-const query = safeTrim(searchInput?.value);
+const query = getSearchQuery();
 if (query) parts.push(`Búsqueda: "${query}"`);
 
 if (currentContext) currentContext.textContent = parts.join(" · ");
 }
 
 function updateProgress() {
-const total = tasks.length;
-const completed = tasks.filter((task) => task.completed).length;
+const { total, completed } = computeStats(tasks);
 const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
 
 if (progressBar) progressBar.style.width = `${percent}%`;
@@ -314,7 +297,7 @@ if (progressText) progressText.textContent = `${percent}% completado`;
 }
 
 function updateClearSearchVisibility() {
-const hasQuery = safeTrim(searchInput?.value).length > 0;
+const hasQuery = getSearchQuery().length > 0;
 if (!clearSearchBtn) return;
 clearSearchBtn.classList.toggle("hidden", !hasQuery);
 }
@@ -332,37 +315,58 @@ li.style.transform = "translateY(0)";
 });
 }
 
-function createTaskItem(task, completed = false) {
-const li = document.createElement("li");
-li.dataset.id = task.id;
-li.className = completed ? getCompletedTaskCardClasses() : getTaskCardClasses();
+function createActionButton({
+action,
+id,
+className,
+textContent,
+innerHTML,
+ariaLabel,
+}) {
+const btn = document.createElement("button");
+btn.type = "button";
+btn.dataset.action = action;
+btn.dataset.id = id;
+btn.className = className;
+if (ariaLabel) btn.setAttribute("aria-label", ariaLabel);
+if (innerHTML !== undefined) {
+btn.innerHTML = innerHTML;
+} else if (textContent !== undefined) {
+btn.textContent = textContent;
+}
+return btn;
+}
 
-const left = document.createElement("div");
-left.className = "flex min-w-0 items-center gap-4";
-
-const checkBtn = document.createElement("button");
-checkBtn.type = "button";
-checkBtn.dataset.action = completed ? "restore" : "complete";
-checkBtn.dataset.id = task.id;
-checkBtn.className = getCheckButtonClasses(completed);
-checkBtn.setAttribute(
-"aria-label",
-completed ? "Marcar como pendiente" : "Marcar como completada"
-);
-checkBtn.innerHTML = completed ? "✓" : "";
-
-const textWrap = document.createElement("div");
-textWrap.className = "min-w-0 pr-2";
-
+function createTaskTitle(task, completed) {
 const title = document.createElement("p");
 title.className = completed
 ? "truncate text-sm font-semibold text-zinc-500 line-through dark:text-zinc-400"
 : "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100";
 title.textContent = task.text;
+return title;
+}
 
-textWrap.appendChild(title);
+function createTaskLeft(task, completed) {
+const left = document.createElement("div");
+left.className = "flex min-w-0 items-center gap-4";
+
+const checkBtn = createActionButton({
+action: completed ? "restore" : "complete",
+id: task.id,
+className: getCheckButtonClasses(completed),
+innerHTML: completed ? "✓" : "",
+ariaLabel: completed ? "Marcar como pendiente" : "Marcar como completada",
+});
+
+const textWrap = document.createElement("div");
+textWrap.className = "min-w-0 pr-2";
+textWrap.appendChild(createTaskTitle(task, completed));
+
 left.append(checkBtn, textWrap);
+return left;
+}
 
+function createTaskRight(task) {
 const right = document.createElement("div");
 right.className = "flex items-center gap-2";
 
@@ -374,18 +378,23 @@ const priorityBadge = document.createElement("span");
 priorityBadge.className = getPriorityClasses(task.priority);
 priorityBadge.textContent = task.priority;
 
-right.append(categoryBadge, priorityBadge);
+const deleteBtn = createActionButton({
+action: "delete",
+id: task.id,
+className: getDeleteButtonClasses(),
+textContent: "Borrar",
+});
 
-const deleteBtn = document.createElement("button");
-deleteBtn.type = "button";
-deleteBtn.dataset.action = "delete";
-deleteBtn.dataset.id = task.id;
-deleteBtn.className = getDeleteButtonClasses();
-deleteBtn.textContent = "Borrar";
+right.append(categoryBadge, priorityBadge, deleteBtn);
+return right;
+}
 
-right.append(deleteBtn);
+function createTaskItem(task, completed = false) {
+const li = document.createElement("li");
+li.dataset.id = task.id;
+li.className = getTaskCardClasses(completed);
 
-li.append(left, right);
+li.append(createTaskLeft(task, completed), createTaskRight(task));
 
 if (task.id === lastAddedTaskId && !completed) {
 animateNewItem(li);
@@ -394,50 +403,84 @@ animateNewItem(li);
 return li;
 }
 
-function renderTasks() {
-const { pending, completed } = getVisibleTasks();
-
+function clearTaskLists() {
 taskList.innerHTML = "";
 completedList.innerHTML = "";
+}
 
+function renderMetaUi() {
 updateCounters();
 updateSidebarState();
 updateCurrentContext();
 updateProgress();
 updateClearSearchVisibility();
+}
 
+function renderSectionVisibility() {
 pendingSection.classList.toggle("hidden", currentView === "completed");
 completedSection.classList.toggle("hidden", currentView === "pending");
+}
 
-if (pending.length === 0) {
-taskList.appendChild(
-createEmptyState(
-safeTrim(searchInput?.value)
+function renderTaskListItems(listEl, items, { completed, emptyMessage }) {
+if (items.length === 0) {
+listEl.appendChild(createEmptyState(emptyMessage));
+return;
+}
+
+items.forEach((task) => {
+listEl.appendChild(createTaskItem(task, completed));
+});
+}
+
+function renderTasks() {
+const { pending, completed } = getVisibleTasks();
+const hasQuery = Boolean(getSearchQuery());
+
+clearTaskLists();
+renderMetaUi();
+renderSectionVisibility();
+
+renderTaskListItems(taskList, pending, {
+completed: false,
+emptyMessage: hasQuery
 ? "No hay tareas pendientes que coincidan con tu búsqueda."
-: "Aún no tienes tareas pendientes. Añade la primera arriba 🙂"
-)
-);
-} else {
-pending.forEach((task) => {
-taskList.appendChild(createTaskItem(task, false));
+: "Aún no tienes tareas pendientes. Añade la primera arriba 🙂",
 });
-}
 
-if (completed.length === 0) {
-completedList.appendChild(
-createEmptyState(
-safeTrim(searchInput?.value)
+renderTaskListItems(completedList, completed, {
+completed: true,
+emptyMessage: hasQuery
 ? "No hay tareas completadas que coincidan con tu búsqueda."
-: "Todavía no has completado ninguna tarea."
-)
-);
-} else {
-completed.forEach((task) => {
-completedList.appendChild(createTaskItem(task, true));
+: "Todavía no has completado ninguna tarea.",
 });
-}
 
 lastAddedTaskId = null;
+}
+
+function computeStats(taskList) {
+const total = taskList.length;
+
+let pending = 0;
+let completed = 0;
+const byCategory = {
+Trabajo: 0,
+Personal: 0,
+Estudio: 0,
+};
+
+for (const task of taskList) {
+if (task.completed) {
+completed += 1;
+} else {
+pending += 1;
+}
+
+if (byCategory[task.category] !== undefined) {
+byCategory[task.category] += 1;
+}
+}
+
+return { total, pending, completed, byCategory };
 }
 
 /* =========================
@@ -456,8 +499,7 @@ completedAt: null,
 
 tasks.unshift(task);
 lastAddedTaskId = task.id;
-saveTasks();
-renderTasks();
+commitTasksAndRender();
 }
 
 function setTaskCompleted(id, completed) {
@@ -471,20 +513,17 @@ completedAt: completed ? Date.now() : null,
 : task
 );
 
-saveTasks();
-renderTasks();
+commitTasksAndRender();
 }
 
 function deleteTask(id) {
 tasks = tasks.filter((task) => task.id !== id);
-saveTasks();
-renderTasks();
+commitTasksAndRender();
 }
 
 function clearCompletedTasks() {
 tasks = tasks.filter((task) => !task.completed);
-saveTasks();
-renderTasks();
+commitTasksAndRender();
 }
 
 function animateAndComplete(li, id) {
@@ -500,6 +539,11 @@ li.style.transform = "translateY(-6px)";
 setTimeout(() => {
 setTaskCompleted(id, true);
 }, 220);
+}
+
+function commitTasksAndRender() {
+saveTasks();
+renderTasks();
 }
 
 /* =========================
