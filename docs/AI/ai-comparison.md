@@ -1,7 +1,6 @@
 
 # Comparativa entre asistentes de IA
 
-## Qué voy a documentar aquí
 Comparativa entre ChatGPT y Claude en tres tipos de tareas:
 explicación de conceptos técnicos, detección de bugs y generación
 de código a partir de descripciones en lenguaje natural.
