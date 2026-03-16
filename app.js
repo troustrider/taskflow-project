@@ -110,10 +110,19 @@ Estudio: "Estudio",
 /* =========================
 Storage
 ========================= */
+/**
+ * Guarda el array `tasks` en `localStorage`.
+ * @returns {void}
+ */
 function saveTasks() {
 localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
+/**
+ * Carga tareas desde `localStorage` y normaliza su estructura.
+ * Si hay datos inválidos, inicializa `tasks` como arreglo vacío.
+ * @returns {void}
+ */
 function loadTasks() {
 try {
 const raw = localStorage.getItem(STORAGE_KEY);
@@ -139,10 +148,28 @@ tasks = [];
 Utilidades
 ========================= */
 
+/**
+ * Convierte un valor a string y aplica `trim()`.
+ * @param {unknown} value
+ * @returns {string}
+ */
 function safeTrim(value) {
 return (value ?? "").toString().trim();
 }
 
+/**
+ * Normaliza un texto para comparaciones (p.ej. detectar duplicados).
+ * @param {unknown} text
+ * @returns {string}
+ */
+function normalizeTaskText(text) {
+return safeTrim(text).replace(/\s+/g, " ").toLowerCase();
+}
+
+/**
+ * Obtiene el query de búsqueda actual (trim).
+ * @returns {string}
+ */
 function getSearchQuery() {
 return safeTrim(searchInput?.value);
 }
@@ -173,6 +200,11 @@ return CLASSES.deleteButton;
 /* =========================
 Tema
 ========================= */
+/**
+ * Aplica el tema indicado (clase `dark`) y sincroniza el texto/icono.
+ * @param {"dark"|"light"} theme
+ * @returns {void}
+ */
 function applyTheme(theme) {
 const isDark = theme === "dark";
 document.documentElement.classList.toggle("dark", isDark);
@@ -181,6 +213,10 @@ if (themeIcon) themeIcon.textContent = isDark ? "🌙" : "☀️";
 if (themeText) themeText.textContent = isDark ? "Oscuro" : "Claro";
 }
 
+/**
+ * Carga el tema guardado o usa preferencia del sistema.
+ * @returns {void}
+ */
 function loadTheme() {
 const savedTheme = localStorage.getItem(THEME_KEY);
 
@@ -196,6 +232,10 @@ window.matchMedia("(prefers-color-scheme: dark)").matches;
 applyTheme(prefersDark ? "dark" : "light");
 }
 
+/**
+ * Alterna entre tema claro y oscuro y lo persiste.
+ * @returns {void}
+ */
 function toggleTheme() {
 const isDark = document.documentElement.classList.contains("dark");
 const nextTheme = isDark ? "light" : "dark";
@@ -206,15 +246,30 @@ applyTheme(nextTheme);
 /* =========================
 Filtros
 ========================= */
+/**
+ * Determina si una tarea coincide con el texto de búsqueda.
+ * @param {{text: string}} task
+ * @param {string} query
+ * @returns {boolean}
+ */
 function matchesSearch(task, query) {
 return task.text.toLowerCase().includes(query.toLowerCase());
 }
 
+/**
+ * Determina si una tarea coincide con el filtro de categoría actual.
+ * @param {{category: string}} task
+ * @returns {boolean}
+ */
 function matchesCategory(task) {
 if (currentCategoryFilter === "all") return true;
 return task.category === currentCategoryFilter;
 }
 
+/**
+ * Devuelve tareas visibles según búsqueda y categoría.
+ * @returns {{pending: Array<any>, completed: Array<any>}}
+ */
 function getVisibleTasks() {
 const query = getSearchQuery();
 
@@ -237,6 +292,10 @@ baseClass + (isActive(btn) ? CLASSES.sidebar.active : CLASSES.sidebar.inactive);
 });
 }
 
+/**
+ * Actualiza el estado visual (clases) de los botones del sidebar.
+ * @returns {void}
+ */
 function updateSidebarState() {
 setActiveButtonClasses(workspaceButtons, {
 baseClass: CLASSES.sidebar.workspaceBase,
@@ -252,6 +311,11 @@ isActive: (btn) => btn.dataset.categoryFilter === currentCategoryFilter,
 /* =========================
 Empty state
 ========================= */
+/**
+ * Crea un `li` para mostrar un mensaje de lista vacía.
+ * @param {string} message
+ * @returns {HTMLLIElement}
+ */
 function createEmptyState(message) {
 const li = document.createElement("li");
 li.className = CLASSES.emptyState;
@@ -262,6 +326,10 @@ return li;
 /* =========================
 Estado extra UI
 ========================= */
+/**
+ * Actualiza contadores (totales, pendientes, completadas y por categoría).
+ * @returns {void}
+ */
 function updateCounters() {
 const stats = computeStats(tasks);
 const { total, pending, completed, byCategory } = stats;
@@ -276,6 +344,10 @@ if (personalCount) personalCount.textContent = byCategory.Personal;
 if (estudioCount) estudioCount.textContent = byCategory.Estudio;
 }
 
+/**
+ * Actualiza el texto de contexto (vista/categoría/búsqueda).
+ * @returns {void}
+ */
 function updateCurrentContext() {
 const parts = [
 `Vista: ${VIEW_LABELS[currentView]}`,
@@ -288,6 +360,10 @@ if (query) parts.push(`Búsqueda: "${query}"`);
 if (currentContext) currentContext.textContent = parts.join(" · ");
 }
 
+/**
+ * Calcula y muestra el progreso de completado.
+ * @returns {void}
+ */
 function updateProgress() {
 const { total, completed } = computeStats(tasks);
 const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
@@ -296,6 +372,10 @@ if (progressBar) progressBar.style.width = `${percent}%`;
 if (progressText) progressText.textContent = `${percent}% completado`;
 }
 
+/**
+ * Muestra u oculta el botón para limpiar búsqueda.
+ * @returns {void}
+ */
 function updateClearSearchVisibility() {
 const hasQuery = getSearchQuery().length > 0;
 if (!clearSearchBtn) return;
@@ -305,6 +385,11 @@ clearSearchBtn.classList.toggle("hidden", !hasQuery);
 /* =========================
 Render
 ========================= */
+/**
+ * Anima la entrada visual de un item nuevo.
+ * @param {HTMLElement} li
+ * @returns {void}
+ */
 function animateNewItem(li) {
 li.style.opacity = "0";
 li.style.transform = "translateY(8px)";
@@ -315,6 +400,18 @@ li.style.transform = "translateY(0)";
 });
 }
 
+/**
+ * Crea un botón con `data-action` y `data-id`.
+ * @param {{
+ *  action: string,
+ *  id: string,
+ *  className: string,
+ *  textContent?: string,
+ *  innerHTML?: string,
+ *  ariaLabel?: string
+ * }} config
+ * @returns {HTMLButtonElement}
+ */
 function createActionButton({
 action,
 id,
@@ -337,6 +434,12 @@ btn.textContent = textContent;
 return btn;
 }
 
+/**
+ * Crea el nodo de texto (título) de una tarea.
+ * @param {{text: string}} task
+ * @param {boolean} completed
+ * @returns {HTMLParagraphElement}
+ */
 function createTaskTitle(task, completed) {
 const title = document.createElement("p");
 title.className = completed
@@ -389,6 +492,12 @@ right.append(categoryBadge, priorityBadge, deleteBtn);
 return right;
 }
 
+/**
+ * Crea el item visual (`li`) de una tarea.
+ * @param {{id: string, text: string, category: string, priority: string}} task
+ * @param {boolean} [completed=false]
+ * @returns {HTMLLIElement}
+ */
 function createTaskItem(task, completed = false) {
 const li = document.createElement("li");
 li.dataset.id = task.id;
@@ -403,11 +512,19 @@ animateNewItem(li);
 return li;
 }
 
+/**
+ * Limpia ambas listas del DOM (pendientes y completadas).
+ * @returns {void}
+ */
 function clearTaskLists() {
 taskList.innerHTML = "";
 completedList.innerHTML = "";
 }
 
+/**
+ * Actualiza los elementos auxiliares del UI (contadores, progreso, contexto, etc.).
+ * @returns {void}
+ */
 function renderMetaUi() {
 updateCounters();
 updateSidebarState();
@@ -416,11 +533,22 @@ updateProgress();
 updateClearSearchVisibility();
 }
 
+/**
+ * Muestra/oculta secciones según la vista seleccionada.
+ * @returns {void}
+ */
 function renderSectionVisibility() {
 pendingSection.classList.toggle("hidden", currentView === "completed");
 completedSection.classList.toggle("hidden", currentView === "pending");
 }
 
+/**
+ * Renderiza una lista de tareas o su empty-state.
+ * @param {HTMLElement} listEl
+ * @param {Array<any>} items
+ * @param {{completed: boolean, emptyMessage: string}} options
+ * @returns {void}
+ */
 function renderTaskListItems(listEl, items, { completed, emptyMessage }) {
 if (items.length === 0) {
 listEl.appendChild(createEmptyState(emptyMessage));
@@ -432,6 +560,10 @@ listEl.appendChild(createTaskItem(task, completed));
 });
 }
 
+/**
+ * Renderiza toda la pantalla (listas y meta UI) según filtros actuales.
+ * @returns {void}
+ */
 function renderTasks() {
 const { pending, completed } = getVisibleTasks();
 const hasQuery = Boolean(getSearchQuery());
@@ -457,6 +589,11 @@ emptyMessage: hasQuery
 lastAddedTaskId = null;
 }
 
+/**
+ * Calcula estadísticas agregadas de un listado de tareas.
+ * @param {Array<{completed: boolean, category: string}>} taskList
+ * @returns {{ total: number, pending: number, completed: number, byCategory: {Trabajo: number, Personal: number, Estudio: number} }}
+ */
 function computeStats(taskList) {
 const total = taskList.length;
 
@@ -486,10 +623,31 @@ return { total, pending, completed, byCategory };
 /* =========================
 Lógica
 ========================= */
+/**
+ * Añade una tarea validando:
+ * - no vacía
+ * - máximo 300 caracteres
+ * - no duplicada (por texto normalizado)
+ * Persiste y re-renderiza si se añadió correctamente.
+ * @param {string} text
+ * @param {string} category
+ * @param {string} priority
+ * @returns {boolean} `true` si se añadió, `false` si falló validación.
+ */
 function addTask(text, category, priority) {
+const trimmed = safeTrim(text);
+if (!trimmed) return false;
+if (trimmed.length > 300) return false;
+
+const normalized = normalizeTaskText(trimmed);
+const isDuplicate = tasks.some(
+(t) => normalizeTaskText(t.text) === normalized
+);
+if (isDuplicate) return false;
+
 const task = {
 id: crypto.randomUUID(),
-text,
+text: trimmed,
 category,
 priority,
 completed: false,
@@ -500,8 +658,16 @@ completedAt: null,
 tasks.unshift(task);
 lastAddedTaskId = task.id;
 commitTasksAndRender();
+return true;
 }
 
+/**
+ * Marca una tarea como completada o pendiente.
+ * Actualiza `completedAt` acorde y persiste + renderiza.
+ * @param {string} id
+ * @param {boolean} completed
+ * @returns {void}
+ */
 function setTaskCompleted(id, completed) {
 tasks = tasks.map((task) =>
 task.id === id
@@ -516,11 +682,20 @@ completedAt: completed ? Date.now() : null,
 commitTasksAndRender();
 }
 
+/**
+ * Elimina una tarea por id, persiste y renderiza.
+ * @param {string} id
+ * @returns {void}
+ */
 function deleteTask(id) {
 tasks = tasks.filter((task) => task.id !== id);
 commitTasksAndRender();
 }
 
+/**
+ * Elimina todas las tareas completadas, persiste y renderiza.
+ * @returns {void}
+ */
 function clearCompletedTasks() {
 tasks = tasks.filter((task) => !task.completed);
 commitTasksAndRender();
@@ -541,6 +716,10 @@ setTaskCompleted(id, true);
 }, 220);
 }
 
+/**
+ * Guarda y re-renderiza el estado actual.
+ * @returns {void}
+ */
 function commitTasksAndRender() {
 saveTasks();
 renderTasks();
@@ -558,12 +737,43 @@ const priority = prioritySelect?.value ?? "Media";
 
 if (!text) return;
 
-addTask(text, category, priority);
+if (input) input.setCustomValidity("");
+
+if (text.length > 300) {
+if (input) {
+input.setCustomValidity("La tarea no puede superar 300 caracteres.");
+input.reportValidity();
+}
+return;
+}
+
+const normalized = normalizeTaskText(text);
+const isDuplicate = tasks.some((t) => normalizeTaskText(t.text) === normalized);
+if (isDuplicate) {
+if (input) {
+input.setCustomValidity("Ya existe una tarea con ese mismo texto.");
+input.reportValidity();
+}
+return;
+}
+
+const ok = addTask(text, category, priority);
+if (!ok) {
+if (input) {
+input.setCustomValidity("No se pudo añadir la tarea. Revisa el texto.");
+input.reportValidity();
+}
+return;
+}
 
 input.value = "";
 categorySelect.value = "Personal";
 prioritySelect.value = "Media";
 input.focus();
+});
+
+input?.addEventListener("input", () => {
+input.setCustomValidity("");
 });
 
 searchInput?.addEventListener("input", () => {
@@ -600,6 +810,12 @@ if (searchInput) searchInput.value = "";
 renderTasks();
 });
 
+/**
+ * Maneja acciones delegadas en las listas (completar/restaurar/borrar).
+ * Lee `data-action` y `data-id` desde el elemento clickeado.
+ * @param {MouseEvent} event
+ * @returns {void}
+ */
 function handleListActions(event) {
 const actionBtn = event.target.closest("[data-action]");
 if (!actionBtn) return;
