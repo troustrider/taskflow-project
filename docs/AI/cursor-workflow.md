@@ -56,3 +56,75 @@ directamente en el código.
 
 Esto es útil porque mejora la legibilidad del código
 sin tener que escribir la documentación manualmente.
+
+## Model Context Protocol (MCP)
+
+### Qué es MCP
+
+Es un protocolo que permite a la IA conectarse a fuentes de
+información externas, como el sistema de archivos local o
+un repositorio de GitHub. Sin MCP, la IA solo sabe lo que
+le escribes en el chat. Con MCP, puede acceder directamente
+a tus archivos y trabajar con el contexto real del proyecto.
+
+---
+
+### Cómo lo configuré
+
+1. Creé el archivo `.cursor/mcp.json` dentro del proyecto
+2. Añadí esta configuración:
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\Usuario\\Desktop\\FFE Corner Estudios"
+      ]
+    }
+  }
+}
+```
+
+3. Reinicié Cursor
+4. Verifiqué que el servidor `filesystem` aparecía en la
+   configuración de MCP de Cursor
+
+---
+
+### Consultas realizadas con MCP
+
+**1. ¿Qué archivos hay en el proyecto?**
+Listó todos los archivos del proyecto correctamente.
+
+**2. ¿Hay algún archivo duplicado?**
+Respondió que no había archivos duplicados.
+
+**3. ¿Hay funciones sin comentarios JSDoc?**
+Detectó varias funciones sin documentar:
+`getPriorityClasses`, `getCategoryClasses`,
+`getTaskCardClasses`, `getCheckButtonClasses`,
+`getDeleteButtonClasses`, `setActiveButtonClasses`,
+`createTaskLeft`, `createTaskRight` y `animateAndComplete`.
+
+**4. ¿Cuántas líneas tiene app.js?**
+857 líneas.
+
+**5. ¿Hay código duplicado en el proyecto?**
+Detectó duplicación en la validación del formulario
+(el chequeo de máximo 300 caracteres y tareas duplicadas
+estaba repetido en el submit y dentro de `addTask()`),
+y clases Tailwind repetidas en `index.html`.
+
+---
+
+### En qué casos es útil MCP en proyectos reales
+
+MCP es especialmente útil en desarrollo y en cualquier
+contexto de trabajo en equipo. Permite que la IA tenga
+acceso al mismo contexto que todos los miembros del equipo,
+sin necesidad de copiarle información manualmente en cada
+consulta. Esto mejora la precisión de las respuestas y
+ahorra tiempo en tareas de análisis del proyecto.
