@@ -45,11 +45,13 @@ Estado
 ========================= */
 const STORAGE_KEY = "taskflow_tasks_v12";
 const THEME_KEY = "taskflow_theme_v12";
+const MAX_TASK_LENGTH = 300;
 
 let tasks = [];
 let currentView = "all";
 let currentCategoryFilter = "all";
 let lastAddedTaskId = null;
+let editingTaskId = null;
 
 const CLASSES = {
 priorityBase:
@@ -253,7 +255,12 @@ Filtros
  * @returns {boolean}
  */
 function matchesSearch(task, query) {
-return task.text.toLowerCase().includes(query.toLowerCase());
+const q = query.toLowerCase();
+return (
+task.text.toLowerCase().includes(q) ||
+task.category.toLowerCase().includes(q) ||
+task.priority.toLowerCase().includes(q)
+);
 }
 
 /**
@@ -463,7 +470,17 @@ ariaLabel: completed ? "Marcar como pendiente" : "Marcar como completada",
 
 const textWrap = document.createElement("div");
 textWrap.className = "min-w-0 pr-2";
+if (editingTaskId === task.id) {
+const editInput = document.createElement("input");
+editInput.dataset.role = "edit-text";
+editInput.value = task.text;
+editInput.className =
+"w-full min-w-[220px] rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm " +
+"focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:ring-zinc-800";
+textWrap.appendChild(editInput);
+} else {
 textWrap.appendChild(createTaskTitle(task, completed));
+}
 
 left.append(checkBtn, textWrap);
 return left;
@@ -481,6 +498,31 @@ const priorityBadge = document.createElement("span");
 priorityBadge.className = getPriorityClasses(task.priority);
 priorityBadge.textContent = task.priority;
 
+const editBtn =
+editingTaskId === task.id
+? createActionButton({
+action: "edit-save",
+id: task.id,
+className: getDeleteButtonClasses(),
+textContent: "Guardar",
+})
+: createActionButton({
+action: "edit",
+id: task.id,
+className: getDeleteButtonClasses(),
+textContent: "Editar",
+});
+
+const cancelBtn =
+editingTaskId === task.id
+? createActionButton({
+action: "edit-cancel",
+id: task.id,
+className: getDeleteButtonClasses(),
+textContent: "Cancelar",
+})
+: null;
+
 const deleteBtn = createActionButton({
 action: "delete",
 id: task.id,
@@ -488,7 +530,9 @@ className: getDeleteButtonClasses(),
 textContent: "Borrar",
 });
 
-right.append(categoryBadge, priorityBadge, deleteBtn);
+right.append(categoryBadge, priorityBadge, editBtn);
+if (cancelBtn) right.append(cancelBtn);
+right.append(deleteBtn);
 return right;
 }
 
@@ -566,7 +610,16 @@ listEl.appendChild(createTaskItem(task, completed));
  */
 function renderTasks() {
 const { pending, completed } = getVisibleTasks();
-const hasQuery = Boolean(getSearchQuery());
+const query = getSearchQuery();
+const hasQuery = Boolean(query);
+const isHighPriorityQuery = hasQuery && query.toLowerCase().includes("alta");
+
+const emptySearchMessage =
+"No encontré nada con esa búsqueda. Prueba con otras palabras o limpia el filtro.";
+const emptyTrabajoMessage =
+"Por aquí todo tranquilo: no tienes tareas de Trabajo. Añade una cuando lo necesites 💼";
+const emptyHighPriorityMessage =
+"¡Bien! No tienes tareas de alta prioridad ahora mismo. Si surge algo urgente, márcalo como Alta.";
 
 clearTaskLists();
 renderMetaUi();
@@ -575,14 +628,18 @@ renderSectionVisibility();
 renderTaskListItems(taskList, pending, {
 completed: false,
 emptyMessage: hasQuery
-? "No hay tareas pendientes que coincidan con tu búsqueda."
+? (isHighPriorityQuery ? emptyHighPriorityMessage : emptySearchMessage)
+: currentCategoryFilter === "Trabajo"
+? emptyTrabajoMessage
 : "Aún no tienes tareas pendientes. Añade la primera arriba 🙂",
 });
 
 renderTaskListItems(completedList, completed, {
 completed: true,
 emptyMessage: hasQuery
-? "No hay tareas completadas que coincidan con tu búsqueda."
+? (isHighPriorityQuery ? emptyHighPriorityMessage : emptySearchMessage)
+: currentCategoryFilter === "Trabajo"
+? emptyTrabajoMessage
 : "Todavía no has completado ninguna tarea.",
 });
 
@@ -632,18 +689,18 @@ Lógica
  * @param {string} text
  * @param {string} category
  * @param {string} priority
- * @returns {boolean} `true` si se añadió, `false` si falló validación.
+ * @returns {{ ok: true } | { ok: false, error: "EMPTY" | "TOO_LONG" | "DUPLICATE" }}
  */
 function addTask(text, category, priority) {
 const trimmed = safeTrim(text);
-if (!trimmed) return false;
-if (trimmed.length > 300) return false;
+if (!trimmed) return { ok: false, error: "EMPTY" };
+if (trimmed.length > MAX_TASK_LENGTH) return { ok: false, error: "TOO_LONG" };
 
 const normalized = normalizeTaskText(trimmed);
 const isDuplicate = tasks.some(
 (t) => normalizeTaskText(t.text) === normalized
 );
-if (isDuplicate) return false;
+if (isDuplicate) return { ok: false, error: "DUPLICATE" };
 
 const task = {
 id: crypto.randomUUID(),
@@ -658,7 +715,23 @@ completedAt: null,
 tasks.unshift(task);
 lastAddedTaskId = task.id;
 commitTasksAndRender();
-return true;
+return { ok: true };
+}
+
+function updateTaskText(id, text) {
+const trimmed = safeTrim(text);
+if (!trimmed) return { ok: false, error: "EMPTY" };
+if (trimmed.length > MAX_TASK_LENGTH) return { ok: false, error: "TOO_LONG" };
+
+const normalized = normalizeTaskText(trimmed);
+const isDuplicate = tasks.some(
+(t) => t.id !== id && normalizeTaskText(t.text) === normalized
+);
+if (isDuplicate) return { ok: false, error: "DUPLICATE" };
+
+tasks = tasks.map((t) => (t.id === id ? { ...t, text: trimmed } : t));
+commitTasksAndRender();
+return { ok: true };
 }
 
 /**
@@ -739,37 +812,30 @@ if (!text) return;
 
 if (input) input.setCustomValidity("");
 
-if (text.length > 300) {
+const result = addTask(text, category, priority);
+if (!result.ok) {
 if (input) {
-input.setCustomValidity("La tarea no puede superar 300 caracteres.");
+const message =
+result.error === "TOO_LONG"
+? `La tarea no puede superar ${MAX_TASK_LENGTH} caracteres.`
+: result.error === "DUPLICATE"
+? "Ya existe una tarea con ese mismo texto."
+: result.error === "EMPTY"
+? "Escribe una tarea."
+: "No se pudo añadir la tarea. Revisa el texto.";
+
+input.setCustomValidity(message);
 input.reportValidity();
 }
 return;
 }
 
-const normalized = normalizeTaskText(text);
-const isDuplicate = tasks.some((t) => normalizeTaskText(t.text) === normalized);
-if (isDuplicate) {
 if (input) {
-input.setCustomValidity("Ya existe una tarea con ese mismo texto.");
-input.reportValidity();
-}
-return;
-}
-
-const ok = addTask(text, category, priority);
-if (!ok) {
-if (input) {
-input.setCustomValidity("No se pudo añadir la tarea. Revisa el texto.");
-input.reportValidity();
-}
-return;
-}
-
 input.value = "";
-categorySelect.value = "Personal";
-prioritySelect.value = "Media";
 input.focus();
+}
+if (categorySelect) categorySelect.value = "Personal";
+if (prioritySelect) prioritySelect.value = "Media";
 });
 
 input?.addEventListener("input", () => {
@@ -781,6 +847,19 @@ renderTasks();
 });
 
 clearSearchBtn?.addEventListener("click", () => {
+searchInput.value = "";
+renderTasks();
+searchInput.focus();
+});
+
+document.addEventListener("keydown", (event) => {
+if (event.key !== "Escape") return;
+if (editingTaskId && document.activeElement?.matches('input[data-role="edit-text"]')) {
+editingTaskId = null;
+renderTasks();
+return;
+}
+if (!searchInput || !searchInput.value) return;
 searchInput.value = "";
 renderTasks();
 searchInput.focus();
@@ -839,10 +918,61 @@ return;
 if (action === "delete") {
 deleteTask(id);
 }
+
+if (action === "edit") {
+editingTaskId = id;
+renderTasks();
+setTimeout(() => {
+const inputEl = document.querySelector(`li[data-id="${id}"] input[data-role="edit-text"]`);
+inputEl?.focus();
+}, 0);
+return;
+}
+
+if (action === "edit-cancel") {
+editingTaskId = null;
+renderTasks();
+return;
+}
+
+if (action === "edit-save") {
+const inputEl = li?.querySelector('input[data-role="edit-text"]');
+const nextText = inputEl?.value ?? "";
+const result = updateTaskText(id, nextText);
+if (!result.ok && inputEl) {
+const message =
+result.error === "TOO_LONG"
+? `La tarea no puede superar ${MAX_TASK_LENGTH} caracteres.`
+: result.error === "DUPLICATE"
+? "Ya existe una tarea con ese mismo texto."
+: "Escribe una tarea.";
+inputEl.setCustomValidity(message);
+inputEl.reportValidity();
+return;
+}
+editingTaskId = null;
+renderTasks();
+}
 }
 
 taskList?.addEventListener("click", handleListActions);
 completedList?.addEventListener("click", handleListActions);
+
+document.addEventListener("keydown", (event) => {
+if (!editingTaskId) return;
+if (!document.activeElement?.matches('input[data-role="edit-text"]')) return;
+if (event.key === "Escape") {
+editingTaskId = null;
+renderTasks();
+return;
+}
+if (event.key !== "Enter") return;
+const nextText = document.activeElement.value;
+const result = updateTaskText(editingTaskId, nextText);
+if (!result.ok) return;
+editingTaskId = null;
+renderTasks();
+});
 
 clearCompletedBtn?.addEventListener("click", () => {
 clearCompletedTasks();
