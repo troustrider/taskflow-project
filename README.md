@@ -2,14 +2,17 @@
 
 App web de tareas en **vanilla JS** + **Tailwind CSS v4** para organizar pendientes y completadas con búsqueda, filtros, reordenación, modo oscuro y persistencia en `localStorage`.
 
+**Demo en producción:** https://taskflow-project-jet.vercel.app/
+
 ---
 
 ### Funcionalidades
 
-- **Añadir tareas** con categoría (Trabajo, Personal, Estudio, Proyectos, Salud, Errands) y prioridad (Alta, Media, Baja).
+- **Añadir tareas** con categoría (Trabajo, Personal, Estudio, Proyectos, Salud, Gestiones) y prioridad (Alta, Media, Baja).
 - **Validaciones** al añadir o editar: máximo 300 caracteres, no permite duplicados (comparación normalizada, insensible a mayúsculas y espacios extra).
 - **Editar tareas** en línea: botón `Editar` activa un input inline; `Guardar` o `Enter` confirman; `Cancelar` o `Esc` descartan.
 - **Completar / restaurar tareas**: botón de check en cada tarjeta. Al completar, la tarjeta se anima y se mueve a la sección de completadas.
+- **Completar todas las pendientes** de golpe con el botón `Completar todas`.
 - **Borrar tareas** individualmente o vaciar todas las completadas de una vez.
 - **Reordenar tareas** mediante drag & drop dentro de cada lista (pendientes y completadas por separado). El orden se persiste en `localStorage`.
 - **Búsqueda** en tiempo real por texto, categoría y prioridad. Muestra un botón para limpiar cuando hay texto activo.
@@ -28,6 +31,8 @@ App web de tareas en **vanilla JS** + **Tailwind CSS v4** para organizar pendien
 ---
 
 ### Diseño
+
+El wireframe original del proyecto está en `docs/design/wireframe-taskflow.svg`.
 
 TaskFlow usa una paleta **stone + amber** en modo claro y **neutral** (negros puros) en modo oscuro, sin acento de color en dark.
 
@@ -69,6 +74,7 @@ El flujo de render es unidireccional: cualquier cambio de estado llama a `commit
 | `setTaskCompleted(id, completed)` | Marca o desmarca una tarea, actualizando `completedAt`. |
 | `deleteTask(id)` | Elimina una tarea del array por ID. |
 | `clearCompletedTasks()` | Elimina todas las tareas con `completed: true`. |
+| `completeAllTasks()` | Marca todas las tareas pendientes como completadas de golpe. |
 | `animateAndComplete(li, id)` | Anima la salida de la tarjeta (fade + slide up, 220 ms) y luego llama a `setTaskCompleted`. Si no hay elemento DOM, completa directamente. |
 | `commitTasksAndRender()` | Llama a `saveTasks()` y luego a `renderTasks()`. Punto de entrada único para cualquier cambio de estado. |
 | `renderTasks()` | Limpia las listas, actualiza la meta UI (contadores, sidebar, contexto, progreso) y renderiza los items o el empty state. |
@@ -126,20 +132,40 @@ npm run build:css
 ```
 ├── index.html          # Layout y markup
 ├── app.js              # Lógica de la app (estado, render, eventos)
+├── style.css           # CSS original pre-Tailwind (referencia del proceso de diseño)
 ├── input.css           # Entrada de Tailwind (fuentes, clases custom)
 ├── css/
 │   └── output.css      # CSS generado (no editar a mano)
 ├── backup/             # Snapshots manuales antes de cambios de diseño
-└── docs/               # Documentación adicional del proyecto
+└── docs/
+    ├── design/         # Wireframe del proyecto
+    └── AI/             # Documentación de IA (Fase 2)
 ```
 
 ---
 
-### Notas
+### Testing manual
 
-- Los datos se guardan en `localStorage` bajo la key `taskflow_tasks_v12`.
-- El tema se guarda en `localStorage` bajo la key `taskflow_theme_v12`.
-- La carpeta `backup/` contiene snapshots de `index.html`, `input.css` y `CLASSES_backup.js` del estado pre-revisión UX/UI. Para revertir, copiar el archivo correspondiente a la raíz del proyecto.
+Pruebas realizadas manualmente sobre la aplicación:
+
+| Prueba | Resultado |
+|---|---|
+| App con lista vacía | Se muestra el empty state con mensaje "Aún no tienes tareas pendientes. Añade la primera arriba." y el icono ○. Contadores en 0, barra de progreso vacía con texto "Sin tareas aún". |
+| Añadir tarea sin título | El formulario no envía (campo vacío). Si se fuerza, `addTask` devuelve `{ ok: false, error: "EMPTY" }` y muestra validación nativa del navegador. |
+| Añadir tarea con título muy largo (>300 caracteres) | Se muestra el mensaje de error "La tarea no puede superar 300 caracteres" vía `setCustomValidity`. La tarea no se añade. |
+| Añadir tarea duplicada (mismo texto, distinta capitalización) | Se detecta como duplicado gracias a `normalizeTaskText` y se bloquea con mensaje "Ya existe una tarea con ese mismo texto." |
+| Marcar varias tareas como completadas | Cada tarea se anima (fade + slide up) y aparece en la sección de completadas con opacidad reducida y texto tachado. Los contadores se actualizan correctamente. |
+| Completar todas las pendientes | El botón "Completar todas" marca todas las pendientes de golpe. Contadores y barra de progreso se actualizan a 100%. |
+| Eliminar varias tareas | Cada tarea se elimina del DOM y del array. Los contadores y la barra de progreso se recalculan. |
+| Vaciar completadas | Todas las tareas completadas desaparecen. Solo quedan las pendientes. |
+| Recargar la página | Las tareas persisten correctamente desde `localStorage`. El tema (claro/oscuro) también se mantiene. |
+| Editar una tarea | El input inline aparece con el texto actual. Guardar con Enter o botón funciona. Cancelar con Esc o botón descarta los cambios. |
+| Drag & drop | Las tarjetas se pueden reordenar arrastrando. El nuevo orden se persiste en `localStorage` y se mantiene tras recargar. |
+| Búsqueda | Filtra en tiempo real por texto, categoría y prioridad. El botón "Limpiar búsqueda" aparece cuando hay texto activo. Esc limpia la búsqueda. |
+| Filtro por categoría | Al pulsar una categoría en el sidebar, solo se muestran las tareas de esa categoría. "Limpiar" restaura la vista completa. |
+| Modo oscuro | El toggle cambia el tema. La preferencia se guarda en `localStorage`. Si no hay preferencia guardada, detecta `prefers-color-scheme` del sistema. |
+| Navegación con teclado | Todos los botones e inputs son accesibles con Tab. El foco es visible con ring de 4px. Los atajos Esc y Enter funcionan correctamente. |
+| HTML validado con W3C | El HTML pasa el validador del W3C sin errores. |
 
 ---
 
@@ -166,3 +192,12 @@ npm run build:css
 **Buscar:**
 1. Escribe en el campo de búsqueda — filtra por texto, categoría y prioridad en tiempo real.
 2. Pulsa `Limpiar búsqueda` o `Esc` para restablecer.
+
+---
+
+### Notas
+
+- Los datos se guardan en `localStorage` bajo la key `taskflow_tasks_v12`.
+- El tema se guarda en `localStorage` bajo la key `taskflow_theme_v12`.
+- La carpeta `backup/` contiene snapshots de `index.html`, `input.css` y `CLASSES_backup.js` del estado pre-revisión UX/UI. Para revertir, copiar el archivo correspondiente a la raíz del proyecto.
+- El archivo `style.css` contiene los estilos originales previos a la migración a Tailwind CSS. No se usa en producción pero se conserva como referencia del proceso de diseño.

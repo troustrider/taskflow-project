@@ -21,6 +21,7 @@ directamente desde el editor sin necesidad de extensiones.
 |---|---|
 | `Tab` | Aceptar sugerencia de autocompletado |
 | `Ctrl + K` | Edición inline: modificar código seleccionado |
+| `Ctrl + I` | Abrir Composer (cambios multi-archivo) |
 | `Ctrl + Shift + L` | Abrir panel de chat con IA |
 | `Ctrl + Shift + ↓` | Seleccionar línea hacia abajo |
 | `Ctrl + Shift + C` | Copiar ruta del archivo actual |
@@ -56,6 +57,40 @@ directamente en el código.
 
 Esto es útil porque mejora la legibilidad del código
 sin tener que escribir la documentación manualmente.
+
+---
+
+## Composer: cambios multi-archivo
+
+Composer (`Ctrl + I`) es la herramienta de Cursor para
+hacer cambios que afectan a varios archivos a la vez.
+A diferencia del chat o la edición inline, Composer
+puede leer y modificar múltiples archivos del proyecto
+en una sola operación.
+
+### Ejemplo: refactorización del objeto CLASSES
+
+Usé Composer para extraer todas las clases Tailwind
+que estaban dispersas por las funciones de `app.js` y
+centralizarlas en el objeto `CLASSES`. Composer leyó
+`app.js` e `index.html`, identificó las clases repetidas
+y generó los cambios en ambos archivos simultáneamente.
+
+Sin Composer habría tenido que ir función por función
+copiando y pegando clases, con el riesgo de romper algo.
+Con Composer, los cambios fueron coherentes entre archivos.
+
+### Cuándo usar Composer vs chat vs edición inline
+
+- **Edición inline** (`Ctrl + K`): para cambiar una función
+  o bloque concreto sin salir del contexto.
+- **Chat** (`Ctrl + Shift + L`): para preguntar, explorar
+  ideas o pedir explicaciones.
+- **Composer** (`Ctrl + I`): para cambios que tocan varios
+  archivos o que requieren coherencia global (renombrar,
+  refactorizar, migrar).
+
+---
 
 ## Model Context Protocol (MCP)
 

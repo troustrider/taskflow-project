@@ -45,38 +45,17 @@ WORKSPACE
 </h2>
 
 <div class="space-y-1">
-<button
-type="button"
-data-view="all"
-class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-view="all" class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">⊙ Hoy</span>
 <span id="all-count" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
 
-<button
-type="button"
-data-view="pending"
-class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-view="pending" class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">○ Pendientes</span>
 <span id="pending-count" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
 
-<button
-type="button"
-data-view="completed"
-class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-view="completed" class="workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">● Completadas</span>
 <span id="completed-count" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
@@ -87,91 +66,37 @@ dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
 
 <section>
 <div class="mb-2 flex items-center justify-between">
-<h2 class="text-xs font-bold tracking-widest text-stone-400 dark:text-neutral-600">
-CATEGORÍAS
-</h2>
-
-<button
-id="clear-category-filter"
-type="button"
-class="inline-flex h-6 items-center rounded-md border border-amber-200 bg-amber-50 px-2 text-[10px] font-medium text-amber-700 shadow-sm
-transition duration-200 ease-out hover:bg-amber-100 hover:text-amber-900
-focus:outline-none focus:ring-2 focus:ring-amber-200
-dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200 dark:focus:ring-neutral-700"
->
-Limpiar
-</button>
+<h2 class="text-xs font-bold tracking-widest text-stone-400 dark:text-neutral-600">CATEGORÍAS</h2>
+<button id="clear-category-filter" type="button" class="inline-flex h-6 items-center rounded-md border border-amber-200 bg-amber-50 px-2 text-[10px] font-medium text-amber-700 shadow-sm transition duration-200 ease-out hover:bg-amber-100 hover:text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200 dark:focus:ring-neutral-700">Limpiar</button>
 </div>
 
 <div class="space-y-1">
-<button
-type="button"
-data-category-filter="Trabajo"
-class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-category-filter="Trabajo" class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">⬡ Trabajo</span>
 <span id="count-trabajo" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
 
-<button
-type="button"
-data-category-filter="Personal"
-class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-category-filter="Personal" class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">♡ Personal</span>
 <span id="count-personal" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
 
-<button
-type="button"
-data-category-filter="Estudio"
-class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-category-filter="Estudio" class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">⯋ Estudio</span>
 <span id="count-estudio" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
 
-<button
-type="button"
-data-category-filter="Proyectos"
-class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-category-filter="Proyectos" class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">⬟ Proyectos</span>
 <span id="count-proyectos" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
 
-<button
-type="button"
-data-category-filter="Salud"
-class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-category-filter="Salud" class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">⊕ Salud</span>
 <span id="count-salud" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
 
-<button
-type="button"
-data-category-filter="Gestiones"
-class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium
-transition duration-200 ease-out hover:bg-stone-100
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
->
+<button type="button" data-category-filter="Gestiones" class="category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700">
 <span class="flex items-center gap-2">◷ Gestiones</span>
 <span id="count-errands" class="w-6 text-right text-xs text-stone-400 dark:text-neutral-500">0</span>
 </button>
@@ -185,25 +110,14 @@ dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
 <h2 class="mb-5 text-xl font-semibold tracking-tight text-stone-800 dark:text-neutral-100">Añadir nueva tarea</h2>
 
 <form id="task-form" class="flex flex-wrap items-center gap-3">
-<input
-id="task-input"
-type="text"
-placeholder="Escribe una tarea"
-autocomplete="off"
-class="min-w-[260px] flex-1 rounded-2xl border border-stone-200 bg-white px-4 py-3.5 text-sm
-transition duration-200 ease-out hover:border-amber-300
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700"
-/>
+<div class="min-w-[260px] flex-1">
+<label for="task-input" class="sr-only">Texto de la tarea</label>
+<input id="task-input" type="text" placeholder="Escribe una tarea" autocomplete="off" class="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3.5 text-sm transition duration-200 ease-out hover:border-amber-300 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700" />
+</div>
 
 <div class="relative w-full sm:w-44">
-<select
-id="task-category"
-class="w-full appearance-none rounded-2xl border border-stone-200 bg-white px-4 py-3.5 pr-10 text-sm
-transition duration-200 ease-out hover:border-amber-300
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700"
->
+<label for="task-category" class="sr-only">Categoría</label>
+<select id="task-category" class="w-full appearance-none rounded-2xl border border-stone-200 bg-white px-4 py-3.5 pr-10 text-sm transition duration-200 ease-out hover:border-amber-300 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700">
 <option value="Trabajo">Trabajo</option>
 <option value="Personal" selected>Personal</option>
 <option value="Estudio">Estudio</option>
@@ -215,13 +129,8 @@ dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:f
 </div>
 
 <div class="relative w-full sm:w-40">
-<select
-id="task-priority"
-class="w-full appearance-none rounded-2xl border border-stone-200 bg-white px-4 py-3.5 pr-10 text-sm
-transition duration-200 ease-out hover:border-amber-300
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700"
->
+<label for="task-priority" class="sr-only">Prioridad</label>
+<select id="task-priority" class="w-full appearance-none rounded-2xl border border-stone-200 bg-white px-4 py-3.5 pr-10 text-sm transition duration-200 ease-out hover:border-amber-300 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700">
 <option value="Alta">Alta</option>
 <option value="Media" selected>Media</option>
 <option value="Baja">Baja</option>
@@ -229,16 +138,7 @@ dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:f
 <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-stone-400">⌄</span>
 </div>
 
-<button
-type="submit"
-class="inline-flex h-[52px] min-w-[120px] items-center justify-center rounded-2xl
-border border-amber-300 bg-amber-50 px-5 text-sm font-semibold text-amber-800 shadow-sm
-transition duration-200 ease-out hover:bg-amber-100 active:scale-[0.98]
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus:ring-neutral-700"
->
-+ Añadir
-</button>
+<button type="submit" class="inline-flex h-[52px] min-w-[120px] items-center justify-center rounded-2xl border border-amber-300 bg-amber-50 px-5 text-sm font-semibold text-amber-800 shadow-sm transition duration-200 ease-out hover:bg-amber-100 active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-amber-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus:ring-neutral-700">+ Añadir</button>
 </form>
 </section>
 
@@ -251,48 +151,41 @@ dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-
 
 <div class="flex w-full max-w-md items-center gap-2">
 <div class="relative flex-1">
+<label for="search-input" class="sr-only">Buscar tareas</label>
 <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-neutral-500">⌕</span>
-<input
-id="search-input"
-placeholder="Buscar tareas..."
-class="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 pl-10 text-sm
-transition duration-200 ease-out hover:border-amber-300
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700"
-/>
+<input id="search-input" placeholder="Buscar tareas..." class="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 pl-10 text-sm transition duration-200 ease-out hover:border-amber-300 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600 dark:focus:ring-neutral-700" />
 </div>
 
-<button
-id="clear-search"
-type="button"
-class="hidden rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-500
-transition duration-200 ease-out hover:bg-stone-50 hover:text-stone-800
-focus:outline-none focus:ring-4 focus:ring-amber-200
-dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 dark:focus:ring-neutral-700"
->
-Limpiar búsqueda
-</button>
+<button id="clear-search" type="button" class="hidden rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-500 transition duration-200 ease-out hover:bg-stone-50 hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 dark:focus:ring-neutral-700">Limpiar búsqueda</button>
 </div>
 </div>
 
 <div class="space-y-3 rounded-xl border border-amber-200/50 bg-amber-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-950">
 <div class="flex flex-wrap items-center justify-between gap-3">
-<p id="current-context" class="text-sm text-stone-500 dark:text-neutral-400">
-Vista: Todas · Categoría: Todas
-</p>
+<p id="current-context" class="text-sm text-stone-500 dark:text-neutral-400">Vista: Todas · Categoría: Todas</p>
 <span id="progress-text" class="text-sm font-medium text-stone-500 dark:text-neutral-400">0% completado</span>
 </div>
 
 <div class="h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-neutral-800">
-<div
-id="progress-bar"
-class="h-full w-0 rounded-full bg-amber-400 transition-all duration-300 ease-out dark:bg-neutral-400"
-></div>
+<div id="progress-bar" class="h-full w-0 rounded-full bg-amber-400 transition-all duration-300 ease-out dark:bg-neutral-400"></div>
 </div>
 </div>
 
 <section id="pending-section" class="space-y-2">
+<div class="flex items-center justify-between">
 <h3 class="text-sm font-medium text-stone-500 dark:text-neutral-500">Pendientes</h3>
+
+<button
+id="complete-all"
+class="rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-500
+transition duration-200 ease-out hover:bg-stone-50 hover:text-stone-800
+focus:outline-none focus:ring-4 focus:ring-amber-200
+dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700"
+>
+Completar todas
+</button>
+</div>
+
 <ul id="task-list" class="space-y-3"></ul>
 </section>
 
@@ -316,6 +209,12 @@ Vaciar completadas
 </section>
 </main>
 </div>
+
+<footer class="border-t border-stone-200/60 dark:border-neutral-800">
+<div class="mx-auto max-w-6xl px-6 py-4 text-center text-xs text-stone-400 dark:text-neutral-600">
+TaskFlow · Proyecto Bootcamp InfraOps · Corner Estudios 2026
+</div>
+</footer>
 
 <script src="app.js" defer></script>
 </body>
