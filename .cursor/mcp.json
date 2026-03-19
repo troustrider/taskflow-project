@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic/mcp-filesystem",
+        "C:\\Users\\Usuario\\OneDrive\\Desktop\\FFE Corner Estudios"
+      ]
+    },
+    "web-search": {
+      "command": "node",
+      "args": ["C:\\Users\\Usuario\\OneDrive\\Desktop\\FFE Corner Estudios\\web-search-mcp\\dist\\index.js"],
+      "env": {
+        "BROWSER_HEADLESS": "true",
+        "MAX_BROWSERS": "2"
+      }
+    }
+  }
+}
