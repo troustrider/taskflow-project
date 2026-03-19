@@ -50,6 +50,77 @@ revise tu código con criterio.
 
 ---
 
+## El problema de la uniformidad — rediseño del wireframe
+
+Este fue el aprendizaje más revelador del proyecto. Le
+pedí a Claude que diseñara un wireframe para TaskFlow
+"como un frontend senior". Lo que generó fue exactamente
+el mismo layout que generaría cualquier otra IA: sidebar
+izquierdo con categorías, formulario arriba, lista abajo.
+Es el diseño por defecto de toda app de tareas que existe.
+
+Cuando le señalé que ese wireframe era genérico y que
+ChatGPT o Gemini habrían generado lo mismo, el segundo
+intento fue completamente distinto: sin sidebar (filtros
+como pills inline), progreso como anillo SVG en vez de
+barra, tareas agrupadas por urgencia (Ahora / Pendiente /
+Hecho) en vez de por estado (Pendientes / Completadas),
+e input tipo command bar centrado.
+
+Esto confirma lo que ya sospechaba: las IAs no diseñan,
+promedian. Su primer resultado es siempre el patrón más
+frecuente en sus datos de entrenamiento. Si no le pides
+explícitamente que sea original, te da algo seguro y
+predecible. La originalidad no es el default de la IA —
+hay que exigirla.
+
+Implementamos el rediseño completo: nuevo HTML, nuevo JS
+(la lógica de negocio se mantuvo, solo cambió el render)
+y nuevo wireframe SVG en docs/design. La app ahora tiene
+una personalidad propia en vez de parecer un clon de
+Todoist con otra paleta de colores.
+
+---
+
+## Teoría cromática y el dark mode
+
+Otro aprendizaje importante fue sobre color. Al principio
+asumía que el dark mode era simplemente "invertir los
+colores" o "poner todo en negro". La IA tampoco me sacó
+de ese error al principio — su primer dark mode usaba
+amber (el acento del modo claro) en todas partes sobre
+fondo negro, y el resultado era agresivo visualmente.
+
+Cuando le pedí que revisara el dark mode "siguiendo
+criterios de teoría cromática", aprendí varias cosas:
+
+1. **El dark mode es una jerarquía de elevación**, no
+   un fondo negro plano. El fondo base es el más oscuro,
+   las tarjetas un paso más claras, y los elementos
+   elevados (como el widget del anillo) otro paso más.
+   Esto crea profundidad sin necesitar sombras.
+
+2. **El acento cálido choca con fondos fríos.** La escala
+   neutral de Tailwind tiene un subtono azulado. El
+   amber es cálido. En modo claro funciona porque stone-50
+   ya es cálido. En dark, el contraste de temperatura
+   es demasiado fuerte.
+
+3. **La regla del punto focal único.** En dark mode
+   profesional, el acento se reserva para un solo
+   elemento hero. En TaskFlow es el anillo de progreso.
+   Todo lo demás (pills, checks, focus rings, labels)
+   pasa a neutro en dark. Esto hace que la mirada vaya
+   directamente donde importa.
+
+La lección general: la IA aplica "dark mode genérico"
+si no le pides algo específico. Cuando le dices
+exactamente qué principios seguir (Material Design,
+punto focal único, jerarquía de elevación), el
+resultado es radicalmente mejor.
+
+---
+
 ## Riesgos de depender demasiado de la IA
 
 El riesgo principal es aceptar código sin entenderlo.
@@ -66,10 +137,11 @@ implementación completa, entendí el problema de verdad.
 Eso me ayudó a evaluar si lo que la IA generaba después
 tenía sentido o no.
 
-También hay un riesgo de uniformidad. Si todo el mundo
-usa la misma IA para generar código, los proyectos
-empiezan a parecerse mucho. La IA tiene patrones muy
-marcados que se repiten.
+Y como demostré con el wireframe y con la paleta de
+colores: la uniformidad y la mediocridad son riesgos
+reales. Si todo el mundo usa la misma IA sin
+cuestionarla, los proyectos empiezan a parecerse
+demasiado. El valor diferencial desaparece.
 
 ---
 
@@ -92,4 +164,7 @@ En general, la IA es una herramienta muy potente, pero
 funciona mejor como un copiloto que como un piloto. Si
 le das el control total, avanzas rápido pero no aprendes.
 Si la usas para complementar lo que ya estás pensando,
-el resultado es mucho mejor.
+el resultado es mucho mejor. Y si le cuestionas su primer
+resultado en vez de aceptarlo, el segundo intento suele
+ser significativamente mejor — tanto en diseño como en
+código como en color.

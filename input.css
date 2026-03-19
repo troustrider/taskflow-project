@@ -6,41 +6,91 @@
 
 @layer base {
 :root {
---app-bg: #fffbeb;
---app-fg: #18181b;
---app-radius: 1rem;
---space-1: 0.25rem;
---space-2: 0.5rem;
---space-3: 0.75rem;
---space-4: 1rem;
+--app-bg: #fafaf9;
+--app-fg: #1c1917;
 --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 --font-mono: 'DM Mono', ui-monospace, monospace;
+--ring-circumference: 201.1;
 }
 
 html, body {
   font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Jerarquía de sombras: header más elevado que el contenido */
 header {
-  box-shadow: 0 1px 0 0 rgb(0 0 0 / 0.06), 0 2px 8px 0 rgb(0 0 0 / 0.05);
+  box-shadow: 0 1px 0 0 rgb(0 0 0 / 0.04);
 }
 
-/* Franja izquierda para tareas de prioridad Alta */
+.dark header {
+  box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.04);
+}
+
+/* Ring widget — elevated disc */
+.ring-widget {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgb(214 211 209 / 0.5);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+}
+
+.dark .ring-widget {
+  background: #262626;
+  border-color: rgb(82 82 82 / 0.5);
+  box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.3);
+}
+
+/* Priority stripe */
 .priority-high {
-  border-left-width: 3px;
-  border-left-style: solid;
-  border-left-color: #fca5a5;
+  border-left: 3px solid #f59e0b;
   padding-left: calc(1rem - 3px);
+  border-radius: 0.75rem;
 }
 
 .dark .priority-high {
-  border-left-color: #ef4444;
+  border-left-color: #f59e0b;
 }
 
-/* Contadores y badges con DM Mono */
+/* Mono UI */
 .font-mono-ui {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+}
+
+#progress-ring-svg text {
+  font-family: var(--font-body);
+}
+
+/* Task actions: hover-only on desktop, always visible on touch */
+.task-actions {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.group:hover .task-actions,
+.group:focus-within .task-actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .task-actions {
+    opacity: 1;
+  }
+}
+
+/* Drag-over feedback */
+[data-section].drag-over {
+  outline: 2px dashed rgb(245 158 11 / 0.4);
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+}
+
+.dark [data-section].drag-over {
+  outline-color: rgb(163 163 163 / 0.3);
 }
 }

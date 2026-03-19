@@ -1,114 +1,83 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" fill="none" font-family="system-ui, sans-serif">
-  <rect width="960" height="640" rx="12" fill="#fafaf9" stroke="#d6d3d1" stroke-width="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" viewBox="0 0 680 760" fill="none" stroke="#a8a29e" font-family="system-ui, sans-serif">
+<style>
+text { fill: #78716c; font-size: 12px; }
+.title { fill: #44403c; font-size: 14px; font-weight: 600; }
+.note { fill: #a8a29e; font-size: 11px; }
+rect.dashed { stroke-dasharray: 4 3; }
+</style>
 
-  <!-- Header -->
-  <rect x="0" y="0" width="960" height="56" rx="12" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="24" y="35" font-size="16" font-weight="700" fill="#1c1917">TaskFlow</text>
-  <text x="108" y="35" font-size="16" fill="#a8a29e">|</text>
-  <text x="124" y="35" font-size="14" fill="#a8a29e">Organiza tus tareas</text>
-  <rect x="904" y="16" width="32" height="24" rx="6" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="913" y="33" font-size="11" fill="#78716c">◗</text>
+<text class="title" x="340" y="20" text-anchor="middle">TaskFlow — wireframe v3</text>
+<text class="note" x="340" y="36" text-anchor="middle">anillo centrado, hora+ubicación, pendiente primero, drag cross-section</text>
 
-  <!-- Sidebar -->
-  <rect x="16" y="72" width="240" height="544" rx="16" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
+<!-- Top bar -->
+<rect class="dashed" x="20" y="52" width="640" height="28" rx="4"/>
+<text class="title" x="32" y="70">TaskFlow</text>
+<rect x="560" y="56" width="40" height="20" rx="4"/><text x="580" y="70" text-anchor="middle">tema</text>
+<rect x="608" y="56" width="40" height="20" rx="4"/><text x="628" y="70" text-anchor="middle">⌕</text>
 
-  <text x="32" y="100" font-size="10" font-weight="700" fill="#a8a29e" letter-spacing="1.5">WORKSPACE</text>
-  <rect x="28" y="110" width="216" height="32" rx="10" fill="#fef3c7" stroke="#fde68a" stroke-width="1"/>
-  <text x="44" y="131" font-size="13" fill="#92400e">⊙ Hoy</text><text x="220" y="131" font-size="11" fill="#a8a29e" text-anchor="end">3</text>
-  <text x="44" y="163" font-size="13" fill="#78716c">○ Pendientes</text><text x="220" y="163" font-size="11" fill="#a8a29e" text-anchor="end">2</text>
-  <text x="44" y="191" font-size="13" fill="#78716c">● Completadas</text><text x="220" y="191" font-size="11" fill="#a8a29e" text-anchor="end">1</text>
+<!-- Progress ring centered -->
+<circle cx="340" cy="124" r="32" stroke-width="3" opacity="0.15"/>
+<path d="M340 92 A32 32 0 1 1 318 152" stroke="#EF9F27" stroke-width="3" stroke-linecap="round" fill="none"/>
+<text class="title" x="340" y="128" text-anchor="middle">60%</text>
 
-  <line x1="32" y1="210" x2="240" y2="210" stroke="#e7e5e4" stroke-width="1"/>
+<!-- Date + time + location -->
+<text class="title" x="340" y="178" text-anchor="middle">jueves 19 de marzo</text>
+<text class="note" x="340" y="194" text-anchor="middle">14:32 · Amsterdam, Netherlands</text>
+<text x="340" y="212" text-anchor="middle">Casi lo tienes — 3 de 5</text>
 
-  <text x="32" y="236" font-size="10" font-weight="700" fill="#a8a29e" letter-spacing="1.5">CATEGORÍAS</text>
-  <rect x="186" y="222" width="52" height="20" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="1"/>
-  <text x="195" y="236" font-size="9" fill="#92400e">Limpiar</text>
+<!-- Command bar -->
+<rect x="120" y="232" width="380" height="36" rx="18"/>
+<text x="140" y="254">¿Qué tienes que hacer?</text>
+<rect x="508" y="234" width="56" height="32" rx="16"/><text x="536" y="254" text-anchor="middle">cat ⌄</text>
+<rect x="570" y="234" width="50" height="32" rx="16"/><text x="595" y="254" text-anchor="middle">prio ⌄</text>
 
-  <text x="44" y="264" font-size="13" fill="#78716c">⬡ Trabajo</text><text x="220" y="264" font-size="11" fill="#a8a29e" text-anchor="end">1</text>
-  <text x="44" y="292" font-size="13" fill="#78716c">♡ Personal</text><text x="220" y="292" font-size="11" fill="#a8a29e" text-anchor="end">1</text>
-  <text x="44" y="320" font-size="13" fill="#78716c">⯋ Estudio</text><text x="220" y="320" font-size="11" fill="#a8a29e" text-anchor="end">0</text>
-  <text x="44" y="348" font-size="13" fill="#78716c">⬟ Proyectos</text><text x="220" y="348" font-size="11" fill="#a8a29e" text-anchor="end">1</text>
-  <text x="44" y="376" font-size="13" fill="#78716c">⊕ Salud</text><text x="220" y="376" font-size="11" fill="#a8a29e" text-anchor="end">0</text>
-  <text x="44" y="404" font-size="13" fill="#78716c">◷ Gestiones</text><text x="220" y="404" font-size="11" fill="#a8a29e" text-anchor="end">0</text>
+<!-- Filter pills — grid 7 cols -->
+<rect x="52" y="286" width="76" height="22" rx="11" fill="#fef3c7" stroke="#fbbf24"/><text x="90" y="301" text-anchor="middle">Todas</text>
+<rect x="134" y="286" width="76" height="22" rx="11"/><text x="172" y="301" text-anchor="middle">Trabajo</text>
+<rect x="216" y="286" width="76" height="22" rx="11"/><text x="254" y="301" text-anchor="middle">Personal</text>
+<rect x="298" y="286" width="76" height="22" rx="11"/><text x="336" y="301" text-anchor="middle">Estudio</text>
+<rect x="380" y="286" width="76" height="22" rx="11"/><text x="418" y="301" text-anchor="middle">Proyectos</text>
+<rect x="462" y="286" width="76" height="22" rx="11"/><text x="500" y="301" text-anchor="middle">Salud</text>
+<rect x="544" y="286" width="84" height="22" rx="11"/><text x="586" y="301" text-anchor="middle">Gestiones</text>
 
-  <!-- Main content -->
-  <!-- Add task section -->
-  <rect x="272" y="72" width="672" height="120" rx="16" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="296" y="104" font-size="16" font-weight="600" fill="#1c1917">Añadir nueva tarea</text>
+<!-- PENDIENTE section (first) -->
+<rect class="dashed" x="60" y="326" width="560" height="120" rx="12"/>
+<text class="title" x="80" y="348">pendiente</text>
+<text class="note" x="170" y="348">media y baja prioridad</text>
+<rect x="80" y="360" width="520" height="36" rx="8"/>
+<circle cx="100" cy="378" r="8"/><text x="118" y="382">Leer capítulo 4 de Node.js</text>
+<text class="note" x="520" y="382" text-anchor="end">Estudio · Media</text>
+<rect x="80" y="402" width="520" height="36" rx="8"/>
+<circle cx="100" cy="420" r="8"/><text x="118" y="424">Comprar material oficina</text>
 
-  <rect x="288" y="116" width="280" height="40" rx="14" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="304" y="141" font-size="12" fill="#a8a29e">Escribe una tarea</text>
+<!-- Drag arrow between sections -->
+<text class="note" x="640" y="470" text-anchor="end">drag ↕</text>
+<text class="note" x="640" y="484" text-anchor="end">cambia</text>
+<text class="note" x="640" y="498" text-anchor="end">prioridad</text>
 
-  <rect x="576" y="116" width="120" height="40" rx="14" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="592" y="141" font-size="12" fill="#57534e">Personal ⌄</text>
+<!-- AHORA section -->
+<rect class="dashed" x="60" y="458" width="560" height="76" rx="12"/>
+<text x="80" y="480" fill="#d97706" font-weight="600" font-size="12">AHORA</text>
+<text class="note" x="132" y="480">alta prioridad</text>
+<rect x="80" y="492" width="520" height="36" rx="8"/>
+<rect x="80" y="492" width="3" height="36" rx="1" fill="#fca5a5"/>
+<circle cx="100" cy="510" r="8"/><text x="118" y="514">Preparar presentación Q2</text>
+<text class="note" x="520" y="514" text-anchor="end">Trabajo · Alta</text>
 
-  <rect x="704" y="116" width="100" height="40" rx="14" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="720" y="141" font-size="12" fill="#57534e">Media ⌄</text>
+<!-- HECHO (collapsed) -->
+<rect class="dashed" x="60" y="548" width="560" height="44" rx="12" opacity="0.5"/>
+<text x="80" y="574" opacity="0.5">▸ hecho (2) — colapsado</text>
+<text x="580" y="574" text-anchor="end" opacity="0.5">vaciar</text>
 
-  <rect x="812" y="116" width="116" height="40" rx="14" fill="#fef3c7" stroke="#fde68a" stroke-width="1"/>
-  <text x="842" y="141" font-size="13" font-weight="600" fill="#92400e">+ Añadir</text>
+<!-- Footer -->
+<rect class="dashed" x="20" y="616" width="640" height="16" rx="0"/>
+<text x="340" y="628" text-anchor="middle">footer</text>
 
-  <!-- Task list section -->
-  <rect x="272" y="200" width="672" height="416" rx="16" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
+<!-- Design decisions -->
+<rect class="dashed" x="40" y="656" width="600" height="76" rx="8"/>
+<text class="note" x="340" y="676" text-anchor="middle">decisiones de diseño:</text>
+<text class="note" x="340" y="694" text-anchor="middle">anillo centrado como hero · hora + ciudad por IP · pendiente primero (flujo natural)</text>
+<text class="note" x="340" y="712" text-anchor="middle">pills en grid fijo (no wrap) · drag entre secciones cambia prioridad · acciones hover-only</text>
 
-  <text x="296" y="228" font-size="16" font-weight="600" fill="#1c1917">Mis tareas</text>
-  <text x="396" y="228" font-size="13" fill="#a8a29e">(3)</text>
-
-  <rect x="560" y="210" width="240" height="36" rx="14" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="584" y="233" font-size="12" fill="#a8a29e">⌕ Buscar tareas...</text>
-
-  <rect x="812" y="212" width="116" height="32" rx="10" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="826" y="233" font-size="11" fill="#78716c">Limpiar búsqueda</text>
-
-  <!-- Progress bar area -->
-  <rect x="288" y="252" width="640" height="56" rx="12" fill="#fefce8" stroke="#fde68a" stroke-width="0.5"/>
-  <text x="304" y="273" font-size="11" fill="#78716c">Vista: Todas · Categoría: Todas</text>
-  <text x="868" y="273" font-size="11" fill="#78716c" text-anchor="end">33%</text>
-  <rect x="304" y="282" width="608" height="8" rx="4" fill="#e7e5e4"/>
-  <rect x="304" y="282" width="200" height="8" rx="4" fill="#fbbf24"/>
-
-  <!-- Pending section -->
-  <text x="296" y="332" font-size="12" font-weight="500" fill="#a8a29e">Pendientes</text>
-
-  <!-- Task card 1 - Alta priority with left stripe -->
-  <rect x="288" y="340" width="640" height="48" rx="14" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <rect x="288" y="340" width="4" height="48" rx="2" fill="#fca5a5"/>
-  <rect x="300" y="351" width="26" height="26" rx="7" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="340" y="369" font-size="13" font-weight="600" fill="#1c1917">Preparar presentación Q2</text>
-  <rect x="680" y="352" width="56" height="24" rx="12" fill="#fafaf9" stroke="#e7e5e4" stroke-width="0.5"/>
-  <text x="691" y="368" font-size="10" fill="#78716c">Trabajo</text>
-  <rect x="744" y="352" width="40" height="24" rx="12" fill="#fef2f2" stroke="#fecaca" stroke-width="0.5"/>
-  <text x="755" y="368" font-size="10" font-weight="600" fill="#b91c1c">Alta</text>
-  <text x="800" y="368" font-size="11" fill="#a8a29e">Editar</text>
-  <text x="840" y="368" font-size="11" fill="#a8a29e">Borrar</text>
-
-  <!-- Task card 2 -->
-  <rect x="288" y="396" width="640" height="48" rx="14" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <rect x="300" y="407" width="26" height="26" rx="7" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="340" y="425" font-size="13" font-weight="600" fill="#1c1917">Leer documentación Node.js</text>
-  <rect x="660" y="408" width="68" height="24" rx="12" fill="#fafaf9" stroke="#e7e5e4" stroke-width="0.5"/>
-  <text x="671" y="424" font-size="10" fill="#78716c">Proyectos</text>
-  <rect x="736" y="408" width="48" height="24" rx="12" fill="#fafaf9" stroke="#e7e5e4" stroke-width="0.5"/>
-  <text x="747" y="424" font-size="10" font-weight="600" fill="#57534e">Media</text>
-  <text x="800" y="424" font-size="11" fill="#a8a29e">Editar</text>
-  <text x="840" y="424" font-size="11" fill="#a8a29e">Borrar</text>
-
-  <!-- Completed section -->
-  <text x="296" y="472" font-size="12" font-weight="500" fill="#a8a29e">Tareas completadas</text>
-  <rect x="816" y="456" width="108" height="28" rx="10" fill="#fff" stroke="#d6d3d1" stroke-width="1"/>
-  <text x="830" y="475" font-size="11" fill="#78716c">Vaciar completadas</text>
-
-  <!-- Completed card - opacity reduced -->
-  <rect x="288" y="484" width="640" height="48" rx="14" fill="#fff" stroke="#d6d3d1" stroke-width="1" opacity="0.6"/>
-  <rect x="300" y="495" width="26" height="26" rx="7" fill="#fef3c7" stroke="#fde68a" stroke-width="1" opacity="0.6"/>
-  <text x="307" y="513" font-size="10" font-weight="700" fill="#92400e" opacity="0.6">✓</text>
-  <text x="340" y="513" font-size="13" font-weight="600" fill="#a8a29e" text-decoration="line-through" opacity="0.6">Configurar entorno de desarrollo</text>
-  <rect x="680" y="496" width="60" height="24" rx="12" fill="#fafaf9" stroke="#e7e5e4" stroke-width="0.5" opacity="0.6"/>
-  <text x="691" y="512" font-size="10" fill="#78716c" opacity="0.6">Personal</text>
-  <rect x="748" y="496" width="36" height="24" rx="12" fill="#fafaf9" stroke="#e7e5e4" stroke-width="0.5" opacity="0.6"/>
-  <text x="759" y="512" font-size="10" fill="#78716c" opacity="0.6">Baja</text>
-
-  <!-- Footer -->
-  <rect x="0" y="610" width="960" height="30" rx="0" fill="#fafaf9" stroke="#e7e5e4" stroke-width="0.5"/>
-  <text x="480" y="629" font-size="11" fill="#a8a29e" text-anchor="middle">TaskFlow · Proyecto Bootcamp InfraOps · Corner Estudios 2026</text>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#d6d3d1" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
 </svg>
