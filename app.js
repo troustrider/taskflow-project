@@ -30,6 +30,9 @@ const taskCount = document.getElementById("task-count");
 const trabajoCount = document.getElementById("count-trabajo");
 const personalCount = document.getElementById("count-personal");
 const estudioCount = document.getElementById("count-estudio");
+const proyectosCount = document.getElementById("count-proyectos");
+const saludCount = document.getElementById("count-salud");
+const errandsCount = document.getElementById("count-errands");
 
 const clearCompletedBtn = document.getElementById("clear-completed");
 
@@ -45,54 +48,61 @@ Estado
 ========================= */
 const STORAGE_KEY = "taskflow_tasks_v12";
 const THEME_KEY = "taskflow_theme_v12";
+/** @type {number} Máximo de caracteres permitidos por tarea. Cambiar aquí afecta validación y mensajes de error. */
 const MAX_TASK_LENGTH = 300;
 
+/** @type {Array<{id: string, text: string, category: string, priority: string, completed: boolean, createdAt: number, completedAt: number|null}>} */
 let tasks = [];
 let currentView = "all";
 let currentCategoryFilter = "all";
+/** @type {string|null} ID de la última tarea añadida; activa su animación de entrada en el render siguiente. */
 let lastAddedTaskId = null;
+/** @type {string|null} ID de la tarea en modo edición activa. Null si ninguna está siendo editada. */
 let editingTaskId = null;
+/** @type {number|null} Índice en `tasks` de la tarea que se está arrastrando. Null si no hay arrastre activo. */
+let dragSrcIndex = null;
 
+/** Clases Tailwind centralizadas por componente. Modificar aquí cambia el estilo globalmente. */
 const CLASSES = {
 priorityBase:
 "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
 priority: {
 Alta:
-" border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-200",
+" border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300",
 Media:
-" border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200",
+" border-stone-200 bg-stone-100 text-stone-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
 Baja:
-" border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300",
+" border-stone-200 bg-white text-stone-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-500",
 },
 categoryBadge:
-"inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300",
+"inline-flex items-center rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1 text-xs font-medium text-stone-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-300",
 taskCard: {
 pending:
-"group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm transition duration-200 ease-out hover:bg-zinc-50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/70",
+"group flex items-center justify-between gap-3 rounded-2xl border border-stone-200/60 bg-white px-4 py-3 shadow-sm transition duration-200 ease-out hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800",
 completed:
-"group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 shadow-sm transition duration-200 ease-out hover:bg-zinc-100 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/70",
+"group flex items-center justify-between gap-3 rounded-2xl border border-stone-200/40 bg-white px-4 py-3 shadow-sm transition duration-200 ease-out hover:shadow-md opacity-60 hover:opacity-100 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800",
 },
 checkButtonBase:
-"inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[11px] font-bold shadow-sm transition duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:focus:ring-zinc-800",
+"inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[11px] font-bold shadow-sm transition duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-stone-200 dark:focus:ring-neutral-700",
 checkButton: {
 pending:
-" border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white",
+" border-stone-200 bg-white text-stone-400 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200",
 completed:
-" border-zinc-300 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600",
+" border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
 },
 deleteButton:
-"rounded-xl px-3 py-2 text-xs font-semibold text-zinc-500 transition duration-200 ease-out hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus:ring-zinc-800",
+"rounded-xl px-3 py-2 text-xs font-semibold text-stone-400 transition duration-200 ease-out hover:bg-stone-100 hover:text-stone-900 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 dark:focus:ring-neutral-700",
 emptyState:
-"rounded-2xl border border-dashed border-zinc-300 bg-white px-4 py-6 text-sm text-zinc-600 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300",
+"rounded-2xl border border-dashed border-stone-200/70 bg-white px-4 py-6 text-sm text-stone-400 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-500",
 sidebar: {
 workspaceBase:
 "workspace-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out ",
 categoryBase:
 "category-filter-btn flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition duration-200 ease-out ",
 active:
-"bg-zinc-100 text-zinc-900 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:ring-zinc-700",
+"bg-amber-50 text-amber-800 ring-1 ring-amber-200 dark:bg-neutral-800 dark:text-neutral-100 dark:ring-neutral-700",
 inactive:
-"text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-800/60 dark:focus:ring-zinc-800",
+"text-stone-600 hover:bg-amber-100/60 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:focus:ring-neutral-700",
 },
 };
 
@@ -107,6 +117,9 @@ all: "Todas",
 Trabajo: "Trabajo",
 Personal: "Personal",
 Estudio: "Estudio",
+Proyectos: "Proyectos",
+Salud: "Salud",
+Gestiones: "Gestiones",
 };
 
 /* =========================
@@ -176,6 +189,7 @@ function getSearchQuery() {
 return safeTrim(searchInput?.value);
 }
 
+/** @param {"Alta"|"Media"|"Baja"} priority @returns {string} */
 function getPriorityClasses(priority) {
 return CLASSES.priorityBase + (CLASSES.priority[priority] ?? CLASSES.priority.Baja);
 }
@@ -202,23 +216,14 @@ return CLASSES.deleteButton;
 /* =========================
 Tema
 ========================= */
-/**
- * Aplica el tema indicado (clase `dark`) y sincroniza el texto/icono.
- * @param {"dark"|"light"} theme
- * @returns {void}
- */
 function applyTheme(theme) {
 const isDark = theme === "dark";
 document.documentElement.classList.toggle("dark", isDark);
 
-if (themeIcon) themeIcon.textContent = isDark ? "🌙" : "☀️";
+if (themeIcon) themeIcon.textContent = isDark ? "◗" : "○";
 if (themeText) themeText.textContent = isDark ? "Oscuro" : "Claro";
 }
 
-/**
- * Carga el tema guardado o usa preferencia del sistema.
- * @returns {void}
- */
 function loadTheme() {
 const savedTheme = localStorage.getItem(THEME_KEY);
 
@@ -234,10 +239,6 @@ window.matchMedia("(prefers-color-scheme: dark)").matches;
 applyTheme(prefersDark ? "dark" : "light");
 }
 
-/**
- * Alterna entre tema claro y oscuro y lo persiste.
- * @returns {void}
- */
 function toggleTheme() {
 const isDark = document.documentElement.classList.contains("dark");
 const nextTheme = isDark ? "light" : "dark";
@@ -292,6 +293,12 @@ completed: filtered.filter((task) => task.completed),
 };
 }
 
+/**
+ * Aplica clases activas o inactivas a un grupo de botones del sidebar.
+ * @param {NodeListOf<HTMLButtonElement>} buttons
+ * @param {{ baseClass: string, isActive: (btn: HTMLButtonElement) => boolean }} options
+ * @returns {void}
+ */
 function setActiveButtonClasses(buttons, { baseClass, isActive }) {
 buttons.forEach((btn) => {
 btn.className =
@@ -299,10 +306,6 @@ baseClass + (isActive(btn) ? CLASSES.sidebar.active : CLASSES.sidebar.inactive);
 });
 }
 
-/**
- * Actualiza el estado visual (clases) de los botones del sidebar.
- * @returns {void}
- */
 function updateSidebarState() {
 setActiveButtonClasses(workspaceButtons, {
 baseClass: CLASSES.sidebar.workspaceBase,
@@ -318,43 +321,41 @@ isActive: (btn) => btn.dataset.categoryFilter === currentCategoryFilter,
 /* =========================
 Empty state
 ========================= */
-/**
- * Crea un `li` para mostrar un mensaje de lista vacía.
- * @param {string} message
- * @returns {HTMLLIElement}
- */
 function createEmptyState(message) {
 const li = document.createElement("li");
-li.className = CLASSES.emptyState;
-li.textContent = message;
+li.className = CLASSES.emptyState + " text-center";
+
+const symbol = document.createElement("div");
+symbol.className = "mb-2 text-2xl text-stone-300 dark:text-neutral-700";
+symbol.textContent = "○";
+
+const text = document.createElement("p");
+text.textContent = message;
+
+li.append(symbol, text);
 return li;
 }
 
 /* =========================
 Estado extra UI
 ========================= */
-/**
- * Actualiza contadores (totales, pendientes, completadas y por categoría).
- * @returns {void}
- */
 function updateCounters() {
 const stats = computeStats(tasks);
 const { total, pending, completed, byCategory } = stats;
 
-if (allCount) allCount.textContent = total;
-if (pendingCount) pendingCount.textContent = pending;
-if (completedCount) completedCount.textContent = completed;
+if (allCount) { allCount.textContent = total; allCount.classList.add("font-mono-ui"); }
+if (pendingCount) { pendingCount.textContent = pending; pendingCount.classList.add("font-mono-ui"); }
+if (completedCount) { completedCount.textContent = completed; completedCount.classList.add("font-mono-ui"); }
 if (taskCount) taskCount.textContent = `(${total})`;
 
-if (trabajoCount) trabajoCount.textContent = byCategory.Trabajo;
-if (personalCount) personalCount.textContent = byCategory.Personal;
-if (estudioCount) estudioCount.textContent = byCategory.Estudio;
+if (trabajoCount) { trabajoCount.textContent = byCategory.Trabajo; trabajoCount.classList.add("font-mono-ui"); }
+if (personalCount) { personalCount.textContent = byCategory.Personal; personalCount.classList.add("font-mono-ui"); }
+if (estudioCount) { estudioCount.textContent = byCategory.Estudio; estudioCount.classList.add("font-mono-ui"); }
+if (proyectosCount) { proyectosCount.textContent = byCategory.Proyectos; proyectosCount.classList.add("font-mono-ui"); }
+if (saludCount) { saludCount.textContent = byCategory.Salud; saludCount.classList.add("font-mono-ui"); }
+if (errandsCount) { errandsCount.textContent = byCategory.Gestiones; errandsCount.classList.add("font-mono-ui"); }
 }
 
-/**
- * Actualiza el texto de contexto (vista/categoría/búsqueda).
- * @returns {void}
- */
 function updateCurrentContext() {
 const parts = [
 `Vista: ${VIEW_LABELS[currentView]}`,
@@ -367,22 +368,23 @@ if (query) parts.push(`Búsqueda: "${query}"`);
 if (currentContext) currentContext.textContent = parts.join(" · ");
 }
 
-/**
- * Calcula y muestra el progreso de completado.
- * @returns {void}
- */
 function updateProgress() {
 const { total, completed } = computeStats(tasks);
 const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
 
 if (progressBar) progressBar.style.width = `${percent}%`;
-if (progressText) progressText.textContent = `${percent}% completado`;
+
+let label;
+if (total === 0)       label = "Sin tareas aún";
+else if (percent === 0)  label = "Por donde empezarás hoy";
+else if (percent < 33)  label = "Buen comienzo — " + percent + "%";
+else if (percent < 66)  label = "Vas por buen camino — " + percent + "%";
+else if (percent < 100) label = "Casi lo tienes — " + percent + "%";
+else                    label = "Todo listo ●";
+
+if (progressText) progressText.textContent = label;
 }
 
-/**
- * Muestra u oculta el botón para limpiar búsqueda.
- * @returns {void}
- */
 function updateClearSearchVisibility() {
 const hasQuery = getSearchQuery().length > 0;
 if (!clearSearchBtn) return;
@@ -392,11 +394,6 @@ clearSearchBtn.classList.toggle("hidden", !hasQuery);
 /* =========================
 Render
 ========================= */
-/**
- * Anima la entrada visual de un item nuevo.
- * @param {HTMLElement} li
- * @returns {void}
- */
 function animateNewItem(li) {
 li.style.opacity = "0";
 li.style.transform = "translateY(8px)";
@@ -450,12 +447,18 @@ return btn;
 function createTaskTitle(task, completed) {
 const title = document.createElement("p");
 title.className = completed
-? "truncate text-sm font-semibold text-zinc-500 line-through dark:text-zinc-400"
-: "truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100";
+? "truncate text-sm font-semibold text-stone-400 line-through dark:text-neutral-500"
+: "truncate text-sm font-semibold text-stone-900 dark:text-neutral-100";
 title.textContent = task.text;
 return title;
 }
 
+/**
+ * Crea la mitad izquierda de la tarjeta: botón de completar y título (o input de edición).
+ * @param {{id: string, text: string}} task
+ * @param {boolean} completed
+ * @returns {HTMLDivElement}
+ */
 function createTaskLeft(task, completed) {
 const left = document.createElement("div");
 left.className = "flex min-w-0 items-center gap-4";
@@ -475,8 +478,8 @@ const editInput = document.createElement("input");
 editInput.dataset.role = "edit-text";
 editInput.value = task.text;
 editInput.className =
-"w-full min-w-[220px] rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm " +
-"focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:ring-zinc-800";
+"w-full min-w-[220px] rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm shadow-sm " +
+"focus:outline-none focus:ring-4 focus:ring-stone-200 dark:border-neutral-700 dark:bg-neutral-950 dark:focus:ring-neutral-700";
 textWrap.appendChild(editInput);
 } else {
 textWrap.appendChild(createTaskTitle(task, completed));
@@ -486,6 +489,11 @@ left.append(checkBtn, textWrap);
 return left;
 }
 
+/**
+ * Crea la mitad derecha de la tarjeta: badges de categoría/prioridad y botones de acción.
+ * @param {{id: string, category: string, priority: string}} task
+ * @returns {HTMLDivElement}
+ */
 function createTaskRight(task) {
 const right = document.createElement("div");
 right.className = "flex items-center gap-2";
@@ -546,6 +554,13 @@ function createTaskItem(task, completed = false) {
 const li = document.createElement("li");
 li.dataset.id = task.id;
 li.className = getTaskCardClasses(completed);
+li.draggable = true;
+li.addEventListener("dragstart", () => (li.style.opacity = "0.4"));
+li.addEventListener("dragend",   () => (li.style.opacity = "1"));
+
+if (task.priority === "Alta" && !completed) {
+li.classList.add("priority-high");
+}
 
 li.append(createTaskLeft(task, completed), createTaskRight(task));
 
@@ -556,19 +571,11 @@ animateNewItem(li);
 return li;
 }
 
-/**
- * Limpia ambas listas del DOM (pendientes y completadas).
- * @returns {void}
- */
 function clearTaskLists() {
 taskList.innerHTML = "";
 completedList.innerHTML = "";
 }
 
-/**
- * Actualiza los elementos auxiliares del UI (contadores, progreso, contexto, etc.).
- * @returns {void}
- */
 function renderMetaUi() {
 updateCounters();
 updateSidebarState();
@@ -577,10 +584,6 @@ updateProgress();
 updateClearSearchVisibility();
 }
 
-/**
- * Muestra/oculta secciones según la vista seleccionada.
- * @returns {void}
- */
 function renderSectionVisibility() {
 pendingSection.classList.toggle("hidden", currentView === "completed");
 completedSection.classList.toggle("hidden", currentView === "pending");
@@ -617,7 +620,7 @@ const isHighPriorityQuery = hasQuery && query.toLowerCase().includes("alta");
 const emptySearchMessage =
 "No encontré nada con esa búsqueda. Prueba con otras palabras o limpia el filtro.";
 const emptyTrabajoMessage =
-"Por aquí todo tranquilo: no tienes tareas de Trabajo. Añade una cuando lo necesites 💼";
+"Por aquí todo tranquilo: no tienes tareas de Trabajo. Añade una cuando lo necesites.";
 const emptyHighPriorityMessage =
 "¡Bien! No tienes tareas de alta prioridad ahora mismo. Si surge algo urgente, márcalo como Alta.";
 
@@ -631,7 +634,7 @@ emptyMessage: hasQuery
 ? (isHighPriorityQuery ? emptyHighPriorityMessage : emptySearchMessage)
 : currentCategoryFilter === "Trabajo"
 ? emptyTrabajoMessage
-: "Aún no tienes tareas pendientes. Añade la primera arriba 🙂",
+: "Aún no tienes tareas pendientes. Añade la primera arriba.",
 });
 
 renderTaskListItems(completedList, completed, {
@@ -660,6 +663,9 @@ const byCategory = {
 Trabajo: 0,
 Personal: 0,
 Estudio: 0,
+Proyectos: 0,
+Salud: 0,
+Gestiones: 0,
 };
 
 for (const task of taskList) {
@@ -718,6 +724,12 @@ commitTasksAndRender();
 return { ok: true };
 }
 
+/**
+ * Actualiza el texto de una tarea existente validando longitud y duplicados.
+ * @param {string} id
+ * @param {string} text
+ * @returns {{ ok: true } | { ok: false, error: "EMPTY" | "TOO_LONG" | "DUPLICATE" }}
+ */
 function updateTaskText(id, text) {
 const trimmed = safeTrim(text);
 if (!trimmed) return { ok: false, error: "EMPTY" };
@@ -755,25 +767,23 @@ completedAt: completed ? Date.now() : null,
 commitTasksAndRender();
 }
 
-/**
- * Elimina una tarea por id, persiste y renderiza.
- * @param {string} id
- * @returns {void}
- */
 function deleteTask(id) {
 tasks = tasks.filter((task) => task.id !== id);
 commitTasksAndRender();
 }
 
-/**
- * Elimina todas las tareas completadas, persiste y renderiza.
- * @returns {void}
- */
 function clearCompletedTasks() {
 tasks = tasks.filter((task) => !task.completed);
 commitTasksAndRender();
 }
 
+/**
+ * Anima la salida de una tarjeta pendiente y luego la marca como completada.
+ * Si no hay elemento DOM disponible, completa directamente sin animación.
+ * @param {HTMLLIElement|null} li
+ * @param {string} id
+ * @returns {void}
+ */
 function animateAndComplete(li, id) {
 if (!li) {
 setTaskCompleted(id, true);
@@ -789,13 +799,49 @@ setTaskCompleted(id, true);
 }, 220);
 }
 
-/**
- * Guarda y re-renderiza el estado actual.
- * @returns {void}
- */
 function commitTasksAndRender() {
 saveTasks();
 renderTasks();
+}
+
+/**
+ * Guarda el índice origen al iniciar un arrastre.
+ * @param {DragEvent} event
+ * @returns {void}
+ */
+function handleDragStart(event) {
+  const li = event.target.closest("[data-id]");
+  if (!li) return;
+  dragSrcIndex = tasks.findIndex((task) => task.id === li.dataset.id);
+}
+
+/**
+ * Reordena el array tasks moviendo el elemento de srcIndex a destIndex.
+ * @param {number} srcIndex
+ * @param {number} destIndex
+ * @returns {void}
+ */
+function reorderTasks(srcIndex, destIndex) {
+  if (srcIndex === destIndex) return;
+  const [moved] = tasks.splice(srcIndex, 1);
+  tasks.splice(destIndex, 0, moved);
+  commitTasksAndRender();
+}
+
+/**
+ * Maneja el drop: calcula el índice destino y reordena.
+ * @param {DragEvent} event
+ * @returns {void}
+ */
+function handleDrop(event) {
+  event.preventDefault();
+  const li = event.target.closest("[data-id]");
+  if (!li) return;
+  if (dragSrcIndex === null) return;
+  const destIndex = tasks.findIndex((task) => task.id === li.dataset.id);
+  if (destIndex === -1) return;
+  reorderTasks(dragSrcIndex, destIndex);
+  dragSrcIndex = null;
 }
 
 /* =========================
@@ -838,6 +884,12 @@ if (categorySelect) categorySelect.value = "Personal";
 if (prioritySelect) prioritySelect.value = "Media";
 });
 
+taskList?.addEventListener("dragover",  (e) => e.preventDefault());
+completedList?.addEventListener("dragover", (e) => e.preventDefault());
+taskList?.addEventListener("drop", handleDrop);
+completedList?.addEventListener("drop", handleDrop);
+taskList?.addEventListener("dragstart", handleDragStart);
+completedList?.addEventListener("dragstart", handleDragStart);
 input?.addEventListener("input", () => {
 input.setCustomValidity("");
 });

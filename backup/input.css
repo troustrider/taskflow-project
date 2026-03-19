@@ -6,7 +6,7 @@
 
 @layer base {
 :root {
---app-bg: #fffbeb;
+--app-bg: #fafaf9;
 --app-fg: #18181b;
 --app-radius: 1rem;
 --space-1: 0.25rem;
@@ -23,7 +23,7 @@ html, body {
 
 /* Jerarquía de sombras: header más elevado que el contenido */
 header {
-  box-shadow: 0 1px 0 0 rgb(0 0 0 / 0.06), 0 2px 8px 0 rgb(0 0 0 / 0.05);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
 }
 
 /* Franja izquierda para tareas de prioridad Alta */
@@ -35,7 +35,7 @@ header {
 }
 
 .dark .priority-high {
-  border-left-color: #ef4444;
+  border-left-color: #d97706;
 }
 
 /* Contadores y badges con DM Mono */
