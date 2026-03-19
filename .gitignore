@@ -4,3 +4,4 @@ node_modules/
 *.log
 css/output.css
 web-search-mcp/
+.env
