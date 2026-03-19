@@ -83,8 +83,15 @@ inactive: "border-stone-200/60 bg-white text-stone-400 hover:border-stone-300 ho
 /* =========================
 Storage
 ========================= */
+
+/** Persiste el array de tareas en localStorage como JSON. */
 function saveTasks() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
 
+/**
+ * Carga las tareas desde localStorage.
+ * Normaliza la estructura de cada tarea y aplica valores por defecto.
+ * Si hay error de parseo o datos inválidos, inicializa tasks como array vacío.
+ */
 function loadTasks() {
 try {
 const raw = localStorage.getItem(STORAGE_KEY);
@@ -102,15 +109,56 @@ createdAt: task.createdAt ?? Date.now(), completedAt: task.completedAt ?? null,
 /* =========================
 Utilidades
 ========================= */
+
+/**
+ * Convierte cualquier valor a string y aplica trim.
+ * @param {*} value - Valor a limpiar.
+ * @returns {string} String limpio sin espacios al inicio/final.
+ */
 function safeTrim(value) { return (value ?? "").toString().trim(); }
+
+/**
+ * Normaliza texto para comparación de duplicados.
+ * Aplica trim, colapsa espacios múltiples y convierte a minúsculas.
+ * @param {string} text - Texto a normalizar.
+ * @returns {string} Texto normalizado.
+ */
 function normalizeTaskText(text) { return safeTrim(text).replace(/\s+/g, " ").toLowerCase(); }
+
+/** @returns {string} Valor actual del input de búsqueda, trimmed. */
 function getSearchQuery() { return safeTrim(searchInput?.value); }
+
+/**
+ * Devuelve las clases Tailwind para un badge de prioridad.
+ * @param {string} priority - "Alta", "Media" o "Baja".
+ * @returns {string} Clases CSS concatenadas.
+ */
 function getPriorityClasses(priority) { return CLASSES.priorityBase + (CLASSES.priority[priority] ?? CLASSES.priority.Baja); }
+
+/** @returns {string} Clases Tailwind para un badge de categoría. */
 function getCategoryClasses() { return CLASSES.categoryBadge; }
+
+/**
+ * Devuelve las clases de la tarjeta de tarea según su estado.
+ * @param {boolean} [completed=false] - Si la tarea está completada.
+ * @returns {string} Clases CSS concatenadas.
+ */
 function getTaskCardClasses(completed = false) { return completed ? CLASSES.taskCard.completed : CLASSES.taskCard.pending; }
+
+/**
+ * Devuelve las clases del botón de check según estado.
+ * @param {boolean} [completed=false] - Si la tarea está completada.
+ * @returns {string} Clases CSS concatenadas.
+ */
 function getCheckButtonClasses(completed = false) { return CLASSES.checkButtonBase + (completed ? CLASSES.checkButton.completed : CLASSES.checkButton.pending); }
+
+/** @returns {string} Clases Tailwind para los botones de acción (Editar, Borrar). */
 function getDeleteButtonClasses() { return CLASSES.deleteButton; }
 
+/**
+ * Genera el titular de fecha en español (e.g. "jueves 19 de marzo").
+ * @returns {string} Fecha formateada.
+ */
 function formatDateHeadline() {
 const days = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -118,10 +166,19 @@ const now = new Date();
 return `${days[now.getDay()]} ${now.getDate()} de ${months[now.getMonth()]}`;
 }
 
+/**
+ * Devuelve la hora local en formato HH:MM.
+ * @returns {string} Hora formateada.
+ */
 function formatTime() {
 return new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 }
 
+/**
+ * Obtiene la ubicación aproximada del usuario por IP (vía ipapi.co).
+ * Actualiza el elemento #time-location con "HH:MM · Ciudad, País".
+ * Si la petición falla, muestra solo la hora.
+ */
 function fetchLocation() {
 fetch("https://ipapi.co/json/")
 .then((r) => r.json())
@@ -136,6 +193,12 @@ timeLocation.textContent = `${formatTime()} · ${data.city}, ${data.country_name
 /* =========================
 Tema
 ========================= */
+
+/**
+ * Aplica un tema (claro u oscuro) al documento.
+ * Añade o elimina la clase "dark" en <html> y actualiza el icono del botón.
+ * @param {"light"|"dark"} theme - Tema a aplicar.
+ */
 function applyTheme(theme) {
 const isDark = theme === "dark";
 document.documentElement.classList.toggle("dark", isDark);
@@ -143,6 +206,10 @@ if (themeIcon) themeIcon.textContent = isDark ? "◗" : "○";
 if (themeText) themeText.textContent = isDark ? "Oscuro" : "Claro";
 }
 
+/**
+ * Carga el tema desde localStorage.
+ * Si no hay preferencia guardada, detecta prefers-color-scheme del sistema.
+ */
 function loadTheme() {
 const savedTheme = localStorage.getItem(THEME_KEY);
 if (savedTheme === "dark" || savedTheme === "light") { applyTheme(savedTheme); return; }
@@ -150,6 +217,7 @@ const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-schem
 applyTheme(prefersDark ? "dark" : "light");
 }
 
+/** Alterna entre tema claro y oscuro, persiste la elección y aplica. */
 function toggleTheme() {
 const isDark = document.documentElement.classList.contains("dark");
 const nextTheme = isDark ? "light" : "dark";
@@ -160,16 +228,34 @@ applyTheme(nextTheme);
 /* =========================
 Filtros
 ========================= */
+
+/**
+ * Comprueba si una tarea coincide con la búsqueda.
+ * Busca en texto, categoría y prioridad (case-insensitive).
+ * @param {Object} task - Tarea a comprobar.
+ * @param {string} query - Texto de búsqueda.
+ * @returns {boolean}
+ */
 function matchesSearch(task, query) {
 const q = query.toLowerCase();
 return task.text.toLowerCase().includes(q) || task.category.toLowerCase().includes(q) || task.priority.toLowerCase().includes(q);
 }
 
+/**
+ * Comprueba si una tarea pertenece a la categoría activa.
+ * @param {Object} task - Tarea a comprobar.
+ * @returns {boolean}
+ */
 function matchesCategory(task) {
 if (currentCategoryFilter === "all") return true;
 return task.category === currentCategoryFilter;
 }
 
+/**
+ * Filtra las tareas según búsqueda y categoría activa.
+ * Agrupa por urgencia: now (Alta), next (Media/Baja), done (completadas).
+ * @returns {{ now: Object[], next: Object[], done: Object[] }}
+ */
 function getVisibleTasks() {
 const query = getSearchQuery();
 const filtered = tasks.filter((task) => {
@@ -183,6 +269,7 @@ done: filtered.filter((t) => t.completed),
 };
 }
 
+/** Aplica las clases activa/inactiva a cada pill de categoría según el filtro actual. */
 function updateFilterPills() {
 categoryFilterButtons.forEach((btn) => {
 const isActive = btn.dataset.categoryFilter === currentCategoryFilter;
@@ -194,6 +281,12 @@ btn.className = base + (isActive ? CLASSES.filterPill.active : CLASSES.filterPil
 /* =========================
 Empty state
 ========================= */
+
+/**
+ * Crea un elemento <li> de empty state con mensaje centrado.
+ * @param {string} message - Texto a mostrar.
+ * @returns {HTMLLIElement}
+ */
 function createEmptyState(message) {
 const li = document.createElement("li");
 li.className = CLASSES.emptyState;
@@ -206,6 +299,11 @@ return li;
 /* =========================
 Estado extra UI
 ========================= */
+
+/**
+ * Actualiza el anillo SVG de progreso y el mensaje contextual.
+ * Calcula el porcentaje de tareas completadas y ajusta stroke-dashoffset.
+ */
 function updateProgress() {
 const { total, completed } = computeStats(tasks);
 const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
@@ -222,13 +320,23 @@ else label = "Todo listo";
 if (progressText) progressText.textContent = label;
 }
 
+/** Actualiza el titular de fecha en el DOM. */
 function updateDateHeadline() { if (dateHeadline) dateHeadline.textContent = formatDateHeadline(); }
+
+/** Actualiza el contador de tareas completadas junto al toggle "Hecho". */
 function updateDoneCount() { if (doneCountEl) doneCountEl.textContent = tasks.filter((t) => t.completed).length; }
+
+/** Muestra u oculta el botón "Limpiar" según si hay texto en la búsqueda. */
 function updateClearSearchVisibility() { if (clearSearchBtn) clearSearchBtn.classList.toggle("hidden", getSearchQuery().length === 0); }
 
 /* =========================
 Render
 ========================= */
+
+/**
+ * Anima la entrada de una nueva tarea (fade + slide down, 220ms).
+ * @param {HTMLLIElement} li - Elemento a animar.
+ */
 function animateNewItem(li) {
 li.style.opacity = "0";
 li.style.transform = "translateY(8px)";
@@ -239,6 +347,17 @@ li.style.transform = "translateY(0)";
 });
 }
 
+/**
+ * Factoría genérica de botones de acción para tarjetas de tarea.
+ * @param {Object} config - Configuración del botón.
+ * @param {string} config.action - Valor de data-action.
+ * @param {string} config.id - Valor de data-id (ID de la tarea).
+ * @param {string} config.className - Clases CSS.
+ * @param {string} [config.textContent] - Texto del botón.
+ * @param {string} [config.innerHTML] - HTML interno del botón.
+ * @param {string} [config.ariaLabel] - Etiqueta ARIA.
+ * @returns {HTMLButtonElement}
+ */
 function createActionButton({ action, id, className, textContent, innerHTML, ariaLabel }) {
 const btn = document.createElement("button");
 btn.type = "button"; btn.dataset.action = action; btn.dataset.id = id; btn.className = className;
@@ -248,6 +367,12 @@ else if (textContent !== undefined) btn.textContent = textContent;
 return btn;
 }
 
+/**
+ * Crea el elemento <p> del título de una tarea.
+ * @param {Object} task - Tarea.
+ * @param {boolean} completed - Si está completada (tachado y color atenuado).
+ * @returns {HTMLParagraphElement}
+ */
 function createTaskTitle(task, completed) {
 const title = document.createElement("p");
 title.className = completed
@@ -257,6 +382,12 @@ title.textContent = task.text;
 return title;
 }
 
+/**
+ * Construye el lado izquierdo de una tarjeta: check button + título o input de edición.
+ * @param {Object} task - Tarea.
+ * @param {boolean} completed - Si está completada.
+ * @returns {HTMLDivElement}
+ */
 function createTaskLeft(task, completed) {
 const left = document.createElement("div");
 left.className = "flex min-w-0 items-center gap-3";
@@ -278,6 +409,11 @@ left.append(checkBtn, textWrap);
 return left;
 }
 
+/**
+ * Construye el lado derecho de una tarjeta: badges + botones de acción.
+ * @param {Object} task - Tarea.
+ * @returns {HTMLDivElement}
+ */
 function createTaskRight(task) {
 const right = document.createElement("div");
 right.className = "flex items-center gap-1.5";
@@ -297,6 +433,12 @@ right.append(deleteBtn);
 return right;
 }
 
+/**
+ * Construye el <li> completo de una tarea: clases, draggable, franja de prioridad, animación.
+ * @param {Object} task - Tarea.
+ * @param {boolean} [completed=false] - Si está completada.
+ * @returns {HTMLLIElement}
+ */
 function createTaskItem(task, completed = false) {
 const li = document.createElement("li");
 li.dataset.id = task.id; li.className = getTaskCardClasses(completed); li.draggable = true;
@@ -308,12 +450,24 @@ if (task.id === lastAddedTaskId && !completed) animateNewItem(li);
 return li;
 }
 
+/**
+ * Renderiza una lista de tareas o su empty state.
+ * @param {HTMLUListElement} listEl - Elemento <ul> destino.
+ * @param {Object[]} items - Tareas a renderizar.
+ * @param {Object} options
+ * @param {boolean} options.completed - Si las tareas son completadas.
+ * @param {string} options.emptyMessage - Mensaje si no hay tareas.
+ */
 function renderTaskListItems(listEl, items, { completed, emptyMessage }) {
 listEl.innerHTML = "";
 if (items.length === 0) { listEl.appendChild(createEmptyState(emptyMessage)); return; }
 items.forEach((task) => { listEl.appendChild(createTaskItem(task, completed)); });
 }
 
+/**
+ * Re-renderiza toda la UI: las 3 listas, progreso, pills, contadores.
+ * Oculta la sección "Ahora" si no hay tareas de prioridad Alta.
+ */
 function renderTasks() {
 const { now, next, done } = getVisibleTasks();
 const query = getSearchQuery();
@@ -328,6 +482,11 @@ if (now.length === 0 && !hasQuery && currentCategoryFilter === "all") { nowSecti
 lastAddedTaskId = null;
 }
 
+/**
+ * Calcula estadísticas de una lista de tareas.
+ * @param {Object[]} taskList - Array de tareas.
+ * @returns {{ total: number, pending: number, completed: number, byCategory: Object }}
+ */
 function computeStats(taskList) {
 const total = taskList.length; let pending = 0, completed = 0;
 const byCategory = { Trabajo: 0, Personal: 0, Estudio: 0, Proyectos: 0, Salud: 0, Gestiones: 0 };
@@ -338,6 +497,15 @@ return { total, pending, completed, byCategory };
 /* =========================
 Lógica
 ========================= */
+
+/**
+ * Añade una nueva tarea al principio del array.
+ * Valida texto vacío, longitud máxima y duplicados.
+ * @param {string} text - Texto de la tarea.
+ * @param {string} category - Categoría.
+ * @param {string} priority - Prioridad ("Alta", "Media", "Baja").
+ * @returns {{ ok: boolean, error?: string }}
+ */
 function addTask(text, category, priority) {
 const trimmed = safeTrim(text);
 if (!trimmed) return { ok: false, error: "EMPTY" };
@@ -348,6 +516,13 @@ const task = { id: crypto.randomUUID(), text: trimmed, category, priority, compl
 tasks.unshift(task); lastAddedTaskId = task.id; commitTasksAndRender(); return { ok: true };
 }
 
+/**
+ * Actualiza el texto de una tarea existente.
+ * Valida las mismas reglas que addTask, excluyendo la propia tarea al detectar duplicados.
+ * @param {string} id - ID de la tarea a editar.
+ * @param {string} text - Nuevo texto.
+ * @returns {{ ok: boolean, error?: string }}
+ */
 function updateTaskText(id, text) {
 const trimmed = safeTrim(text);
 if (!trimmed) return { ok: false, error: "EMPTY" };
@@ -357,28 +532,55 @@ if (tasks.some((t) => t.id !== id && normalizeTaskText(t.text) === normalized)) 
 tasks = tasks.map((t) => (t.id === id ? { ...t, text: trimmed } : t)); commitTasksAndRender(); return { ok: true };
 }
 
+/**
+ * Marca o desmarca una tarea como completada.
+ * @param {string} id - ID de la tarea.
+ * @param {boolean} completed - Nuevo estado.
+ */
 function setTaskCompleted(id, completed) { tasks = tasks.map((task) => task.id === id ? { ...task, completed, completedAt: completed ? Date.now() : null } : task); commitTasksAndRender(); }
+
+/** @param {string} id - ID de la tarea a eliminar. */
 function deleteTask(id) { tasks = tasks.filter((task) => task.id !== id); commitTasksAndRender(); }
+
+/** Elimina todas las tareas completadas. */
 function clearCompletedTasks() { tasks = tasks.filter((task) => !task.completed); commitTasksAndRender(); }
+
+/** Marca todas las tareas pendientes como completadas. */
 function completeAllTasks() { tasks = tasks.map((task) => task.completed ? task : { ...task, completed: true, completedAt: Date.now() }); commitTasksAndRender(); }
 
+/**
+ * Anima la salida de una tarjeta (fade + slide up) y luego la marca como completada.
+ * @param {HTMLLIElement|null} li - Elemento DOM de la tarjeta.
+ * @param {string} id - ID de la tarea.
+ */
 function animateAndComplete(li, id) {
 if (!li) { setTaskCompleted(id, true); return; }
 li.style.transition = "opacity 220ms ease, transform 220ms ease"; li.style.opacity = "0"; li.style.transform = "translateY(-6px)";
 setTimeout(() => { setTaskCompleted(id, true); }, 220);
 }
 
+/**
+ * Anima la salida de una tarjeta (fade + scale down) y luego la elimina.
+ * @param {HTMLLIElement|null} li - Elemento DOM de la tarjeta.
+ * @param {string} id - ID de la tarea.
+ */
 function animateAndDelete(li, id) {
 if (!li) { deleteTask(id); return; }
 li.style.transition = "opacity 220ms ease, transform 220ms ease"; li.style.opacity = "0"; li.style.transform = "scale(0.95) translateY(-4px)";
 setTimeout(() => { deleteTask(id); }, 220);
 }
 
+/** Persiste en localStorage y re-renderiza toda la UI. Punto de entrada único para cambios de estado. */
 function commitTasksAndRender() { saveTasks(); renderTasks(); }
 
 /* =========================
 Drag & drop
 ========================= */
+
+/**
+ * Handler de dragstart. Guarda el índice y la sección de origen de la tarea arrastrada.
+ * @param {DragEvent} event
+ */
 function handleDragStart(event) {
 const li = event.target.closest("[data-id]");
 if (!li) return;
@@ -387,16 +589,31 @@ const parentList = li.closest("[data-section]");
 dragSrcSection = parentList ? parentList.dataset.section : null;
 }
 
+/**
+ * Handler de dragenter. Añade feedback visual (outline) al entrar en una sección distinta.
+ * @param {DragEvent} event
+ */
 function handleDragEnter(event) {
 const list = event.target.closest("[data-section]");
 if (list && dragSrcSection && list.dataset.section !== dragSrcSection) list.classList.add("drag-over");
 }
 
+/**
+ * Handler de dragleave. Quita el feedback visual al salir de la sección.
+ * @param {DragEvent} event
+ */
 function handleDragLeave(event) {
 const list = event.target.closest("[data-section]");
 if (list && !list.contains(event.relatedTarget)) list.classList.remove("drag-over");
 }
 
+/**
+ * Handler de drop. Si es cross-section, cambia la prioridad de la tarea:
+ * - Ahora → Pendiente: Alta → Media
+ * - Pendiente → Ahora: Media/Baja → Alta
+ * Si es same-section, reordena mediante splice.
+ * @param {DragEvent} event
+ */
 function handleDrop(event) {
 event.preventDefault();
 document.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
@@ -475,6 +692,11 @@ if (doneArrow) doneArrow.style.transform = doneExpanded ? "rotate(90deg)" : "rot
 renderTasks();
 });
 
+/**
+ * Delegación de eventos para acciones dentro de las listas de tareas.
+ * Lee data-action y data-id del botón pulsado y despacha la función correspondiente.
+ * @param {MouseEvent} event
+ */
 function handleListActions(event) {
 const actionBtn = event.target.closest("[data-action]");
 if (!actionBtn) return;

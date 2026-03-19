@@ -49,19 +49,21 @@ El wireframe del proyecto está en `docs/design/wireframe-taskflow.svg` (versió
 - **Acento:** el **único** amber en dark mode es el trazo del anillo SVG y la franja de prioridad alta. Todo lo demás (pills activas, checks completados, focus rings, labels) es neutro.
 - **Focus rings:** `neutral-600` en todo — consistente y uniforme.
 
-#### Decisiones de diseño
+#### Decisiones de diseño y desviaciones del enunciado
 
-- **Sin sidebar.** Los filtros de categoría son pills inline en grid. El sidebar consumía 30% del ancho para 6 botones.
+- **Sin `<aside>` ni sidebar.** El enunciado sugiere un panel lateral para estadísticas. El rediseño eliminó el sidebar porque consumía un 30% del ancho de pantalla para mostrar 6 botones. Las estadísticas se muestran ahora en el anillo de progreso SVG centrado (más eficiente visualmente) y los filtros son pills inline en grid. La función informativa del aside se cumple con el anillo + mensajes contextuales.
+- **Tailwind vía npm, no CDN.** El enunciado sugiere CDN. Se optó por la instalación con npm (`@tailwindcss/cli`) porque permite purging automático (el CSS final solo incluye las clases usadas), build minificado para producción, y es la práctica estándar de la industria. El CDN carga todo el framework (~300KB) sin purging.
 - **Anillo centrado como hero.** Se lee en 0.1s frente a 1-2s de una barra. Es lo primero que ves al abrir la app.
 - **Pendiente primero, Ahora después.** El flujo natural es: tareas normales arriba (las que más hay), urgentes debajo (las que requieren atención inmediata), completadas colapsadas al final.
 - **Command bar sin botón visible.** Submit con Enter — menos ceremonia, más acción.
 - **Acciones hover-only en desktop, siempre visibles en touch.** `@media (hover: none)` resuelve la accesibilidad en móvil sin ensuciar la interfaz en desktop.
+- **`css/output.css` en `.gitignore`:** Vercel ejecuta `npm run build:css` en cada deploy, por lo que el CSS generado no necesita subirse al repositorio. Es la práctica profesional para archivos generados.
 
 ---
 
 ### Estructura del código (`app.js`)
 
-El estado de la app vive en variables globales (`tasks`, `currentCategoryFilter`, etc.). Todas las clases Tailwind están centralizadas en el objeto `CLASSES` — modificar una entrada cambia el estilo globalmente sin tocar el HTML generado.
+El estado de la app vive en variables globales (`tasks`, `currentCategoryFilter`, etc.). Todas las clases Tailwind están centralizadas en el objeto `CLASSES` — modificar una entrada cambia el estilo globalmente sin tocar el HTML generado. Las funciones principales están documentadas con JSDoc.
 
 El flujo de render es unidireccional: cualquier cambio de estado llama a `commitTasksAndRender()`, que persiste y re-renderiza todo.
 
@@ -130,15 +132,15 @@ npm run build:css
 
 ```
 ├── index.html          # Layout y markup
-├── app.js              # Lógica de la app (estado, render, eventos)
+├── app.js              # Lógica de la app (estado, render, eventos, JSDoc)
 ├── style.css           # CSS original pre-Tailwind (referencia)
 ├── input.css           # Entrada de Tailwind (fuentes, custom CSS)
 ├── css/
-│   └── output.css      # CSS generado (no editar a mano)
+│   └── output.css      # CSS generado por Tailwind (en .gitignore, Vercel lo genera)
 ├── docs/
 │   ├── design/
 │   │   └── wireframe-taskflow.svg  # Wireframe v3
-│   └── AI/             # Documentación de IA (Fase 2)
+│   └── ai/             # Documentación de IA (Fase 2)
 │       ├── reflection.md
 │       ├── experiments.md
 │       ├── cursor-workflow.md
@@ -172,6 +174,7 @@ npm run build:css
 | Hora y ubicación | Hora local se muestra y actualiza cada minuto. Ciudad por IP aparece tras la carga. |
 | Móvil | Form stackea correctamente. Pills en 4 columnas. Acciones de tarea siempre visibles (touch). |
 | Navegación con teclado | Todos los elementos son accesibles con Tab. Focus rings visibles. |
+| HTML validado con W3C | Sin errores. |
 
 ---
 
