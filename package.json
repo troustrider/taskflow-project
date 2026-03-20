@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "dev:css": "npx @tailwindcss/cli -i ./input.css -o ./css/output.css --watch",
-    "build:css": "npx @tailwindcss/cli -i ./input.css -o ./css/output.css --minify"
+    "build:css": "npx @tailwindcss/cli -i ./input.css -o ./css/output.css --minify",
+    "build": "npm run build:css"
   },
   "repository": {
     "type": "git",
