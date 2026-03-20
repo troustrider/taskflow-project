@@ -1,200 +1,286 @@
 ## TaskFlow
 
-App web de tareas en **vanilla JS** + **Tailwind CSS v4** para organizar pendientes por urgencia, con búsqueda, filtros, drag & drop entre secciones, modo oscuro y persistencia en `localStorage`.
+App web de gestión de tareas con diseño responsive de 3 columnas, construida en **vanilla JS** + **Tailwind CSS v4**. Arquitectura modular preparada para backend en Fase 3.
 
-**Demo en producción:** https://taskflow-project-jet.vercel.app/
+**Demo:** https://taskflow-project-jet.vercel.app/
+
+---
+
+### Stack técnico
+
+- **Frontend:** HTML5, vanilla JavaScript (ES2022+, `"use strict"`), Tailwind CSS v4 (`@tailwindcss/cli`)
+- **Tipografía:** DM Sans (cuerpo) + DM Mono (contadores, UI monospace) via Google Fonts
+- **Persistencia:** `localStorage` (Fase 2), diseñado para migrar a API REST (Fase 3)
+- **Deploy:** Vercel (build automático con `npm run build:css`)
+
+---
+
+### Arquitectura del código (`app.js`)
+
+El código está organizado en 17 módulos con responsabilidad única. El flujo de datos es unidireccional: cualquier cambio de estado pasa por `App.commit()` → `TaskService.save()` → `App.render()`.
+
+```
+CONFIG / CATEGORIES / CATEGORY_COLORS / RING / CLASSES   ← Constantes inmutables (Object.freeze)
+                          │
+                    ┌─────┴─────┐
+                    │  Utils    │  ← Funciones puras: safeTrim, normalizeText, formatDate/Time
+                    └─────┬─────┘
+                          │
+              ┌───────────┴───────────┐
+              │      TaskStore        │  ← Capa de persistencia (localStorage)
+              │  load() / save()      │     En Fase 3: reemplazar por fetch("/api/tasks")
+              └───────────┬───────────┘
+                          │
+              ┌───────────┴───────────┐
+              │     TaskService       │  ← Lógica de negocio pura (sin DOM)
+              │  add / updateText /   │     CRUD, validación, stats, filtrado
+              │  remove / completeAll │
+              │  getVisible / reorder │
+              └───────────┬───────────┘
+                          │
+              ┌───────────┴───────────┐
+              │     UIState           │  ← Estado UI centralizado
+              │  categoryFilter       │     (categoryFilter, editingTaskId,
+              │  editingTaskId        │      doneExpanded, lastAddedTaskId,
+              │  doneExpanded ...     │      searchDebounceTimer)
+              └───────────┬───────────┘
+                          │
+        ┌─────────────────┼─────────────────┐
+        │                 │                 │
+   ┌────┴────┐     ┌──────┴──────┐    ┌────┴────┐
+   │   DOM   │     │    App      │    │Keyboard │
+   │ get(id) │     │ commit()    │    │ init()  │
+   │ (cache) │     │ render()    │    └─────────┘
+   └─────────┘     │ _bindEvents│
+                   └──────┬──────┘
+                          │ render() llama a:
+        ┌────┬────┬───┬───┼───┬────┬────┬────┐
+        │    │    │   │   │   │    │    │    │
+     Theme Loc Search Greet Welc Prog Side Rend Anim
+                                              │
+                                          UndoToast
+                                          DragDrop
+                                          ListActions
+```
+
+#### Módulos
+
+| Módulo | Responsabilidad |
+|---|---|
+| `CONFIG` | Constantes de la app: keys de storage, límites, timeouts, duraciones |
+| `CATEGORIES` | Array de categorías disponibles |
+| `CATEGORY_COLORS` | Mapa categoría → color hex para dots y barras |
+| `RING` | Circumferencias SVG (hero: 201.1, sidebar: 119.4) |
+| `CLASSES` | Mapa centralizado de clases Tailwind para todos los elementos generados por JS |
+| `DOM` | Cache lazy de `getElementById`. `DOM.get("id")` consulta una vez, cachea para siempre |
+| `Utils` | Funciones puras: `safeTrim`, `normalizeText`, `formatDate`, `formatTime`, `currentHour` |
+| `TaskStore` | Capa de persistencia aislada. `load()` → `Task[]`, `save(tasks)` → persiste. En Fase 3, solo este módulo cambia |
+| `TaskService` | Lógica de negocio sin DOM: `add`, `updateText`, `setCompleted`, `remove`, `insertAt`, `completeAll`, `clearCompleted`, `updateTask`, `reorder`, `computeStats`, `getVisible` |
+| `UIState` | Objeto mutable con estado de UI: `categoryFilter`, `editingTaskId`, `lastAddedTaskId`, `doneExpanded`, `searchDebounceTimer` |
+| `Theme` | `load()` detecta sistema o localStorage, `apply(theme)`, `toggle()` |
+| `Location` | Geolocalización IP: `ip-api.com` (primario, 5s timeout) → `ipapi.co` (fallback). Cache en `sessionStorage` |
+| `Search` | Lógica del buscador del header: `getQuery()`, `clear()`, `focus()`, `updateHints()` |
+| `Greeting` | Saludo contextual cuando hay tareas. Varía por hora y % completado |
+| `Welcome` | Pantalla de onboarding cuando no hay tareas. Oculta secciones de tareas y pills |
+| `Progress` | Actualiza anillo SVG hero + texto de progreso + fecha |
+| `Sidebar` | `build()` genera filtros una vez, `update()` sincroniza ring, barras, stats, fecha/hora/ubicación |
+| `DragDrop` | 6 combinaciones cross-section + reorder within-section |
+| `UndoToast` | Toast de 4s con barra de progreso y restauración en posición original |
+| `TaskRenderer` | Construcción DOM de tarjetas: `createItem()`, `renderList()`, `_buildLeft/_buildRight`, `_animateIn` |
+| `Animations` | `complete(li, id)` y `delete(li, id)`: animan y luego ejecutan la acción |
+| `ListActions` | Handler delegado de clicks: `complete`, `restore`, `delete`, `edit`, `edit-save`, `edit-cancel` |
+| `Keyboard` | Atajos centralizados: `Ctrl+K`, `Ctrl+Shift+C`, `Ctrl+Shift+X`, `Esc`, `Enter` |
+| `App` | Orquestador: `init()` bootstrapea, `commit()` persiste+renderiza, `render()` re-renderiza toda la UI, `_bindEvents()` conecta todos los listeners |
+
+#### Preparación para Fase 3 (backend)
+
+La migración a API REST requiere cambiar **solo `TaskStore`**:
+
+```js
+// Fase 2 (actual):
+const TaskStore = {
+  load() { return JSON.parse(localStorage.getItem(key)); },
+  save(tasks) { localStorage.setItem(key, JSON.stringify(tasks)); },
+};
+
+// Fase 3 (backend):
+const TaskStore = {
+  async load() { return (await fetch("/api/tasks")).json(); },
+  async save(tasks) { await fetch("/api/tasks", { method: "PUT", body: JSON.stringify(tasks) }); },
+};
+```
+
+`TaskService`, `App`, y todos los módulos de UI no necesitan cambios. La interfaz `load()` / `save()` es el contrato.
 
 ---
 
 ### Funcionalidades
 
-- **Añadir tareas** con categoría (Trabajo, Personal, Estudio, Proyectos, Salud, Gestiones) y prioridad (Alta, Media, Baja).
-- **Validaciones** al añadir o editar: máximo 300 caracteres, no permite duplicados (comparación normalizada, insensible a mayúsculas y espacios extra).
-- **Editar tareas** en línea: botón `Editar` activa un input inline; `Guardar` o `Enter` confirman; `Cancelar` o `Esc` descartan.
-- **Completar / restaurar tareas**: botón de check en cada tarjeta. Al completar, la tarjeta se anima y se mueve a "Hecho".
-- **Completar todas las pendientes** de golpe con el botón `Completar todas`.
-- **Borrar tareas** individualmente (con animación) o vaciar todas las completadas.
-- **Agrupación por urgencia**: las tareas se organizan en tres secciones — "Pendiente" (media/baja prioridad), "Ahora" (alta prioridad) y "Hecho" (completadas, colapsado por defecto).
-- **Drag & drop entre secciones**: arrastrar una tarea de "Ahora" a "Pendiente" cambia su prioridad de Alta a Media; de "Pendiente" a "Ahora" sube a Alta. Dentro de la misma sección, reordena. Feedback visual con outline dashed al arrastrar entre secciones.
-- **Drag & drop dentro de secciones**: reordena libremente. El orden se persiste en `localStorage`.
-- **Búsqueda** en tiempo real por texto, categoría y prioridad. Barra de búsqueda oculta por defecto, toggleable desde el header.
-- **Filtros por categoría** mediante pills en grid (4 columnas en móvil, 7 en desktop).
-- **Anillo de progreso** SVG centrado como elemento hero. Muestra porcentaje completado con mensajes contextuales ("Sin tareas aún", "Buen comienzo", "Casi lo tienes", "Todo listo").
-- **Fecha, hora y ubicación**: la cabecera muestra la fecha en lenguaje natural, la hora local actualizada cada minuto, y la ciudad aproximada obtenida por IP (vía `ipapi.co`).
-- **Tema claro/oscuro** con detección automática de preferencia del sistema. Persistido en `localStorage`.
-- **Tipografía**: DM Sans (cuerpo) + DM Mono (contadores y UI monospace).
-- **Prioridad Alta** marcada con franja amber en el borde izquierdo de la tarjeta.
-- **Acciones de tarea** (Editar, Borrar): ocultas por defecto en desktop (aparecen en hover), siempre visibles en dispositivos táctiles (`@media (hover: none)`).
-- **Atajos de teclado**:
-  - `Esc` — limpia la búsqueda si hay texto activo; cancela la edición si hay una tarea en edición.
-  - `Enter` — guarda la edición activa; añade tarea si el foco está en el input principal.
+#### Tareas
+- Añadir con categoría (6) y prioridad (3). Submit con `Enter`, hint `↵` visual
+- Validación: vacío, >300 chars, duplicados (normalización case-insensitive + espacios)
+- Editar inline: `Editar` → input → `Enter`/`Guardar` o `Esc`/`Cancelar`
+- Completar/restaurar con animación fade+slide (220ms)
+- Borrar con animación fade+scale + undo-toast 4s con barra de progreso
+- Completar todas (`Ctrl+Shift+C` o botón)
+- Vaciar completadas (`Ctrl+Shift+X` o botón)
+
+#### Organización
+- 3 secciones: "Ahora" (Alta), "Pendiente" (Media/Baja), "Hecho" (colapsado)
+- Drag & drop completo (6 combinaciones cross-section + reorder):
+  - Ahora ↔ Pendiente: cambia prioridad
+  - Pendiente/Ahora → Hecho: marca completada
+  - Hecho → Ahora: restaura como Alta
+  - Hecho → Pendiente: restaura con prioridad original
+- Filtros por categoría: pills (mobile) + sidebar vertical con dots (xl)
+- Búsqueda en header: siempre visible, hint `⌘K`, debounce 150ms
+
+#### Atajos de teclado
+| Atajo | Acción |
+|---|---|
+| `Ctrl+K` / `⌘K` | Enfocar búsqueda |
+| `Ctrl+Shift+C` | Completar todas las pendientes |
+| `Ctrl+Shift+X` | Vaciar completadas |
+| `Esc` | Limpiar búsqueda / cancelar edición / desenfocar |
+| `Enter` | Añadir tarea / confirmar edición |
+
+#### Layout
+- **Mobile/tablet** (<1280px): columna única, hero con anillo, pills en grid, secciones
+- **Desktop** (≥1280px): grid `[240px_1fr_240px]`, sidebars sticky, hero y pills ocultos
+
+#### Sidebar izquierdo (xl)
+- Anillo mini de progreso + label "N/M completadas"
+- Barras de categoría con colores
+- Fecha, hora, ubicación (separados)
+- Panel de atajos de teclado (5 atajos)
+
+#### Sidebar derecho (xl)
+- Filtros de categoría con dots de color
+- Botones: "Completar todas", "Vaciar completadas"
+- Resumen: total, pendientes, completadas
+
+#### Saludos contextuales
+- **Con tareas** (greeting-section): título + subtítulo arriba del todo, varía por hora y progreso
+- **Sin tareas** (welcome-section): icono SVG + saludo + 3 mini-cards de onboarding
 
 ---
 
 ### Diseño
 
-El wireframe del proyecto está en `docs/design/wireframe-taskflow.svg` (versión 3).
+#### Paleta (60-30-10)
 
-#### Paleta cromática (regla 60-30-10)
+**Claro:** stone-50 / white (60%) → stone-700 / stone-400 (30%) → amber-400/500 (10%)
 
-**Modo claro:**
-- **60% — superficies:** `stone-50` (fondo) + `white` (tarjetas, inputs, pills).
-- **30% — texto y bordes:** `stone-700` (texto principal), `stone-400/500` (secundario), `stone-200` (bordes).
-- **10% — acento:** `amber-400/500` — anillo de progreso, franja de prioridad alta, pill activa, check completado, focus rings. Escaso e intencional.
+**Oscuro:** neutral-950 / neutral-900 (60%) → neutral-100..500 (30%) → amber solo en anillo y stripe (10%)
 
-**Modo oscuro — completamente neutro:**
-- **Fondo:** `neutral-950` (#0a0a0a). **Tarjetas:** `neutral-900` (#171717). **Ring widget:** `neutral-800` (#262626) — un paso de elevación por encima de las tarjetas.
-- **Bordes:** `neutral-700/50` — visibles pero no protagonistas.
-- **Texto:** `neutral-100/200` (principal), `neutral-400/500` (secundario).
-- **Acento:** el **único** amber en dark mode es el trazo del anillo SVG y la franja de prioridad alta. Todo lo demás (pills activas, checks completados, focus rings, labels) es neutro.
-- **Focus rings:** `neutral-600` en todo — consistente y uniforme.
-
-#### Decisiones de diseño y desviaciones del enunciado
-
-- **Sin `<aside>` ni sidebar.** El enunciado sugiere un panel lateral para estadísticas. El rediseño eliminó el sidebar porque consumía un 30% del ancho de pantalla para mostrar 6 botones. Las estadísticas se muestran ahora en el anillo de progreso SVG centrado (más eficiente visualmente) y los filtros son pills inline en grid. La función informativa del aside se cumple con el anillo + mensajes contextuales.
-- **Tailwind vía npm, no CDN.** El enunciado sugiere CDN. Se optó por la instalación con npm (`@tailwindcss/cli`) porque permite purging automático (el CSS final solo incluye las clases usadas), build minificado para producción, y es la práctica estándar de la industria. El CDN carga todo el framework (~300KB) sin purging.
-- **Anillo centrado como hero.** Se lee en 0.1s frente a 1-2s de una barra. Es lo primero que ves al abrir la app.
-- **Pendiente primero, Ahora después.** El flujo natural es: tareas normales arriba (las que más hay), urgentes debajo (las que requieren atención inmediata), completadas colapsadas al final.
-- **Command bar sin botón visible.** Submit con Enter — menos ceremonia, más acción.
-- **Acciones hover-only en desktop, siempre visibles en touch.** `@media (hover: none)` resuelve la accesibilidad en móvil sin ensuciar la interfaz en desktop.
-- **`css/output.css` en `.gitignore`:** Vercel ejecuta `npm run build:css` en cada deploy, por lo que el CSS generado no necesita subirse al repositorio. Es la práctica profesional para archivos generados.
+#### Colores de categoría
+| Categoría | Color | Hex |
+|---|---|---|
+| Trabajo | Naranja quemado | `#c2410c` |
+| Personal | Azul medio | `#2563eb` |
+| Estudio | Violeta | `#7c3aed` |
+| Proyectos | Teal | `#0d9488` |
+| Salud | Rosa intenso | `#db2777` |
+| Gestiones | Stone neutro | `#78716c` |
 
 ---
 
-### Estructura del código (`app.js`)
+### Estilos custom (`input.css`)
 
-El estado de la app vive en variables globales (`tasks`, `currentCategoryFilter`, etc.). Todas las clases Tailwind están centralizadas en el objeto `CLASSES` — modificar una entrada cambia el estilo globalmente sin tocar el HTML generado. Las funciones principales están documentadas con JSDoc.
+Dentro de `@layer base`:
+- `.ring-widget` / `.ring-widget-sm` — discos circulares elevados para SVG rings
+- `.priority-high` — franja amber izquierda en tarjetas de prioridad Alta
+- `.category-bar` / `.category-bar-fill` — barras de progreso por categoría en sidebar
+- `.sidebar-filter-btn` + estados hover/active/dark — botones de filtro del sidebar
+- `.enter-hint` / `.enter-hint-kbd` — hint ↵ dentro del input de tarea
+- `.font-mono-ui` — utilidad DM Mono para contadores
+- `.task-actions` — hover-only en desktop, siempre visible en touch (`@media (hover: none)`)
+- `.undo-toast` / `.undo-toast-action` / `.undo-toast-progress` — toast fixed con animación spring
+- `[data-section].drag-over` — outline dashed para feedback de drag & drop
 
-El flujo de render es unidireccional: cualquier cambio de estado llama a `commitTasksAndRender()`, que persiste y re-renderiza todo.
+---
 
-#### Funciones principales
+### Persistencia
 
-| Función | Descripción |
-|---|---|
-| `loadTasks()` | Lee `localStorage`, parsea JSON y normaliza la estructura de cada tarea. |
-| `saveTasks()` | Serializa `tasks` a JSON y lo escribe en `localStorage`. |
-| `loadTheme()` | Lee el tema guardado o detecta `prefers-color-scheme`. |
-| `applyTheme(theme)` | Añade/elimina la clase `dark` en `<html>` y actualiza el icono. |
-| `toggleTheme()` | Alterna claro/oscuro, persiste y aplica. |
-| `computeStats(taskList)` | Calcula total, pendientes, completadas y conteo por categoría. |
-| `getVisibleTasks()` | Filtra `tasks` por búsqueda y categoría. Devuelve `{ now, next, done }`. |
-| `addTask(text, category, priority)` | Valida (vacío, longitud, duplicado) y añade al principio del array. |
-| `updateTaskText(id, text)` | Valida y actualiza el texto de una tarea existente. |
-| `setTaskCompleted(id, completed)` | Marca/desmarca una tarea. |
-| `deleteTask(id)` | Elimina una tarea por ID. |
-| `clearCompletedTasks()` | Elimina todas las completadas. |
-| `completeAllTasks()` | Marca todas las pendientes como completadas. |
-| `animateAndComplete(li, id)` | Anima fade+slide (220ms) y luego completa. |
-| `animateAndDelete(li, id)` | Anima fade+scale (220ms) y luego elimina. |
-| `commitTasksAndRender()` | Persiste en localStorage y re-renderiza. Punto de entrada único. |
-| `renderTasks()` | Limpia las 3 listas, actualiza progreso/pills/contadores y renderiza items o empty states. |
-| `createTaskItem(task, completed)` | Construye el `<li>` completo: clases, draggable, franja de prioridad, animación de entrada. |
-| `handleListActions(event)` | Delegación de eventos: despacha `complete`, `restore`, `delete`, `edit`, `edit-save`, `edit-cancel`. |
-| `handleDragStart(event)` | Guarda índice y sección de origen del drag. |
-| `handleDrop(event)` | Si cross-section: cambia prioridad. Si same-section: reordena. |
-| `handleDragEnter/Leave(event)` | Añade/quita clase `drag-over` para feedback visual. |
-| `formatDateHeadline()` | Devuelve "jueves 19 de marzo" en español. |
-| `formatTime()` | Devuelve la hora local en formato HH:MM. |
-| `fetchLocation()` | Consulta `ipapi.co/json/` para obtener ciudad y país por IP. |
-| `updateProgress()` | Calcula porcentaje, actualiza `stroke-dashoffset` del anillo SVG y elige mensaje contextual. |
-| `updateFilterPills()` | Aplica clases activas/inactivas a las pills de categoría. |
-| `normalizeTaskText(text)` | `safeTrim` + colapso de espacios + lowercase. Para detectar duplicados. |
+| Key | Storage | Contenido |
+|---|---|---|
+| `taskflow_tasks_v12` | `localStorage` | Array JSON de tareas |
+| `taskflow_theme_v12` | `localStorage` | `"light"` o `"dark"` |
+| `taskflow_location` | `sessionStorage` | `"Rotterdam, Netherlands"` (cache de geolocalización) |
+
+#### Estructura de una tarea
+```json
+{
+  "id": "uuid",
+  "text": "Revisar PR del backend",
+  "category": "Trabajo",
+  "priority": "Alta",
+  "completed": false,
+  "createdAt": 1711000000000,
+  "completedAt": null
+}
+```
 
 ---
 
 ### Requisitos
 
-- Node.js ≥ 20 (requerido por `@tailwindcss/oxide`).
+- Node.js ≥ 20
 
-### Instalación
-
-```bash
-npm install
-```
-
-### Desarrollo (watch de CSS)
+### Comandos
 
 ```bash
-npm run dev:css
+npm install           # Instalar dependencias
+npm run dev:css       # Watch mode (desarrollo)
+npm run build:css     # Build minificado (producción)
 ```
-
-### Build de CSS (minificado)
-
-```bash
-npm run build:css
-```
-
-> Ejecutar `npm run build:css` siempre que se modifique `input.css` o se añadan nuevas clases Tailwind en `app.js` o `index.html`.
 
 ---
 
 ### Estructura del proyecto
 
 ```
-├── index.html          # Layout y markup
-├── app.js              # Lógica de la app (estado, render, eventos, JSDoc)
-├── style.css           # CSS original pre-Tailwind (referencia)
-├── input.css           # Entrada de Tailwind (fuentes, custom CSS)
+├── index.html              # Layout: header, sidebars, main, footer, undo-toast
+├── app.js                  # 17 módulos: Store, Service, UI modules, App orchestrator
+├── input.css               # Tailwind entry + custom styles (@layer base)
+├── tailwind.config.js      # darkMode: "class"
+├── package.json            # Scripts: dev:css, build:css
 ├── css/
-│   └── output.css      # CSS generado por Tailwind (en .gitignore, Vercel lo genera)
+│   └── output.css          # Generado por Tailwind (en .gitignore)
 ├── docs/
 │   ├── design/
-│   │   └── wireframe-taskflow.svg  # Wireframe v3
-│   └── ai/             # Documentación de IA (Fase 2)
+│   │   └── wireframe-taskflow.svg
+│   └── ai/
 │       ├── reflection.md
 │       ├── experiments.md
 │       ├── cursor-workflow.md
 │       ├── prompt-engineering.md
 │       └── ai-comparison.md
-└── backup/             # Snapshots pre-rediseño
+├── server/                 # Backend (Fase 3)
+└── backup/                 # Snapshots pre-rediseño
 ```
 
 ---
 
 ### Testing manual
 
-| Prueba | Resultado |
+| Prueba | Resultado esperado |
 |---|---|
-| App con lista vacía | Empty state "Añade una tarea arriba para empezar." Anillo en 0%, mensaje "Sin tareas aún". |
-| Añadir tarea sin título | `addTask` devuelve `{ ok: false, error: "EMPTY" }`. Validación nativa del navegador. |
-| Añadir tarea >300 caracteres | Error "La tarea no puede superar 300 caracteres" vía `setCustomValidity`. |
-| Añadir tarea duplicada | Detectada por `normalizeTaskText`. Bloqueada con mensaje. |
-| Completar tareas | Animación fade+slide. Aparecen en "Hecho" (si expandido). Anillo se actualiza. |
-| Completar todas | Marca todas las pendientes. Anillo al 100%, mensaje "Todo listo". |
-| Eliminar tareas | Animación fade+scale. Contadores y anillo se recalculan. |
-| Vaciar completadas | Todas las completadas desaparecen. |
-| Recargar página | Tareas y tema persisten desde `localStorage`. |
-| Editar tarea | Input inline con Enter/Guardar para confirmar, Esc/Cancelar para descartar. |
-| Drag & drop dentro de sección | Reordena. Orden persiste. |
-| Drag & drop Ahora → Pendiente | Prioridad cambia de Alta a Media. Tarea se mueve de sección. |
-| Drag & drop Pendiente → Ahora | Prioridad cambia a Alta. Tarea se mueve a "Ahora". |
-| Búsqueda | Filtra en tiempo real. Botón "Limpiar" aparece. Esc limpia. |
-| Filtro por categoría | Pills en grid. La activa tiene estilo diferenciado. |
-| Modo oscuro | Toggle funciona. Persiste en localStorage. Detecta preferencia del sistema. Dark mode completamente neutro excepto anillo y stripe. |
-| Hora y ubicación | Hora local se muestra y actualiza cada minuto. Ciudad por IP aparece tras la carga. |
-| Móvil | Form stackea correctamente. Pills en 4 columnas. Acciones de tarea siempre visibles (touch). |
-| Navegación con teclado | Todos los elementos son accesibles con Tab. Focus rings visibles. |
-| HTML validado con W3C | Sin errores. |
-
----
-
-### Uso
-
-**Añadir tarea:** escribe en el input y pulsa Enter. Selecciona categoría y prioridad con los selects.
-
-**Editar:** pulsa Editar → modifica → Enter o Guardar. Esc o Cancelar para descartar.
-
-**Cambiar prioridad:** arrastra una tarea entre "Pendiente" y "Ahora". La prioridad se ajusta automáticamente.
-
-**Filtrar:** pulsa una pill de categoría. "Todas" para restablecer.
-
-**Buscar:** pulsa ⌕ en el header. Escribe para filtrar. Esc para cerrar.
-
----
-
-### Notas
-
-- Datos en `localStorage` key `taskflow_tasks_v12`. Tema en `taskflow_theme_v12`.
-- La hora se obtiene del sistema. La ubicación se obtiene de `ipapi.co/json/` (aproximada por IP, sin permisos de geolocalización).
-- `style.css` contiene los estilos originales pre-Tailwind. No se usa en producción.
-- `backup/` contiene snapshots del estado pre-rediseño.
+| Sin tareas | Welcome state: saludo contextual + mini-cards onboarding |
+| Añadir primera tarea | Welcome → greeting + tarea en "Pendiente" |
+| Completar tarea | Animación fade+slide → "Hecho" (si expandido) |
+| Borrar tarea | Animación fade+scale → undo-toast 4s → "Deshacer" restaura |
+| Vaciar todas → añadir nueva | Secciones se restauran correctamente |
+| Drag: Pendiente → Ahora | Prioridad cambia a Alta |
+| Drag: Ahora → Pendiente | Prioridad cambia a Media |
+| Drag: Pendiente → Hecho | Tarea se marca completada, sección se expande |
+| Drag: Hecho → Ahora | Restaurada como pendiente con prioridad Alta |
+| Drag: Hecho → Pendiente | Restaurada con prioridad original |
+| `Ctrl+K` | Focus en búsqueda |
+| `Ctrl+Shift+C` | Todas las pendientes se completan |
+| `Ctrl+Shift+X` | Todas las completadas se eliminan |
+| Pantalla ≥1280px | 3 columnas, hero/pills ocultos, sidebars visibles |
+| Pantalla <1280px | Columna única, hero/pills visibles, sidebars ocultos |
+| Dark mode | Toggle funciona, persiste, neutro excepto amber en anillo/stripe |
+| Geolocalización | Hora + ciudad tras carga (ip-api.com → ipapi.co fallback) |
+| Recarga | Tareas + tema persisten desde localStorage |
