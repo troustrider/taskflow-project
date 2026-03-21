@@ -34,28 +34,59 @@ const CONFIG = Object.freeze({
 const CATEGORIES = Object.freeze(["Trabajo", "Personal", "Estudio", "Salud", "Gestiones"]);
 
 const CATEGORY_COLORS = Object.freeze({
-  Trabajo: "#c2410c", Personal: "#2563eb", Estudio: "#7c3aed",
-  Salud: "#db2777", Gestiones: "#78716c",
+  Trabajo: "#b45309",
+  Personal: "#be185d",
+  Estudio: "#5b5bd6",
+  Salud: "#0f766e",
+  Gestiones: "#64748b",
+});
+
+const CATEGORY_COLORS_DARK = Object.freeze({
+  Trabajo: "#8f7551",
+  Personal: "#8f6676",
+  Estudio: "#6f7399",
+  Salud: "#5f8079",
+  Gestiones: "#697384",
 });
 
 /** Tailwind classes for tinted category badges — each category gets its own identity. */
-const CATEGORY_BADGE_CLASSES = Object.freeze({
-  Trabajo:   "border-orange-200/60 bg-orange-50 text-orange-700 dark:border-orange-800/40 dark:bg-orange-950/30 dark:text-orange-400",
-  Personal:  "border-blue-200/60 bg-blue-50 text-blue-700 dark:border-blue-800/40 dark:bg-blue-950/30 dark:text-blue-400",
-  Estudio:   "border-violet-200/60 bg-violet-50 text-violet-700 dark:border-violet-800/40 dark:bg-violet-950/30 dark:text-violet-400",
-  Salud:     "border-pink-200/60 bg-pink-50 text-pink-700 dark:border-pink-800/40 dark:bg-pink-950/30 dark:text-pink-400",
-  Gestiones: "border-stone-200/60 bg-stone-100 text-stone-600 dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-400",
-});
+const CATEGORY_BADGE_CLASS = "border-stone-200/80 bg-stone-50/90 text-stone-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-200";
+const PRIORITIES = Object.freeze(["Alta", "Media", "Baja"]);
 
 /** Paleta de proyectos — tonos fríos/verdes para no solapar con categorías (cálidas). */
 const PROJECT_COLORS = Object.freeze([
-  "#6366f1", "#8b5cf6", "#06b6d4", "#0891b2", "#059669", "#0284c7", "#7c3aed",
+  "#4f46e5", "#0f766e", "#7c3aed", "#b7791f", "#2563eb", "#64748b", "#be185d",
 ]);
 
+const PROJECT_COLORS_DARK = Object.freeze([
+  "#7b84a1", "#68817d", "#81779a", "#8f7b5f", "#6f88a8", "#768091", "#8b6d7d",
+]);
+
+function isDarkTheme() {
+  return document.documentElement.classList.contains("dark");
+}
+
+function categoryColor(name) {
+  const palette = isDarkTheme() ? CATEGORY_COLORS_DARK : CATEGORY_COLORS;
+  return palette[name] || "#999";
+}
+
 function projectColor(name) {
-  if (!name) return PROJECT_COLORS[0];
+  const colors = isDarkTheme() ? PROJECT_COLORS_DARK : PROJECT_COLORS;
+  if (!name) return colors[0];
   let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0;
-  return PROJECT_COLORS[Math.abs(h) % PROJECT_COLORS.length];
+  return colors[Math.abs(h) % colors.length];
+}
+
+function normalizeProjectName(value) {
+  const trimmed = Utils.safeTrim(value);
+  if (!trimmed) return null;
+  return (trimmed.charAt(0).toUpperCase() + trimmed.slice(1)).slice(0, CONFIG.MAX_PROJECT_LENGTH);
+}
+
+function setProjectFilter(project) {
+  UIState.projectFilter = project || "all";
+  App.render();
 }
 
 const RING = Object.freeze({ HERO_CIRCUMFERENCE: 201.1, SIDEBAR_CIRCUMFERENCE: 119.4 });
@@ -75,46 +106,46 @@ const EXAMPLE_TASKS = Object.freeze([
 
 const CLASSES = Object.freeze({
   /* Badge tokens: shared height (h-[22px]) + text-[11px] for uniform row */
-  badgeBase: "inline-flex items-center h-[22px] border text-[11px] leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-  priorityBase: "inline-flex items-center h-[22px] rounded-full border px-2 text-[11px] font-semibold leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  badgeBase: "inline-flex items-center h-[24px] border text-[11px] leading-none tracking-[0.01em] backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+  priorityBase: "inline-flex items-center h-[24px] rounded-full border px-2.5 text-[11px] font-semibold leading-none tracking-[0.01em] backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
   priority: {
-    Alta:  "border-red-200/80 bg-red-50 text-red-600 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-400",
-    Media: "border-stone-200/80 bg-stone-100 text-stone-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400",
-    Baja:  "border-stone-200/60 bg-white text-stone-400 dark:border-neutral-700/60 dark:bg-neutral-900 dark:text-neutral-500",
+    Alta:  "border-red-200/90 bg-red-50/90 text-red-700 dark:border-red-300/10 dark:bg-red-300/6 dark:text-red-200",
+    Media: "border-amber-200/90 bg-amber-50/90 text-amber-800 dark:border-amber-300/10 dark:bg-amber-300/6 dark:text-stone-200",
+    Baja:  "border-stone-200/85 bg-white/85 text-stone-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-stone-300",
   },
-  categoryBase: "inline-flex items-center gap-1.5 h-[22px] rounded-full border px-2 text-[11px] font-medium leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-  projectBadge: "inline-flex items-center gap-1.5 h-[22px] rounded-md border px-2 text-[11px] font-semibold leading-none tracking-[0.01em] cursor-pointer transition-colors duration-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  categoryBase: "inline-flex items-center gap-1.5 h-[24px] rounded-full border px-2.5 text-[11px] font-medium leading-none tracking-[0.01em] backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+  projectBadge: "inline-flex items-center gap-1.5 h-[24px] rounded-xl border px-2.5 text-[11px] font-semibold leading-none tracking-[0.01em] cursor-pointer transition duration-150 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
   taskCard: {
-    pending:   "group relative grid gap-2.5 rounded-xl border border-stone-200/70 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,25,23,0.04)] transition duration-200 ease-out hover:-translate-y-0.5 hover:border-stone-300/80 hover:shadow-[0_8px_20px_rgba(28,25,23,0.05)] sm:grid-cols-[minmax(0,1fr)_minmax(332px,max-content)] sm:items-start sm:px-4 dark:border-neutral-700/50 dark:bg-neutral-900 dark:hover:border-neutral-600 dark:hover:shadow-[0_8px_20px_rgba(0,0,0,0.2)]",
-    completed: "group relative grid gap-2.5 rounded-xl border border-stone-200/50 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,25,23,0.03)] transition duration-200 ease-out opacity-55 hover:opacity-85 sm:grid-cols-[minmax(0,1fr)_minmax(332px,max-content)] sm:items-start dark:border-neutral-700/40 dark:bg-neutral-900",
+    pending:   "group relative grid gap-3 rounded-[22px] border border-stone-200/85 bg-white/85 px-4 py-3 shadow-[0_20px_50px_rgba(41,31,20,0.07),0_3px_10px_rgba(41,31,20,0.04)] backdrop-blur-xl transition duration-200 ease-out hover:-translate-y-0.5 hover:border-stone-300/90 hover:bg-white/92 hover:shadow-[0_24px_60px_rgba(41,31,20,0.09),0_4px_12px_rgba(41,31,20,0.05)] sm:grid-cols-[minmax(0,1fr)_minmax(320px,max-content)] sm:items-start dark:border-white/10 dark:bg-[rgba(17,22,30,0.88)] dark:hover:border-white/16 dark:hover:bg-[rgba(21,27,36,0.94)] dark:shadow-[0_22px_52px_rgba(0,0,0,0.36),0_3px_12px_rgba(0,0,0,0.24)]",
+    completed: "group relative grid gap-3 rounded-[22px] border border-stone-200/70 bg-white/72 px-4 py-3 shadow-[0_14px_34px_rgba(41,31,20,0.05)] backdrop-blur-lg transition duration-200 ease-out opacity-60 hover:opacity-88 sm:grid-cols-[minmax(0,1fr)_minmax(320px,max-content)] sm:items-start dark:border-white/8 dark:bg-[rgba(17,22,30,0.72)] dark:shadow-[0_16px_34px_rgba(0,0,0,0.26)]",
   },
   taskMain: "flex min-w-0 items-start gap-3",
-  taskContent: "min-w-0 space-y-0.5",
-  taskMetaText: "flex flex-wrap items-center gap-1 text-[11px] text-stone-500 dark:text-neutral-400 font-mono-ui",
-  detailCue: "inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-stone-200/70 bg-stone-50/90 px-1 text-[9px] font-semibold text-stone-500 dark:border-neutral-700/70 dark:bg-neutral-800/90 dark:text-neutral-400",
-  taskSide: "flex min-w-0 shrink-0 flex-col gap-2 pt-0.5 sm:min-w-[332px] sm:max-w-[360px] sm:items-end sm:pt-0",
-  badgeRail: "badge-rail flex min-h-[22px] w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap sm:justify-end",
+  taskContent: "min-w-0 space-y-1",
+  taskMetaText: "flex flex-wrap items-center gap-1 text-[11px] text-stone-500 dark:text-stone-400 font-mono-ui",
+  detailCue: "inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-stone-200/80 bg-stone-50/90 px-1 text-[9px] font-semibold text-stone-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-400",
+  taskSide: "flex min-w-0 shrink-0 flex-col gap-2 pt-0.5 sm:min-w-[320px] sm:max-w-[360px] sm:items-end sm:pt-0",
+  badgeRail: "badge-rail flex min-h-[24px] w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap sm:justify-end",
   badgeGroup: "badge-group flex shrink-0 items-center gap-1",
-  actionRail: "flex flex-wrap items-center gap-1 rounded-lg bg-stone-100/85 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] sm:justify-end dark:bg-neutral-800/85 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
-  checkButtonBase: "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-[10px] font-bold transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600",
+  actionRail: "flex flex-wrap items-center gap-0.5 rounded-lg bg-stone-50/28 p-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-sm sm:justify-end dark:bg-white/[0.012] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]",
+  checkButtonBase: "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-bold transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-amber-300/30",
   checkButton: {
-    pending:   "border-stone-200/80 bg-white text-stone-300 hover:border-amber-400 hover:text-amber-500 hover:bg-amber-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-600 dark:hover:border-neutral-500 dark:hover:text-neutral-300",
-    completed: "border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
+    pending:   "border-stone-200/85 bg-white/88 text-stone-300 shadow-[0_1px_2px_rgba(41,31,20,0.04)] hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50 dark:border-white/10 dark:bg-white/[0.03] dark:text-stone-600 dark:hover:border-amber-300/25 dark:hover:text-amber-100",
+    completed: "border-amber-300 bg-amber-50/90 text-amber-700 hover:bg-amber-100 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100 dark:hover:bg-amber-300/14",
   },
-  actionButton: "task-actions inline-flex min-h-7 items-center justify-center rounded-md border border-stone-200/80 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-600 shadow-[0_1px_2px_rgba(28,25,23,0.05)] transition duration-150 ease-out hover:border-stone-300 hover:bg-stone-50 hover:text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700/80 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-950 dark:hover:text-neutral-100 dark:focus:ring-neutral-600",
-  actionButtonDetails: "border-amber-200/80 bg-amber-50/80 text-amber-700 hover:border-amber-300 hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-950/20 dark:text-amber-300 dark:hover:border-amber-600 dark:hover:bg-amber-950/30",
-  emptyState: "rounded-xl border border-dashed border-stone-200/50 bg-white px-4 py-8 text-sm text-stone-500 text-center dark:border-neutral-700/40 dark:bg-neutral-900 dark:text-neutral-500",
+  actionButton: "task-actions inline-flex min-h-5.5 items-center justify-center rounded-md border border-stone-200/45 bg-white/28 px-1.5 py-0 text-[9px] font-medium text-stone-400 shadow-none backdrop-blur-sm transition duration-150 ease-out hover:border-stone-300/65 hover:bg-white/52 hover:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-400/15 dark:border-white/6 dark:bg-white/[0.014] dark:text-stone-500 dark:hover:border-white/9 dark:hover:bg-white/[0.03] dark:hover:text-stone-300 dark:focus:ring-amber-300/12",
+  actionButtonDetails: "border-amber-200/55 bg-amber-50/28 text-amber-700 hover:border-amber-300/70 hover:bg-amber-50/52 dark:border-amber-300/8 dark:bg-amber-300/4 dark:text-stone-400 dark:hover:border-amber-300/12 dark:hover:bg-amber-300/7",
+  emptyState: "rounded-[22px] border border-dashed border-stone-200/60 bg-white/76 px-4 py-8 text-sm text-stone-500 text-center shadow-[0_14px_34px_rgba(41,31,20,0.04)] backdrop-blur-lg dark:border-white/10 dark:bg-[rgba(17,22,30,0.72)] dark:text-stone-400",
   filterPill: {
-    active: "border-amber-400 bg-amber-50 text-amber-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200",
-    inactive: "border-stone-200/60 bg-white text-stone-400 hover:border-stone-300 hover:text-stone-600 dark:border-neutral-700/50 dark:bg-neutral-900 dark:text-neutral-500 dark:hover:border-neutral-600 dark:hover:text-neutral-300",
+    active: "border-amber-300/90 bg-amber-50/90 text-amber-800 shadow-[0_8px_18px_rgba(183,121,31,0.12)] dark:border-white/10 dark:bg-white/[0.045] dark:text-stone-100",
+    inactive: "border-stone-200/75 bg-white/72 text-stone-500 hover:border-stone-300 hover:bg-white/90 hover:text-stone-700 dark:border-white/8 dark:bg-white/[0.03] dark:text-stone-400 dark:hover:border-white/12 dark:hover:text-stone-200",
   },
-  filterPillBase: "category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600",
-  editInput: "w-full min-w-[200px] rounded-lg border border-stone-200/80 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:focus:ring-neutral-600",
+  filterPillBase: "category-filter-btn rounded-full border px-2.5 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-amber-300/30",
+  editInput: "w-full min-w-[200px] rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30",
   dueBadge: {
-    base:    "inline-flex items-center gap-1 h-[22px] rounded-md border px-2 text-[10px] font-mono-ui leading-none tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-    overdue: "border-red-300/80 bg-red-50 text-red-600 font-semibold dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-400",
-    today:   "border-blue-200/80 bg-blue-50 text-blue-600 font-semibold dark:border-blue-800/50 dark:bg-blue-950/30 dark:text-blue-400",
-    future:  "border-stone-300/80 bg-stone-100 text-stone-500 font-medium dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-500",
+    base:    "inline-flex items-center gap-1 h-[24px] rounded-xl border px-2.5 text-[10px] font-mono-ui leading-none tracking-[0.02em] backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+    overdue: "border-red-200/90 bg-red-50/90 text-red-700 font-semibold dark:border-red-300/10 dark:bg-red-300/6 dark:text-red-200",
+    today:   "border-amber-200/90 bg-amber-50/90 text-amber-800 font-semibold dark:border-amber-300/10 dark:bg-amber-300/6 dark:text-stone-200",
+    future:  "border-stone-200/90 bg-stone-100/85 text-stone-600 font-medium dark:border-white/10 dark:bg-white/[0.03] dark:text-stone-300",
   },
 });
 
@@ -197,6 +228,11 @@ const InputParser = {
     "!media":"Media","!med":"Media","!m":"Media","!2":"Media",
     "!baja":"Baja","!low":"Baja","!b":"Baja","!3":"Baja",
   },
+  /**
+   * Extracts smart tokens from the quick-add input while keeping the form UX unchanged.
+   * @param {string} raw
+   * @returns {{ text: string, category: (string|null), priority: (string|null), dueDate: (number|null), project: (string|null) }}
+   */
   parse(raw) {
     let text = raw; let category = null; let priority = null; let dueDate = null; let project = null;
     const cm = text.match(/#\w+/gi);
@@ -206,7 +242,7 @@ const InputParser = {
     const dm = text.match(/@[\w\-áéíóúñü]+/gi);
     if (dm) { for (const tk of dm) { const p = Utils.parseDateToken(tk); if (p) { dueDate = p; text = text.replace(tk, ""); break; } } }
     const pjm = text.match(/\/([^\s]+)/);
-    if (pjm) { let pn = pjm[1].charAt(0).toUpperCase() + pjm[1].slice(1).toLowerCase(); project = pn.slice(0, CONFIG.MAX_PROJECT_LENGTH); text = text.replace(pjm[0], ""); }
+    if (pjm) { project = normalizeProjectName(pjm[1].toLowerCase()); text = text.replace(pjm[0], ""); }
     return { text: text.replace(/\s+/g, " ").trim(), category, priority, dueDate, project };
   },
   updatePreview(val) {
@@ -219,7 +255,7 @@ const InputParser = {
     const cat = p.category || DOM.get("task-category")?.value || "Personal";
     const pri = p.priority || DOM.get("task-priority")?.value || "Media";
     pv.classList.remove("hidden");
-    const dot = DOM.get("preview-cat-dot"); if (dot) dot.style.background = CATEGORY_COLORS[cat] || "#999";
+    const dot = DOM.get("preview-cat-dot"); if (dot) dot.style.background = categoryColor(cat);
     const ct = DOM.get("preview-cat-text"); if (ct) ct.textContent = cat;
     const pb = DOM.get("preview-priority"); if (pb) { pb.textContent = pri; pb.className = CLASSES.priorityBase + (CLASSES.priority[pri] ?? CLASSES.priority.Media); }
     const pd = DOM.get("preview-due"); if (pd) { pd.textContent = p.dueDate ? Utils.formatDueDate(p.dueDate) : ""; pd.classList.toggle("hidden", !p.dueDate); }
@@ -256,21 +292,35 @@ const TaskService = {
   load() { this.tasks = TaskStore.load(); },
   save() { TaskStore.save(this.tasks); },
 
+  _validateText(text, currentId = null) {
+    const trimmed = Utils.safeTrim(text);
+    if (!trimmed) return { ok: false, error: "EMPTY" };
+    if (trimmed.length > CONFIG.MAX_TASK_LENGTH) return { ok: false, error: "TOO_LONG" };
+    const normalized = Utils.normalizeText(trimmed);
+    const duplicate = this.tasks.some(task => task.id !== currentId && Utils.normalizeText(task.text) === normalized);
+    if (duplicate) return { ok: false, error: "DUPLICATE" };
+    return { ok: true, text: trimmed };
+  },
+
+  /**
+   * Creates a task and inserts it at the top of the store.
+   * @param {string} text
+   * @param {string} category
+   * @param {string} priority
+   * @param {{ dueDate?: (number|null), notes?: string, project?: (string|null) }} [options]
+   * @returns {{ ok: true, task: object } | { ok: false, error: string }}
+   */
   add(text, category, priority, { dueDate = null, notes = "", project = null } = {}) {
-    const tr = Utils.safeTrim(text);
-    if (!tr) return { ok: false, error: "EMPTY" };
-    if (tr.length > CONFIG.MAX_TASK_LENGTH) return { ok: false, error: "TOO_LONG" };
-    if (this.tasks.some(t => Utils.normalizeText(t.text) === Utils.normalizeText(tr))) return { ok: false, error: "DUPLICATE" };
-    const task = { id: crypto.randomUUID(), text: tr, category, priority, completed: false, createdAt: Date.now(), completedAt: null, dueDate, notes, project };
+    const validation = this._validateText(text);
+    if (!validation.ok) return validation;
+    const task = { id: crypto.randomUUID(), text: validation.text, category, priority, completed: false, createdAt: Date.now(), completedAt: null, dueDate, notes, project };
     this.tasks.unshift(task);
     return { ok: true, task };
   },
   updateText(id, text) {
-    const tr = Utils.safeTrim(text);
-    if (!tr) return { ok: false, error: "EMPTY" };
-    if (tr.length > CONFIG.MAX_TASK_LENGTH) return { ok: false, error: "TOO_LONG" };
-    if (this.tasks.some(t => t.id !== id && Utils.normalizeText(t.text) === Utils.normalizeText(tr))) return { ok: false, error: "DUPLICATE" };
-    this.tasks = this.tasks.map(t => t.id === id ? { ...t, text: tr } : t);
+    const validation = this._validateText(text, id);
+    if (!validation.ok) return validation;
+    this.tasks = this.tasks.map(t => t.id === id ? { ...t, text: validation.text } : t);
     return { ok: true };
   },
   setCompleted(id, c) { this.tasks = this.tasks.map(t => t.id === id ? { ...t, completed: c, completedAt: c ? Date.now() : null } : t); },
@@ -298,7 +348,6 @@ const TaskService = {
     this.tasks = this.tasks.filter(t => !t.completed || !set.has(t.id));
   },
   updateTask(id, u) { this.tasks = this.tasks.map(t => t.id === id ? { ...t, ...u } : t); },
-  reorder(fi, ti) { if (fi === ti) return; const [m] = this.tasks.splice(fi, 1); this.tasks.splice(ti, 0, m); },
   reorderVisible(visibleIds, movedId, targetId = null) {
     if (!visibleIds.includes(movedId)) return false;
     const visibleSet = new Set(visibleIds);
@@ -324,6 +373,13 @@ const TaskService = {
     for (const t of this.tasks) { if (t.completed) completed++; else pending++; if (byCategory[t.category] !== undefined) byCategory[t.category]++; }
     return { total: this.tasks.length, pending, completed, byCategory };
   },
+  /**
+   * Splits the filtered collection into the three sections rendered by the UI.
+   * @param {string} query
+   * @param {string} categoryFilter
+   * @param {string} projectFilter
+   * @returns {{ now: object[], next: object[], done: object[] }}
+   */
   getVisible(query, categoryFilter, projectFilter) {
     const q = query.toLowerCase();
     const filtered = this.tasks.filter(t => {
@@ -556,51 +612,61 @@ const UndoToast = {
    ═══════════════════════════════════════════ */
 
 const TaskDetail = {
+  /**
+   * Builds the inline detail editor shown below an expanded task card.
+   * @param {object} task
+   * @returns {HTMLDivElement}
+   */
   createPanel(task) {
     const panel = document.createElement("div");
-    panel.className = "task-detail-panel mt-2 rounded-lg border border-stone-200/40 bg-stone-50/50 p-4 space-y-3 dark:border-neutral-700/30 dark:bg-neutral-800/30";
+    panel.className = "task-detail-panel mt-2 rounded-[20px] border p-4 space-y-3";
     panel.dataset.detailFor = task.id;
 
     const r1 = document.createElement("div"); r1.className = "flex flex-wrap gap-3";
     const dw = document.createElement("div"); dw.className = "flex-1 min-w-[140px]";
-    dw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Fecha limite</label>`;
+    dw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Fecha limite</label>`;
     const di = document.createElement("input"); di.type = "date";
-    di.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200";
+    di.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
     di.value = task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "";
     di.addEventListener("change", () => { TaskService.updateTask(task.id, { dueDate: di.value ? Utils.startOfDay(Date.parse(di.value+"T00:00:00")) : null }); App.commit(); });
     dw.appendChild(di);
 
     const pw = document.createElement("div"); pw.className = "flex-1 min-w-[140px]";
-    pw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Proyecto</label>`;
+    pw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Proyecto</label>`;
     const pi = document.createElement("input"); pi.type = "text"; pi.placeholder = "Ej: Mudanza, Sprint 14…";
-    pi.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder-neutral-500";
+    pi.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 placeholder-stone-400 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:placeholder-stone-500 dark:focus:ring-amber-300/30";
     pi.value = task.project || ""; pi.setAttribute("list", "project-options-" + task.id);
     const dl = document.createElement("datalist"); dl.id = "project-options-" + task.id;
     for (const n of TaskService.getAllProjectNames()) { const o = document.createElement("option"); o.value = n; dl.appendChild(o); }
-    pi.addEventListener("change", () => { let v = Utils.safeTrim(pi.value); if (v) { v = (v.charAt(0).toUpperCase()+v.slice(1)).slice(0, CONFIG.MAX_PROJECT_LENGTH); pi.value = v; } TaskService.updateTask(task.id, { project: v || null }); App.commit(); });
+    pi.addEventListener("change", () => {
+      const value = normalizeProjectName(pi.value);
+      pi.value = value || "";
+      TaskService.updateTask(task.id, { project: value });
+      App.commit();
+    });
     pw.append(pi, dl); r1.append(dw, pw);
 
     const r2 = document.createElement("div"); r2.className = "flex flex-wrap gap-3";
     const cw = document.createElement("div"); cw.className = "flex-1 min-w-[120px]";
-    cw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Categoria</label>`;
+    cw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Categoria</label>`;
     const cs = document.createElement("select");
-    cs.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200";
+    cs.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
     for (const c of CATEGORIES) { const o = document.createElement("option"); o.value = c; o.textContent = c; if (c === task.category) o.selected = true; cs.appendChild(o); }
     cs.addEventListener("change", () => { TaskService.updateTask(task.id, { category: cs.value }); App.commit(); });
     cw.appendChild(cs);
 
     const prw = document.createElement("div"); prw.className = "flex-1 min-w-[100px]";
-    prw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Prioridad</label>`;
+    prw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Prioridad</label>`;
     const ps = document.createElement("select");
-    ps.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200";
-    for (const p of ["Alta","Media","Baja"]) { const o = document.createElement("option"); o.value = p; o.textContent = p; if (p === task.priority) o.selected = true; ps.appendChild(o); }
+    ps.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
+    for (const p of PRIORITIES) { const o = document.createElement("option"); o.value = p; o.textContent = p; if (p === task.priority) o.selected = true; ps.appendChild(o); }
     ps.addEventListener("change", () => { TaskService.updateTask(task.id, { priority: ps.value }); App.commit(); });
     prw.appendChild(ps); r2.append(cw, prw);
 
     const nw = document.createElement("div");
-    nw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Notas</label>`;
+    nw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Notas</label>`;
     const ta = document.createElement("textarea");
-    ta.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 placeholder-stone-400 resize-y min-h-[72px] focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder-neutral-500";
+    ta.className = "w-full min-h-[84px] resize-y rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 placeholder-stone-400 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:placeholder-stone-500 dark:focus:ring-amber-300/30";
     ta.placeholder = "Añade notas, detalles, enlaces…"; ta.value = task.notes || ""; ta.maxLength = CONFIG.MAX_NOTES_LENGTH;
     ta.addEventListener("blur", () => { TaskService.updateTask(task.id, { notes: ta.value }); TaskService.save(); });
     nw.appendChild(ta);
@@ -618,12 +684,63 @@ const TaskRenderer = {
   cardClasses(c) { return c ? CLASSES.taskCard.completed : CLASSES.taskCard.pending; },
   checkClasses(c) { return `${CLASSES.checkButtonBase} ${c ? CLASSES.checkButton.completed : CLASSES.checkButton.pending}`; },
 
+  _createDueBadge(dueDate) {
+    if (!dueDate) return null;
+    const variant = Utils.isOverdue(dueDate)
+      ? CLASSES.dueBadge.overdue
+      : Utils.isDueToday(dueDate) ? CLASSES.dueBadge.today : CLASSES.dueBadge.future;
+    const badge = document.createElement("span");
+    badge.className = `${CLASSES.dueBadge.base} ${variant}`;
+    badge.textContent = Utils.formatDueDate(dueDate);
+    return badge;
+  },
+  _createCategoryBadge(category) {
+    const badge = document.createElement("span");
+    badge.className = `${CLASSES.categoryBase} ${CATEGORY_BADGE_CLASS}`;
+    const dot = document.createElement("span");
+    dot.className = "w-1.5 h-1.5 rounded-full shrink-0";
+    dot.style.background = categoryColor(category);
+    const label = document.createElement("span");
+    label.textContent = category;
+    badge.append(dot, label);
+    return badge;
+  },
+  _createProjectBadge(project) {
+    if (!project) return null;
+    const color = projectColor(project);
+    const badge = document.createElement("button");
+    badge.type = "button";
+    badge.className = CLASSES.projectBadge;
+    badge.style.borderColor = color + "40";
+    badge.style.background = color + "12";
+    badge.style.color = color;
+    const dot = document.createElement("span");
+    dot.className = "w-1.5 h-1.5 rounded-sm shrink-0";
+    dot.style.background = color;
+    const label = document.createElement("span");
+    label.className = "truncate max-w-[84px] sm:max-w-[96px]";
+    label.textContent = project;
+    badge.append(dot, label);
+    badge.title = `Proyecto: ${project} (click para filtrar)`;
+    badge.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setProjectFilter(project);
+    });
+    return badge;
+  },
+
   _button({ action, id, className, text, html, ariaLabel }) {
     const b = document.createElement("button"); b.type = "button"; b.dataset.action = action; b.dataset.id = id; b.className = className;
     if (ariaLabel) b.setAttribute("aria-label", ariaLabel);
     if (html !== undefined) b.innerHTML = html; else if (text !== undefined) b.textContent = text; return b;
   },
 
+  /**
+   * Creates the DOM node for a task, including inline details when expanded.
+   * @param {object} task
+   * @param {boolean} [completed=false]
+   * @returns {HTMLLIElement}
+   */
   createItem(task, completed = false) {
     const wrapper = document.createElement("li"); wrapper.dataset.id = task.id; wrapper.draggable = true;
     wrapper.addEventListener("dragstart", () => wrapper.style.opacity = "0.4");
@@ -645,8 +762,8 @@ const TaskRenderer = {
       const inp = document.createElement("input"); inp.dataset.role = "edit-text"; inp.value = task.text; inp.className = CLASSES.editInput; tw.appendChild(inp);
     } else {
       const p = document.createElement("p"); const sq = Search.getQuery();
-      if (sq && !completed) { p.className = "truncate text-sm text-stone-700 dark:text-neutral-200"; p.innerHTML = Utils.highlightText(task.text, sq); }
-      else { p.className = completed ? "truncate text-sm text-stone-400 line-through dark:text-neutral-500" : "truncate text-sm text-stone-700 dark:text-neutral-200"; p.textContent = task.text; }
+      if (sq && !completed) { p.className = "truncate text-[15px] font-medium tracking-[-0.01em] text-stone-800 dark:text-stone-100"; p.innerHTML = Utils.highlightText(task.text, sq); }
+      else { p.className = completed ? "truncate text-[15px] text-stone-400 line-through dark:text-stone-500" : "truncate text-[15px] font-medium tracking-[-0.01em] text-stone-800 dark:text-stone-100"; p.textContent = task.text; }
       tw.appendChild(p);
       const meta = document.createElement("span"); meta.className = CLASSES.taskMetaText;
       meta.textContent = completed ? `Hecha ${Utils.relativeTime(task.completedAt)}` : Utils.relativeTime(task.createdAt);
@@ -661,7 +778,7 @@ const TaskRenderer = {
       tw.appendChild(meta);
       if (task.notes && !completed) {
         const notePreview = document.createElement("p");
-        notePreview.className = "notes-preview text-[10px] text-stone-500/80 dark:text-neutral-400/80 italic truncate cursor-pointer";
+        notePreview.className = "notes-preview truncate cursor-pointer text-[11px] italic text-stone-500/90 dark:text-stone-400/90";
         const firstLine = task.notes.split("\n")[0].trim();
         notePreview.textContent = firstLine.length > 50 ? firstLine.slice(0, 50) + "\u2026" : firstLine;
         notePreview.title = "Click para ver detalles";
@@ -687,11 +804,10 @@ const TaskRenderer = {
 
       // 2. Categoría — contexto del tipo de actividad (tintado por categoría)
       const cb = document.createElement("span");
-      const catClasses = CATEGORY_BADGE_CLASSES[task.category] || CATEGORY_BADGE_CLASSES.Gestiones;
-      cb.className = `${CLASSES.categoryBase} ${catClasses}`;
+      cb.className = `${CLASSES.categoryBase} ${CATEGORY_BADGE_CLASS}`;
       const cd = document.createElement("span");
       cd.className = "w-1.5 h-1.5 rounded-full shrink-0";
-      cd.style.background = CATEGORY_COLORS[task.category] || "#999";
+      cd.style.background = categoryColor(task.category);
       const cl = document.createElement("span");
       cl.textContent = task.category;
       cb.append(cd, cl);
@@ -727,8 +843,7 @@ const TaskRenderer = {
         pb.title = `Proyecto: ${task.project} (click para filtrar)`;
         pb.addEventListener("click", (e) => {
           e.stopPropagation();
-          UIState.projectFilter = task.project;
-          App.render();
+          setProjectFilter(task.project);
         });
         wrap.appendChild(pb);
       }
@@ -742,7 +857,7 @@ const TaskRenderer = {
       if (!completed && task.notes && UIState.expandedTaskId !== task.id) {
         const hint = document.createElement("button");
         hint.type = "button";
-        hint.className = "detail-hint inline-flex items-center justify-center w-5 h-5 rounded-md border border-stone-200/60 bg-stone-50 text-[11px] text-stone-500 cursor-pointer shrink-0 transition hover:border-amber-300 hover:text-amber-700 hover:bg-amber-50 dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200";
+        hint.className = "detail-hint inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-stone-200/80 bg-white/80 text-[11px] text-stone-500 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm transition hover:border-amber-300 hover:text-amber-700 hover:bg-amber-50 dark:border-white/10 dark:bg-white/[0.03] dark:text-stone-400 dark:hover:border-amber-300/20 dark:hover:text-amber-100";
         hint.textContent = "\u2026";
         hint.title = "Tiene notas \u2014 click para ver";
         hint.setAttribute("aria-label", "Ver notas de la tarea");
@@ -758,7 +873,7 @@ const TaskRenderer = {
     // Separador visual entre badges y acciones
     if (!isEd && !completed) {
       const sep = document.createElement("span");
-      sep.className = "w-px h-4 bg-stone-200/50 dark:bg-neutral-700/40 mx-0.5 shrink-0 hidden sm:block";
+      sep.className = "mx-0.5 hidden h-4 w-px shrink-0 bg-stone-200/70 dark:bg-white/8 sm:block";
       wrap.appendChild(sep);
     }
 
@@ -796,55 +911,18 @@ const TaskRenderer = {
     const contextGroup = document.createElement("div");
     contextGroup.className = CLASSES.badgeGroup;
 
-    if (task.dueDate && !completed) {
-      const variant = Utils.isOverdue(task.dueDate)
-        ? CLASSES.dueBadge.overdue
-        : Utils.isDueToday(task.dueDate) ? CLASSES.dueBadge.today : CLASSES.dueBadge.future;
-      const db = document.createElement("span");
-      db.className = `${CLASSES.dueBadge.base} ${variant}`;
-      db.textContent = Utils.formatDueDate(task.dueDate);
-      scheduleGroup.appendChild(db);
-    }
+    const dueBadge = !completed ? this._createDueBadge(task.dueDate) : null;
+    if (dueBadge) scheduleGroup.appendChild(dueBadge);
 
-    const cb = document.createElement("span");
-    const catClasses = CATEGORY_BADGE_CLASSES[task.category] || CATEGORY_BADGE_CLASSES.Gestiones;
-    cb.className = `${CLASSES.categoryBase} ${catClasses}`;
-    const cd = document.createElement("span");
-    cd.className = "w-1.5 h-1.5 rounded-full shrink-0";
-    cd.style.background = CATEGORY_COLORS[task.category] || "#999";
-    const cl = document.createElement("span");
-    cl.textContent = task.category;
-    cb.append(cd, cl);
-    contextGroup.appendChild(cb);
+    contextGroup.appendChild(this._createCategoryBadge(task.category));
 
     const prb = document.createElement("span");
     prb.className = this.priorityClasses(task.priority);
     prb.textContent = task.priority;
     contextGroup.appendChild(prb);
 
-    if (task.project) {
-      const pColor = projectColor(task.project);
-      const pb = document.createElement("button");
-      pb.type = "button";
-      pb.className = CLASSES.projectBadge;
-      pb.style.borderColor = pColor + "40";
-      pb.style.background = pColor + "12";
-      pb.style.color = pColor;
-      const pbDot = document.createElement("span");
-      pbDot.className = "w-1.5 h-1.5 rounded-sm shrink-0";
-      pbDot.style.background = pColor;
-      const pbLabel = document.createElement("span");
-      pbLabel.className = "truncate max-w-[84px] sm:max-w-[96px]";
-      pbLabel.textContent = task.project;
-      pb.append(pbDot, pbLabel);
-      pb.title = `Proyecto: ${task.project} (click para filtrar)`;
-      pb.addEventListener("click", (e) => {
-        e.stopPropagation();
-        UIState.projectFilter = task.project;
-        App.render();
-      });
-      scheduleGroup.appendChild(pb);
-    }
+    const projectBadge = this._createProjectBadge(task.project);
+    if (projectBadge) scheduleGroup.appendChild(projectBadge);
 
     if (scheduleGroup.childElementCount > 0) wrap.appendChild(scheduleGroup);
     wrap.appendChild(contextGroup);
@@ -956,7 +1034,7 @@ const Sidebar = {
     const c = DOM.get("sidebar-category-filters"); if (!c) return; c.innerHTML = "";
     for (const cat of ["all", ...CATEGORIES]) {
       const btn = document.createElement("button"); btn.type = "button"; btn.className = "sidebar-filter-btn" + (UIState.categoryFilter === cat ? " active" : ""); btn.dataset.sidebarFilter = cat;
-      const dot = document.createElement("span"); Object.assign(dot.style, { width:"8px", height:"8px", borderRadius:"50%", flexShrink:"0" }); dot.style.background = cat === "all" ? "rgb(163 163 163)" : (CATEGORY_COLORS[cat] || "#999");
+      const dot = document.createElement("span"); Object.assign(dot.style, { width:"8px", height:"8px", borderRadius:"50%", flexShrink:"0" }); dot.style.background = cat === "all" ? "rgb(163 163 163)" : categoryColor(cat);
       const label = document.createElement("span"); label.textContent = cat === "all" ? "Todas" : cat; btn.append(dot, label);
       btn.addEventListener("click", () => { UIState.categoryFilter = cat; App.render(); }); c.appendChild(btn);
     }
@@ -973,7 +1051,7 @@ const Sidebar = {
         const ns = document.createElement("span"); ns.className = "text-stone-500 dark:text-neutral-400"; ns.textContent = cat;
         const cs = document.createElement("span"); cs.className = "font-mono-ui text-stone-600 dark:text-neutral-300"; cs.textContent = count;
         row.append(ns, cs); const bar = document.createElement("div"); bar.className = "category-bar";
-        const fill = document.createElement("div"); fill.className = "category-bar-fill"; fill.style.width = `${Math.round((count/st.total)*100)}%`; fill.style.background = CATEGORY_COLORS[cat] || "#f59e0b"; bar.appendChild(fill);
+        const fill = document.createElement("div"); fill.className = "category-bar-fill"; fill.style.width = `${Math.round((count/st.total)*100)}%`; fill.style.background = categoryColor(cat); bar.appendChild(fill);
         li.append(row, bar); se.appendChild(li);
       }
     }
@@ -1053,10 +1131,10 @@ const FocusMode = {
     if (this._tasks.length === 0) { card.innerHTML = ""; card.classList.add("hidden"); empty?.classList.remove("hidden"); nav?.classList.add("hidden"); if (counter) counter.textContent = ""; return; }
     card.classList.remove("hidden"); empty?.classList.add("hidden"); nav?.classList.remove("hidden");
     const t = this._tasks[UIState.focusIndex]; if (!t) return;
-    const color = CATEGORY_COLORS[t.category] || "#999";
+    const color = categoryColor(t.category);
     const urgent = t.priority === "Alta" || Utils.isOverdue(t.dueDate) || Utils.isDueToday(t.dueDate);
     const dueTxt = t.dueDate ? Utils.formatDueDate(t.dueDate) : "";
-    const dueClass = Utils.isOverdue(t.dueDate) ? "text-red-500 dark:text-red-400" : Utils.isDueToday(t.dueDate) ? "text-blue-600 dark:text-blue-400" : "text-stone-500 dark:text-neutral-500";
+    const dueClass = Utils.isOverdue(t.dueDate) ? "text-red-500 dark:text-red-400" : Utils.isDueToday(t.dueDate) ? "text-amber-700 dark:text-amber-300" : "text-stone-500 dark:text-neutral-500";
     const notes = t.notes ? `<p class="text-sm text-stone-500 dark:text-neutral-400 mt-4 text-left whitespace-pre-line max-h-28 overflow-y-auto italic border-t border-stone-100 dark:border-neutral-800 pt-3">${Utils._escapeHtml(t.notes)}</p>` : "";
     const pColor = t.project ? projectColor(t.project) : "";
     card.innerHTML = `<div class="rounded-2xl border ${urgent?"border-amber-300/50 ring-2 ring-amber-400/20 dark:ring-neutral-600/30":"border-stone-200/60"} bg-white p-6 sm:p-8 dark:border-neutral-700/50 dark:bg-neutral-900">
@@ -1130,6 +1208,9 @@ const ListActions = {
    ═══════════════════════════════════════════ */
 
 const App = {
+  /**
+   * Persists current state and refreshes every rendered section.
+   */
   commit() { TaskService.save(); this.render(); },
   _getViewState() {
     const query = Search.getQuery();
@@ -1211,6 +1292,9 @@ const App = {
     const focusBtn = DOM.get("focus-toggle");
     if (focusBtn) focusBtn.setAttribute("aria-pressed", UIState.focusMode ? "true" : "false");
   },
+  /**
+   * Recomputes the active view and updates all dynamic UI fragments.
+   */
   render() {
     const view = this._getViewState();
     UIState.visibleTaskIds = { now: view.now.map(t => t.id), next: view.next.map(t => t.id), done: view.done.map(t => t.id) };
@@ -1266,8 +1350,7 @@ const App = {
       const p = InputParser.parse(raw); const text = p.text; const cat = p.category || DOM.get("task-category")?.value || "Personal"; const pri = p.priority || DOM.get("task-priority")?.value || "Media";
       if (!text) return;
       const dueDate = p.dueDate || (DOM.get("task-duedate")?.value ? Utils.startOfDay(Date.parse(DOM.get("task-duedate").value + "T00:00:00")) : null);
-      let projectRaw = p.project || Utils.safeTrim(DOM.get("task-project")?.value) || null;
-      const project = projectRaw ? (projectRaw.charAt(0).toUpperCase() + projectRaw.slice(1)).slice(0, CONFIG.MAX_PROJECT_LENGTH) : null;
+      const project = normalizeProjectName(p.project || DOM.get("task-project")?.value);
       const r = TaskService.add(text, cat, pri, { dueDate, project });
       if (!r.ok) { if (inp) { inp.setCustomValidity(r.error === "TOO_LONG" ? `Máx ${CONFIG.MAX_TASK_LENGTH} chars.` : r.error === "DUPLICATE" ? "Ya existe." : "Escribe algo."); inp.reportValidity(); } return; }
       UIState.lastAddedTaskId = r.task.id; this.commit();
@@ -1291,7 +1374,7 @@ const App = {
     const si = DOM.get("search-input");
     si?.addEventListener("input", () => { Search.updateHints(); if (UIState.searchDebounceTimer) clearTimeout(UIState.searchDebounceTimer); UIState.searchDebounceTimer = setTimeout(() => this.render(), CONFIG.SEARCH_DEBOUNCE_MS); });
     DOM.get("clear-search")?.addEventListener("click", () => { Search.clear(); this.render(); Search.updateHints(); Search.focus(); });
-    DOM.get("active-project-pill")?.addEventListener("click", () => { UIState.projectFilter = "all"; App.render(); });
+    DOM.get("active-project-pill")?.addEventListener("click", () => setProjectFilter(null));
     DOM.get("theme-toggle")?.addEventListener("click", () => Theme.toggle());
     DOM.get("focus-toggle")?.addEventListener("click", () => FocusMode.toggle());
     DOM.get("focus-close")?.addEventListener("click", () => FocusMode.close());
@@ -1335,6 +1418,9 @@ const App = {
     DOM.get("load-examples")?.addEventListener("click", () => { for (const ex of EXAMPLE_TASKS) TaskService.add(ex.text, ex.category, ex.priority, { dueDate: ex.dueDate, project: ex.project, notes: ex.notes || "" }); this.commit(); });
     Keyboard.init();
   },
+  /**
+   * Bootstraps theme, data, listeners and the initial render pass.
+   */
   init() {
     Theme.load(); TaskService.load(); this._bindEvents(); ShortcutHints.apply(); FormVisualOrder.apply(); Location.fetch();
     setInterval(() => Location._applyEverywhere(), CONFIG.CLOCK_INTERVAL_MS); Sidebar.build();
