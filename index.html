@@ -30,7 +30,7 @@
   <button id="clear-search" type="button" class="hidden absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-1.5 py-0.5 text-[11px] text-stone-400 hover:text-stone-700 dark:hover:text-neutral-200">✕</button>
 </div>
 <div class="flex items-center gap-2 shrink-0">
-<button id="focus-toggle" type="button" aria-label="Modo focus"
+<button id="focus-toggle" type="button" aria-label="Modo focus" aria-controls="focus-overlay" aria-pressed="false"
 class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200/80 bg-white text-sm text-stone-400
 transition duration-200 ease-out hover:border-amber-400 hover:text-amber-600 active:scale-95
 focus:outline-none focus:ring-2 focus:ring-amber-400/40
@@ -40,7 +40,7 @@ title="Modo focus — muestra solo la siguiente tarea">
   <circle cx="8" cy="8" r="7"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="0.5" fill="currentColor"/>
 </svg>
 </button>
-<button id="theme-toggle" type="button" aria-label="Alternar tema"
+<button id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"
 class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200/80 bg-white text-sm text-stone-500
 transition duration-200 ease-out hover:border-amber-400 hover:text-amber-600 active:scale-95
 focus:outline-none focus:ring-2 focus:ring-amber-400/40
@@ -53,12 +53,12 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bor
 </header>
 
 <!-- FOCUS MODE OVERLAY -->
-<div id="focus-overlay" class="hidden fixed inset-0 z-40 bg-stone-50/98 dark:bg-neutral-950/98 backdrop-blur-lg">
+<div id="focus-overlay" class="hidden fixed inset-0 z-40 bg-stone-50/98 dark:bg-neutral-950/98 backdrop-blur-lg" role="dialog" aria-modal="true" aria-labelledby="focus-title" tabindex="-1">
   <div class="flex flex-col items-center justify-center min-h-screen px-6">
-    <button id="focus-close" type="button" class="absolute top-6 right-6 rounded-lg p-2 text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-200 transition">
+    <button id="focus-close" type="button" aria-label="Cerrar modo focus" class="absolute top-6 right-6 rounded-lg p-2 text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-200 transition">
       <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
     </button>
-    <p class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-6">Modo Focus</p>
+    <p id="focus-title" class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-6">Modo Focus</p>
     <div id="focus-card" class="w-full max-w-lg"></div>
     <div id="focus-empty" class="hidden text-center">
       <p class="text-lg font-semibold text-stone-700 dark:text-neutral-200">¡Todo hecho!</p>
@@ -147,7 +147,7 @@ class="text-xs font-semibold fill-stone-700 dark:fill-neutral-200" style="font-f
 <form id="task-form" class="relative">
 <div class="relative">
 <label for="task-input" class="sr-only">Texto de la tarea</label>
-<input id="task-input" type="text" placeholder="Escribe una tarea… (@fecha !prioridad #categoría /proyecto)" autocomplete="off"
+<input id="task-input" type="text" placeholder="Escribe una tarea…" autocomplete="off"
 class="w-full rounded-2xl border border-stone-200/80 bg-white px-5 py-3.5 pr-12 text-sm placeholder-stone-400
 transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30
 dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:ring-neutral-600">
@@ -163,6 +163,16 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
   </span>
   <span id="preview-project" class="hidden text-[11px] text-indigo-500 dark:text-indigo-400 font-medium"></span>
   <span id="preview-text" class="text-xs text-stone-400 dark:text-neutral-500 truncate"></span>
+</div>
+<div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-[12px] text-stone-500 dark:text-neutral-400">
+  <p class="min-w-0 flex-1">Empieza por el texto. Opcional: <span class="font-mono-ui">@fecha</span> <span class="font-mono-ui">/proyecto</span> <span class="font-mono-ui">#categoria</span> <span class="font-mono-ui">!prioridad</span>.</p>
+  <div class="flex items-center gap-2">
+    <button id="toggle-input-help" type="button" aria-expanded="false" aria-controls="input-help" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-500 transition hover:border-stone-300 hover:text-stone-700 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Ver sintaxis</button>
+    <button id="toggle-selectors" type="button" aria-expanded="false" aria-controls="selector-panel" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-500 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-400 hover:border-stone-300 hover:text-stone-700 dark:hover:border-neutral-600 dark:hover:text-neutral-200 transition flex items-center gap-1">
+      <span id="selector-arrow" class="transition-transform duration-200 text-[9px]">></span>
+      Campos guiados
+    </button>
+  </div>
 </div>
 <!-- Tooltip de sintaxis -->
 <div id="input-help" class="hidden absolute left-0 right-0 top-full mt-2 rounded-xl border border-stone-200/60 bg-white p-4 shadow-lg z-10 dark:border-neutral-700/50 dark:bg-neutral-900">
@@ -190,7 +200,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 </form>
 <!-- Selectores clásicos (colapsables) -->
 <div id="classic-selectors" class="mt-2">
-  <button id="toggle-selectors" type="button" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-400 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-500 hover:border-stone-300 hover:text-stone-600 dark:hover:border-neutral-600 dark:hover:text-neutral-300 transition flex items-center gap-1 mx-auto">
+  <button id="toggle-selectors-legacy" type="button" hidden aria-hidden="true" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-400 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-500 hover:border-stone-300 hover:text-stone-600 dark:hover:border-neutral-600 dark:hover:text-neutral-300 transition flex items-center gap-1 mx-auto">
     <span id="selector-arrow" class="transition-transform duration-200 text-[9px]">▸</span>
     Selectores clásicos
   </button>
@@ -258,10 +268,21 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 <button type="button" data-category-filter="Gestiones" class="category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600">Gestiones</button>
 </section>
 
+<section id="active-filters-summary" class="hidden">
+<div class="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200/60 bg-white/90 px-4 py-3 text-[12px] dark:border-neutral-700/50 dark:bg-neutral-900/90">
+<span class="font-semibold text-stone-600 dark:text-neutral-300">Viendo</span>
+<div id="active-filter-chips" class="flex flex-1 flex-wrap items-center gap-2"></div>
+<button id="clear-active-filters" type="button" class="rounded-full border border-stone-200/70 bg-stone-50 px-3 py-1 text-[11px] font-medium text-stone-500 transition hover:border-stone-300 hover:text-stone-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Limpiar</button>
+</div>
+</section>
+
 <section id="now-section" class="space-y-3">
 <button id="active-project-pill" type="button" class="hidden rounded-full border border-indigo-300 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 dark:hover:bg-indigo-950/50 mb-2"></button>
 <div class="flex items-center justify-between">
+<div>
 <h2 class="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-neutral-300">Ahora</h2>
+<p class="mt-1 text-[12px] text-stone-500 dark:text-neutral-400">Alta prioridad, vence hoy o esta atrasada.</p>
+</div>
 <button id="complete-all-now" type="button" class="complete-all-btn rounded-lg px-3 py-1.5 text-xs font-medium text-stone-400 transition duration-200 ease-out hover:text-stone-700 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:text-neutral-500 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Completar todas</button>
 </div>
 <ul id="now-list" data-section="now" class="space-y-2"></ul>
@@ -269,7 +290,10 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 
 <section id="next-section" class="space-y-3">
 <div class="flex items-center justify-between">
+<div>
 <h2 class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500">Pendiente</h2>
+<p class="mt-1 text-[12px] text-stone-500 dark:text-neutral-400">Tareas planificadas para despues.</p>
+</div>
 <button id="complete-all-next" type="button" class="complete-all-btn hidden rounded-lg px-3 py-1.5 text-xs font-medium text-stone-400 transition duration-200 ease-out hover:text-stone-700 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:text-neutral-500 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Completar todas</button>
 </div>
 <ul id="next-list" data-section="next" class="space-y-2"></ul>
@@ -277,7 +301,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 
 <section id="done-section" class="space-y-3">
 <div class="flex items-center justify-between">
-<button id="toggle-done" type="button" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-stone-300 dark:text-neutral-600 hover:text-stone-500 dark:hover:text-neutral-400 transition duration-200">
+<button id="toggle-done" type="button" aria-controls="done-list" aria-expanded="false" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 hover:text-stone-600 dark:hover:text-neutral-300 transition duration-200">
 <span id="done-arrow" class="transition-transform duration-200">▸</span>
 Hecho <span id="done-count" class="font-mono-ui">0</span>
 </button>

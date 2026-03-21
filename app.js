@@ -75,23 +75,23 @@ const EXAMPLE_TASKS = Object.freeze([
 
 const CLASSES = Object.freeze({
   /* Badge tokens: shared height (h-[22px]) + text-[11px] for uniform row */
-  badgeBase: "inline-flex items-center h-[22px] border text-[10px] leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-  priorityBase: "inline-flex items-center h-[22px] rounded-full border px-2 text-[10px] font-semibold leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  badgeBase: "inline-flex items-center h-[22px] border text-[11px] leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  priorityBase: "inline-flex items-center h-[22px] rounded-full border px-2 text-[11px] font-semibold leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
   priority: {
     Alta:  "border-red-200/80 bg-red-50 text-red-600 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-400",
     Media: "border-stone-200/80 bg-stone-100 text-stone-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400",
     Baja:  "border-stone-200/60 bg-white text-stone-400 dark:border-neutral-700/60 dark:bg-neutral-900 dark:text-neutral-500",
   },
-  categoryBase: "inline-flex items-center gap-1.5 h-[22px] rounded-full border px-2 text-[10px] font-medium leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-  projectBadge: "inline-flex items-center gap-1.5 h-[22px] rounded-md border px-2 text-[10px] font-semibold leading-none tracking-[0.01em] cursor-pointer transition-colors duration-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  categoryBase: "inline-flex items-center gap-1.5 h-[22px] rounded-full border px-2 text-[11px] font-medium leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  projectBadge: "inline-flex items-center gap-1.5 h-[22px] rounded-md border px-2 text-[11px] font-semibold leading-none tracking-[0.01em] cursor-pointer transition-colors duration-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
   taskCard: {
     pending:   "group relative grid gap-2.5 rounded-xl border border-stone-200/70 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,25,23,0.04)] transition duration-200 ease-out hover:-translate-y-0.5 hover:border-stone-300/80 hover:shadow-[0_8px_20px_rgba(28,25,23,0.05)] sm:grid-cols-[minmax(0,1fr)_minmax(332px,max-content)] sm:items-start sm:px-4 dark:border-neutral-700/50 dark:bg-neutral-900 dark:hover:border-neutral-600 dark:hover:shadow-[0_8px_20px_rgba(0,0,0,0.2)]",
     completed: "group relative grid gap-2.5 rounded-xl border border-stone-200/50 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,25,23,0.03)] transition duration-200 ease-out opacity-55 hover:opacity-85 sm:grid-cols-[minmax(0,1fr)_minmax(332px,max-content)] sm:items-start dark:border-neutral-700/40 dark:bg-neutral-900",
   },
   taskMain: "flex min-w-0 items-start gap-3",
   taskContent: "min-w-0 space-y-0.5",
-  taskMetaText: "flex flex-wrap items-center gap-1 text-[10px] text-stone-400 dark:text-neutral-500 font-mono-ui",
-  detailCue: "inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-stone-200/70 bg-stone-50/90 px-1 text-[8px] font-semibold text-stone-500 dark:border-neutral-700/70 dark:bg-neutral-800/90 dark:text-neutral-400",
+  taskMetaText: "flex flex-wrap items-center gap-1 text-[11px] text-stone-500 dark:text-neutral-400 font-mono-ui",
+  detailCue: "inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-stone-200/70 bg-stone-50/90 px-1 text-[9px] font-semibold text-stone-500 dark:border-neutral-700/70 dark:bg-neutral-800/90 dark:text-neutral-400",
   taskSide: "flex min-w-0 shrink-0 flex-col gap-2 pt-0.5 sm:min-w-[332px] sm:max-w-[360px] sm:items-end sm:pt-0",
   badgeRail: "badge-rail flex min-h-[22px] w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap sm:justify-end",
   badgeGroup: "badge-group flex shrink-0 items-center gap-1",
@@ -101,9 +101,9 @@ const CLASSES = Object.freeze({
     pending:   "border-stone-200/80 bg-white text-stone-300 hover:border-amber-400 hover:text-amber-500 hover:bg-amber-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-600 dark:hover:border-neutral-500 dark:hover:text-neutral-300",
     completed: "border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
   },
-  actionButton: "task-actions inline-flex min-h-7 items-center justify-center rounded-md border border-stone-200/80 bg-white px-2.5 py-1 text-[10px] font-medium text-stone-500 shadow-[0_1px_2px_rgba(28,25,23,0.05)] transition duration-150 ease-out hover:border-stone-300 hover:bg-stone-50 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700/80 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-950 dark:hover:text-neutral-200 dark:focus:ring-neutral-600",
+  actionButton: "task-actions inline-flex min-h-7 items-center justify-center rounded-md border border-stone-200/80 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-600 shadow-[0_1px_2px_rgba(28,25,23,0.05)] transition duration-150 ease-out hover:border-stone-300 hover:bg-stone-50 hover:text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700/80 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-950 dark:hover:text-neutral-100 dark:focus:ring-neutral-600",
   actionButtonDetails: "border-amber-200/80 bg-amber-50/80 text-amber-700 hover:border-amber-300 hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-950/20 dark:text-amber-300 dark:hover:border-amber-600 dark:hover:bg-amber-950/30",
-  emptyState: "rounded-xl border border-dashed border-stone-200/50 bg-white px-4 py-8 text-sm text-stone-400 text-center dark:border-neutral-700/40 dark:bg-neutral-900 dark:text-neutral-600",
+  emptyState: "rounded-xl border border-dashed border-stone-200/50 bg-white px-4 py-8 text-sm text-stone-500 text-center dark:border-neutral-700/40 dark:bg-neutral-900 dark:text-neutral-500",
   filterPill: {
     active: "border-amber-400 bg-amber-50 text-amber-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200",
     inactive: "border-stone-200/60 bg-white text-stone-400 hover:border-stone-300 hover:text-stone-600 dark:border-neutral-700/50 dark:bg-neutral-900 dark:text-neutral-500 dark:hover:border-neutral-600 dark:hover:text-neutral-300",
@@ -111,7 +111,7 @@ const CLASSES = Object.freeze({
   filterPillBase: "category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600",
   editInput: "w-full min-w-[200px] rounded-lg border border-stone-200/80 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:focus:ring-neutral-600",
   dueBadge: {
-    base:    "inline-flex items-center gap-1 h-[22px] rounded-md border px-2 text-[9px] font-mono-ui leading-none tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+    base:    "inline-flex items-center gap-1 h-[22px] rounded-md border px-2 text-[10px] font-mono-ui leading-none tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
     overdue: "border-red-300/80 bg-red-50 text-red-600 font-semibold dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-400",
     today:   "border-blue-200/80 bg-blue-50 text-blue-600 font-semibold dark:border-blue-800/50 dark:bg-blue-950/30 dark:text-blue-400",
     future:  "border-stone-300/80 bg-stone-100 text-stone-500 font-medium dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-500",
@@ -214,6 +214,8 @@ const InputParser = {
     const tr = Utils.safeTrim(val);
     if (!tr) { pv.classList.add("hidden"); return; }
     const p = this.parse(tr);
+    const hasSmartTokens = Boolean(p.dueDate || p.project || p.category || p.priority || p.text !== tr);
+    if (!hasSmartTokens) { pv.classList.add("hidden"); return; }
     const cat = p.category || DOM.get("task-category")?.value || "Personal";
     const pri = p.priority || DOM.get("task-priority")?.value || "Media";
     pv.classList.remove("hidden");
@@ -374,7 +376,19 @@ const UIState = {
 
 const Theme = {
   load() { const s = localStorage.getItem(CONFIG.THEME_KEY); if (s === "dark" || s === "light") { this.apply(s); return; } this.apply(window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light"); },
-  apply(theme) { const dk = theme === "dark"; document.documentElement.classList.toggle("dark", dk); const i = DOM.get("theme-icon"); const t = DOM.get("theme-text"); if (i) i.textContent = dk ? "◗" : "○"; if (t) t.textContent = dk ? "Oscuro" : "Claro"; },
+  apply(theme) {
+    const dk = theme === "dark";
+    document.documentElement.classList.toggle("dark", dk);
+    const i = DOM.get("theme-icon");
+    const t = DOM.get("theme-text");
+    const b = DOM.get("theme-toggle");
+    if (i) i.textContent = dk ? "◗" : "○";
+    if (t) t.textContent = dk ? "Oscuro" : "Claro";
+    if (b) {
+      b.setAttribute("aria-pressed", dk ? "true" : "false");
+      b.setAttribute("title", dk ? "Cambiar a tema claro" : "Cambiar a tema oscuro");
+    }
+  },
   toggle() { const n = document.documentElement.classList.contains("dark") ? "light" : "dark"; localStorage.setItem(CONFIG.THEME_KEY, n); this.apply(n); },
 };
 
@@ -429,7 +443,7 @@ const ShortcutHints = {
 const FormVisualOrder = {
   apply() {
     const taskInput = DOM.get("task-input");
-    if (taskInput) taskInput.placeholder = "Escribe una tarea… (@fecha /proyecto #categoría !prioridad)";
+    if (taskInput) taskInput.placeholder = "Escribe una tarea…";
 
     const preview = DOM.get("input-preview");
     if (preview) {
@@ -447,6 +461,13 @@ const FormVisualOrder = {
         .map(id => DOM.get(id)?.closest(".relative"))
         .filter(Boolean);
       for (const field of fields) panel.appendChild(field);
+    }
+
+    const legacySelectorToggle = document.querySelector('#classic-selectors > button#toggle-selectors');
+    if (legacySelectorToggle) {
+      legacySelectorToggle.id = "toggle-selectors-legacy";
+      legacySelectorToggle.hidden = true;
+      legacySelectorToggle.setAttribute("aria-hidden", "true");
     }
 
     const welcomeExample = document.querySelector("#welcome-section .grid > div:first-child p:last-child");
@@ -542,17 +563,17 @@ const TaskDetail = {
 
     const r1 = document.createElement("div"); r1.className = "flex flex-wrap gap-3";
     const dw = document.createElement("div"); dw.className = "flex-1 min-w-[140px]";
-    dw.innerHTML = `<label class="text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-1 block">Fecha límite</label>`;
+    dw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Fecha limite</label>`;
     const di = document.createElement("input"); di.type = "date";
-    di.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-1.5 text-xs text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300";
+    di.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200";
     di.value = task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "";
     di.addEventListener("change", () => { TaskService.updateTask(task.id, { dueDate: di.value ? Utils.startOfDay(Date.parse(di.value+"T00:00:00")) : null }); App.commit(); });
     dw.appendChild(di);
 
     const pw = document.createElement("div"); pw.className = "flex-1 min-w-[140px]";
-    pw.innerHTML = `<label class="text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-1 block">Proyecto</label>`;
+    pw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Proyecto</label>`;
     const pi = document.createElement("input"); pi.type = "text"; pi.placeholder = "Ej: Mudanza, Sprint 14…";
-    pi.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-1.5 text-xs text-stone-600 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-600";
+    pi.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder-neutral-500";
     pi.value = task.project || ""; pi.setAttribute("list", "project-options-" + task.id);
     const dl = document.createElement("datalist"); dl.id = "project-options-" + task.id;
     for (const n of TaskService.getAllProjectNames()) { const o = document.createElement("option"); o.value = n; dl.appendChild(o); }
@@ -561,25 +582,25 @@ const TaskDetail = {
 
     const r2 = document.createElement("div"); r2.className = "flex flex-wrap gap-3";
     const cw = document.createElement("div"); cw.className = "flex-1 min-w-[120px]";
-    cw.innerHTML = `<label class="text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-1 block">Categoría</label>`;
+    cw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Categoria</label>`;
     const cs = document.createElement("select");
-    cs.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-1.5 text-xs text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300";
+    cs.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200";
     for (const c of CATEGORIES) { const o = document.createElement("option"); o.value = c; o.textContent = c; if (c === task.category) o.selected = true; cs.appendChild(o); }
     cs.addEventListener("change", () => { TaskService.updateTask(task.id, { category: cs.value }); App.commit(); });
     cw.appendChild(cs);
 
     const prw = document.createElement("div"); prw.className = "flex-1 min-w-[100px]";
-    prw.innerHTML = `<label class="text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-1 block">Prioridad</label>`;
+    prw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Prioridad</label>`;
     const ps = document.createElement("select");
-    ps.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-1.5 text-xs text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300";
+    ps.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200";
     for (const p of ["Alta","Media","Baja"]) { const o = document.createElement("option"); o.value = p; o.textContent = p; if (p === task.priority) o.selected = true; ps.appendChild(o); }
     ps.addEventListener("change", () => { TaskService.updateTask(task.id, { priority: ps.value }); App.commit(); });
     prw.appendChild(ps); r2.append(cw, prw);
 
     const nw = document.createElement("div");
-    nw.innerHTML = `<label class="text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-1 block">Notas</label>`;
+    nw.innerHTML = `<label class="text-[11px] font-semibold uppercase tracking-widest text-stone-500 dark:text-neutral-400 mb-1 block">Notas</label>`;
     const ta = document.createElement("textarea");
-    ta.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-xs text-stone-600 placeholder-stone-300 resize-y min-h-[60px] focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-600";
+    ta.className = "w-full rounded-lg border border-stone-200/80 bg-white px-3 py-2 text-sm text-stone-700 placeholder-stone-400 resize-y min-h-[72px] focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder-neutral-500";
     ta.placeholder = "Añade notas, detalles, enlaces…"; ta.value = task.notes || ""; ta.maxLength = CONFIG.MAX_NOTES_LENGTH;
     ta.addEventListener("blur", () => { TaskService.updateTask(task.id, { notes: ta.value }); TaskService.save(); });
     nw.appendChild(ta);
@@ -640,7 +661,7 @@ const TaskRenderer = {
       tw.appendChild(meta);
       if (task.notes && !completed) {
         const notePreview = document.createElement("p");
-        notePreview.className = "notes-preview text-[9px] text-stone-400/70 dark:text-neutral-500/70 italic truncate cursor-pointer";
+        notePreview.className = "notes-preview text-[10px] text-stone-500/80 dark:text-neutral-400/80 italic truncate cursor-pointer";
         const firstLine = task.notes.split("\n")[0].trim();
         notePreview.textContent = firstLine.length > 50 ? firstLine.slice(0, 50) + "\u2026" : firstLine;
         notePreview.title = "Click para ver detalles";
@@ -721,7 +742,7 @@ const TaskRenderer = {
       if (!completed && task.notes && UIState.expandedTaskId !== task.id) {
         const hint = document.createElement("button");
         hint.type = "button";
-        hint.className = "detail-hint inline-flex items-center justify-center w-5 h-5 rounded-md border border-stone-200/60 bg-stone-50 text-[10px] text-stone-400 cursor-pointer shrink-0 transition hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50 dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-500 dark:hover:border-neutral-600 dark:hover:text-neutral-300";
+        hint.className = "detail-hint inline-flex items-center justify-center w-5 h-5 rounded-md border border-stone-200/60 bg-stone-50 text-[11px] text-stone-500 cursor-pointer shrink-0 transition hover:border-amber-300 hover:text-amber-700 hover:bg-amber-50 dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200";
         hint.textContent = "\u2026";
         hint.title = "Tiene notas \u2014 click para ver";
         hint.setAttribute("aria-label", "Ver notas de la tarea");
@@ -987,8 +1008,42 @@ const Sidebar = {
 
 const FocusMode = {
   _tasks: [],
-  open() { UIState.focusMode = true; UIState.focusIndex = 0; this._tasks = TaskService.getPendingForFocus(); DOM.get("focus-overlay")?.classList.remove("hidden"); document.body.style.overflow = "hidden"; this._render(); DOM.get("focus-toggle")?.classList.add("text-amber-500","border-amber-400"); },
-  close() { UIState.focusMode = false; DOM.get("focus-overlay")?.classList.add("hidden"); document.body.style.overflow = ""; DOM.get("focus-toggle")?.classList.remove("text-amber-500","border-amber-400"); App.render(); },
+  _lastFocused: null,
+  _handleTrap(e) {
+    if (!UIState.focusMode || e.key !== "Tab") return;
+    const overlay = DOM.get("focus-overlay");
+    if (!overlay) return;
+    const focusables = [...overlay.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(el => !el.classList.contains("hidden"));
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  },
+  open() {
+    UIState.focusMode = true;
+    UIState.focusIndex = 0;
+    this._lastFocused = document.activeElement;
+    this._tasks = TaskService.getPendingForFocus();
+    const overlay = DOM.get("focus-overlay");
+    overlay?.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    this._render();
+    DOM.get("focus-toggle")?.classList.add("text-amber-500","border-amber-400");
+    App._syncDisclosureState();
+    document.addEventListener("keydown", this._handleTrap);
+    setTimeout(() => DOM.get("focus-close")?.focus(), 0);
+  },
+  close() {
+    UIState.focusMode = false;
+    DOM.get("focus-overlay")?.classList.add("hidden");
+    document.body.style.overflow = "";
+    DOM.get("focus-toggle")?.classList.remove("text-amber-500","border-amber-400");
+    document.removeEventListener("keydown", this._handleTrap);
+    App._syncDisclosureState();
+    App.render();
+    this._lastFocused?.focus?.();
+  },
   toggle() { if (UIState.focusMode) this.close(); else this.open(); },
   completeCurrent() { const t = this._tasks[UIState.focusIndex]; if (!t) return; TaskService.setCompleted(t.id, true); TaskService.save(); this._tasks = TaskService.getPendingForFocus(); if (UIState.focusIndex >= this._tasks.length) UIState.focusIndex = 0; this._render(); },
   skipCurrent() { UIState.focusIndex = (UIState.focusIndex + 1) % Math.max(1, this._tasks.length); this._render(); },
@@ -1002,7 +1057,7 @@ const FocusMode = {
     const urgent = t.priority === "Alta" || Utils.isOverdue(t.dueDate) || Utils.isDueToday(t.dueDate);
     const dueTxt = t.dueDate ? Utils.formatDueDate(t.dueDate) : "";
     const dueClass = Utils.isOverdue(t.dueDate) ? "text-red-500 dark:text-red-400" : Utils.isDueToday(t.dueDate) ? "text-blue-600 dark:text-blue-400" : "text-stone-500 dark:text-neutral-500";
-    const notes = t.notes ? `<p class="text-xs text-stone-400 dark:text-neutral-500 mt-4 text-left whitespace-pre-line max-h-28 overflow-y-auto italic border-t border-stone-100 dark:border-neutral-800 pt-3">${Utils._escapeHtml(t.notes)}</p>` : "";
+    const notes = t.notes ? `<p class="text-sm text-stone-500 dark:text-neutral-400 mt-4 text-left whitespace-pre-line max-h-28 overflow-y-auto italic border-t border-stone-100 dark:border-neutral-800 pt-3">${Utils._escapeHtml(t.notes)}</p>` : "";
     const pColor = t.project ? projectColor(t.project) : "";
     card.innerHTML = `<div class="rounded-2xl border ${urgent?"border-amber-300/50 ring-2 ring-amber-400/20 dark:ring-neutral-600/30":"border-stone-200/60"} bg-white p-6 sm:p-8 dark:border-neutral-700/50 dark:bg-neutral-900">
       <h3 class="text-lg sm:text-xl font-semibold text-stone-800 dark:text-neutral-100 leading-relaxed text-center">${Utils._escapeHtml(t.text)}</h3>
@@ -1034,7 +1089,8 @@ const Keyboard = {
     if (e.key !== "Escape") return;
     if (UIState.focusMode) { FocusMode.close(); return; }
     if (UIState.expandedTaskId) { UIState.expandedTaskId = null; App.render(); return; }
-    const ih = DOM.get("input-help"); if (ih && !ih.classList.contains("hidden")) { ih.classList.add("hidden"); return; }
+    const ih = DOM.get("input-help"); if (ih && !ih.classList.contains("hidden")) { App._setInputHelpOpen(false); return; }
+    if (UIState.selectorsExpanded) { App._setSelectorsOpen(false); return; }
     if (UIState.editingTaskId && document.activeElement?.matches('input[data-role="edit-text"]')) { UIState.editingTaskId = null; App.render(); return; }
     const si = DOM.get("search-input"); if (si?.value) { si.value = ""; App.render(); Search.updateHints(); si.focus(); return; }
     if (document.activeElement === si) si.blur();
@@ -1081,6 +1137,7 @@ const App = {
     const { now, next, done } = TaskService.getVisible(query, UIState.categoryFilter, UIState.projectFilter);
     const showWelcome = TaskService.count === 0 && !hasQuery;
     return {
+      query,
       hasQuery,
       now,
       next,
@@ -1093,25 +1150,85 @@ const App = {
       emptySearchMessage: "No encontrÃ© nada con esa bÃºsqueda.",
     };
   },
+  _emptyMessage(section, view) {
+    const hasScopedFilters = UIState.categoryFilter !== "all" || UIState.projectFilter !== "all";
+    if (view.hasQuery && hasScopedFilters) return "No hay resultados aqui con la busqueda y los filtros activos.";
+    if (view.hasQuery) return "No hay resultados para esa busqueda en esta seccion.";
+    if (hasScopedFilters) {
+      if (section === "done") return "Nada completado con los filtros activos.";
+      return "No hay tareas en esta vista con los filtros activos.";
+    }
+    if (section === "now") return "Nada urgente ahora mismo.";
+    if (section === "next") return "Anade una tarea arriba para empezar.";
+    return "Todavia no has completado ninguna tarea.";
+  },
+  _setInputHelpOpen(open) {
+    const panel = DOM.get("input-help");
+    const btn = DOM.get("toggle-input-help");
+    if (panel) panel.classList.toggle("hidden", !open);
+    if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    this._syncDisclosureState();
+  },
+  _setSelectorsOpen(open) {
+    UIState.selectorsExpanded = open;
+    const panel = DOM.get("selector-panel");
+    const btn = DOM.get("toggle-selectors");
+    const arrow = DOM.get("selector-arrow");
+    if (panel) panel.classList.toggle("hidden", !open);
+    if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (arrow) arrow.style.transform = open ? "rotate(90deg)" : "rotate(0deg)";
+    this._syncDisclosureState();
+  },
+  _renderActiveFiltersSummary(query) {
+    const section = DOM.get("active-filters-summary");
+    const chips = DOM.get("active-filter-chips");
+    const clear = DOM.get("clear-active-filters");
+    if (!section || !chips || !clear) return;
+    const items = [];
+    if (query) items.push({ key: "query", label: `Busqueda: ${query}` });
+    if (UIState.categoryFilter !== "all") items.push({ key: "category", label: `Categoria: ${UIState.categoryFilter}` });
+    if (UIState.projectFilter !== "all") items.push({ key: "project", label: `Proyecto: ${UIState.projectFilter}` });
+    chips.innerHTML = "";
+    for (const item of items) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.dataset.clearFilter = item.key;
+      chip.className = "inline-flex items-center gap-1 rounded-full border border-stone-200/70 bg-stone-50 px-3 py-1 text-[11px] font-medium text-stone-600 transition hover:border-stone-300 hover:text-stone-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:text-neutral-100";
+      chip.textContent = `${item.label} x`;
+      chips.appendChild(chip);
+    }
+    const hasItems = items.length > 0;
+    section.classList.toggle("hidden", !hasItems);
+    clear.classList.toggle("hidden", !hasItems);
+  },
+  _syncDisclosureState() {
+    const doneBtn = DOM.get("toggle-done");
+    if (doneBtn) doneBtn.setAttribute("aria-expanded", UIState.doneExpanded ? "true" : "false");
+    const selectorsBtn = DOM.get("toggle-selectors");
+    if (selectorsBtn) selectorsBtn.setAttribute("aria-expanded", UIState.selectorsExpanded ? "true" : "false");
+    const helpBtn = DOM.get("toggle-input-help");
+    if (helpBtn) helpBtn.setAttribute("aria-expanded", DOM.get("input-help")?.classList.contains("hidden") ? "false" : "true");
+    const focusBtn = DOM.get("focus-toggle");
+    if (focusBtn) focusBtn.setAttribute("aria-pressed", UIState.focusMode ? "true" : "false");
+  },
   render() {
     const view = this._getViewState();
     UIState.visibleTaskIds = { now: view.now.map(t => t.id), next: view.next.map(t => t.id), done: view.done.map(t => t.id) };
     const { now, next, done } = view;
-    const hq = view.hasQuery;
-    const es = "No encontré nada con esa búsqueda.";
     this._updateFilterPills(); Progress.update(); Greeting.update(); Welcome.update();
+    this._renderActiveFiltersSummary(view.query);
+    this._syncDisclosureState();
 
     const pp = DOM.get("active-project-pill");
-    if (pp) { if (UIState.projectFilter && UIState.projectFilter !== "all") { pp.classList.remove("hidden"); pp.textContent = `${UIState.projectFilter} ✕`; } else { pp.classList.add("hidden"); } }
+    if (pp) { if (UIState.projectFilter && UIState.projectFilter !== "all") { pp.classList.remove("hidden"); pp.textContent = `${UIState.projectFilter} x`; } else { pp.classList.add("hidden"); } }
 
     const dc = DOM.get("done-count"); if (dc) dc.textContent = TaskService.tasks.filter(t => t.completed).length;
     const cb = DOM.get("clear-search"); if (cb) cb.classList.toggle("hidden", !view.hasQuery);
-    TaskRenderer.renderList(DOM.get("next-list"), next, { completed: false, emptyMessage: hq ? es : "Añade una tarea arriba para empezar." });
-    TaskRenderer.renderList(DOM.get("now-list"), now, { completed: false, emptyMessage: hq ? es : "Nada urgente ahora mismo." });
+    TaskRenderer.renderList(DOM.get("next-list"), next, { completed: false, emptyMessage: this._emptyMessage("next", view) });
+    TaskRenderer.renderList(DOM.get("now-list"), now, { completed: false, emptyMessage: this._emptyMessage("now", view) });
     const dl = DOM.get("done-list");
-    if (UIState.doneExpanded) { dl?.classList.remove("hidden"); TaskRenderer.renderList(dl, done, { completed: true, emptyMessage: hq ? es : "Todavía no has completado ninguna tarea." }); }
+    if (UIState.doneExpanded) { dl?.classList.remove("hidden"); TaskRenderer.renderList(dl, done, { completed: true, emptyMessage: this._emptyMessage("done", view) }); }
     else { dl?.classList.add("hidden"); if (dl) dl.innerHTML = ""; }
-    const nv = now.length > 0 || hq;
     DOM.get("welcome-section")?.classList.toggle("hidden", !view.showWelcome);
     DOM.get("greeting-section")?.classList.toggle("hidden", !view.showGreeting);
     DOM.get("now-section")?.classList.toggle("hidden", !view.showNow);
@@ -1156,6 +1273,7 @@ const App = {
       UIState.lastAddedTaskId = r.task.id; this.commit();
       if (inp) { inp.value = ""; inp.focus(); }
       DOM.get("input-preview")?.classList.add("hidden");
+      this._setInputHelpOpen(false);
       const eh = DOM.get("enter-hint"); if (eh) eh.classList.remove("visible");
       const cs2 = DOM.get("task-category"); const ps2 = DOM.get("task-priority"); if (cs2) cs2.value = "Personal"; if (ps2) ps2.value = "Media";
       const dd = DOM.get("task-duedate"); if (dd) dd.value = "";
@@ -1163,9 +1281,13 @@ const App = {
     });
     const ti = DOM.get("task-input"); const eh = DOM.get("enter-hint");
     ti?.addEventListener("input", () => { ti.setCustomValidity(""); if (eh) eh.classList.toggle("visible", Utils.safeTrim(ti.value).length > 0); InputParser.updatePreview(ti.value); });
-    ti?.addEventListener("focus", () => { if (eh && Utils.safeTrim(ti.value).length > 0) eh.classList.add("visible"); if (!Utils.safeTrim(ti.value)) DOM.get("input-help")?.classList.remove("hidden"); });
-    ti?.addEventListener("blur", () => { if (eh) eh.classList.remove("visible"); setTimeout(() => DOM.get("input-help")?.classList.add("hidden"), 200); });
-    DOM.get("toggle-selectors")?.addEventListener("click", () => { UIState.selectorsExpanded = !UIState.selectorsExpanded; const p2 = DOM.get("selector-panel"); const a = DOM.get("selector-arrow"); if (p2) p2.classList.toggle("hidden",!UIState.selectorsExpanded); if (a) a.style.transform = UIState.selectorsExpanded?"rotate(90deg)":"rotate(0deg)"; });
+    ti?.addEventListener("focus", () => { if (eh && Utils.safeTrim(ti.value).length > 0) eh.classList.add("visible"); });
+    ti?.addEventListener("blur", () => { if (eh) eh.classList.remove("visible"); });
+    DOM.get("toggle-input-help")?.addEventListener("click", () => {
+      const panel = DOM.get("input-help");
+      this._setInputHelpOpen(panel?.classList.contains("hidden"));
+    });
+    DOM.get("toggle-selectors")?.addEventListener("click", () => this._setSelectorsOpen(!UIState.selectorsExpanded));
     const si = DOM.get("search-input");
     si?.addEventListener("input", () => { Search.updateHints(); if (UIState.searchDebounceTimer) clearTimeout(UIState.searchDebounceTimer); UIState.searchDebounceTimer = setTimeout(() => this.render(), CONFIG.SEARCH_DEBOUNCE_MS); });
     DOM.get("clear-search")?.addEventListener("click", () => { Search.clear(); this.render(); Search.updateHints(); Search.focus(); });
@@ -1177,6 +1299,27 @@ const App = {
     DOM.get("focus-skip-btn")?.addEventListener("click", () => FocusMode.skipCurrent());
     DOM.categoryFilterButtons.forEach(b => b.addEventListener("click", () => { UIState.categoryFilter = b.dataset.categoryFilter; this.render(); }));
     DOM.get("toggle-done")?.addEventListener("click", () => { UIState.doneExpanded = !UIState.doneExpanded; const a = DOM.get("done-arrow"); if (a) a.style.transform = UIState.doneExpanded?"rotate(90deg)":"rotate(0deg)"; this.render(); });
+    DOM.get("clear-active-filters")?.addEventListener("click", () => {
+      UIState.categoryFilter = "all";
+      UIState.projectFilter = "all";
+      Search.clear();
+      Search.updateHints();
+      this.render();
+    });
+    DOM.get("active-filter-chips")?.addEventListener("click", e => {
+      const chip = e.target.closest("[data-clear-filter]");
+      if (!chip) return;
+      if (chip.dataset.clearFilter === "query") Search.clear();
+      if (chip.dataset.clearFilter === "category") UIState.categoryFilter = "all";
+      if (chip.dataset.clearFilter === "project") UIState.projectFilter = "all";
+      Search.updateHints();
+      this.render();
+    });
+    document.addEventListener("click", e => {
+      const help = DOM.get("input-help");
+      const helpBtn = DOM.get("toggle-input-help");
+      if (help && !help.classList.contains("hidden") && !help.contains(e.target) && !helpBtn?.contains(e.target)) this._setInputHelpOpen(false);
+    });
     ["now-list","next-list","done-list"].forEach(id => {
       const l = DOM.get(id); if (!l) return;
       l.addEventListener("dragover", e => e.preventDefault()); l.addEventListener("drop", e => DragDrop.handleDrop(e));
