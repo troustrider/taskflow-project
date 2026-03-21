@@ -166,16 +166,15 @@ header {
   font-family: var(--font-body);
 }
 
-/* Task actions: visible by default, stronger on intent */
+/* Task actions: hover-only on desktop, always visible on touch */
 .task-actions {
-  opacity: 0.84;
-  transition: opacity 150ms ease, color 150ms ease, background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+  opacity: 0;
+  transition: opacity 150ms ease;
 }
 
 .group:hover .task-actions,
 .group:focus-within .task-actions {
   opacity: 1;
-  transform: translateY(-1px);
 }
 
 @media (hover: none) {
@@ -204,19 +203,13 @@ header {
    ═══════════════════════════════════════════ */
 
 .notes-preview {
-  max-width: min(320px, 100%);
-  letter-spacing: 0.01em;
-}
-
-.badge-rail {
-  scrollbar-width: none;
-}
-
-.badge-rail::-webkit-scrollbar {
-  display: none;
+  max-width: min(260px, 100%);
 }
 
 /* Detail hint button — inherits badge height for alignment */
+.detail-hint {
+  font-family: var(--font-body);
+}
 
 /* ═══════════════════════════════════════════
    TASK DETAIL PANEL — inline expandible
@@ -224,11 +217,6 @@ header {
 
 .task-detail-panel {
   animation: detailSlideIn 200ms ease-out;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
-}
-
-.dark .task-detail-panel {
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
 }
 
 @keyframes detailSlideIn {

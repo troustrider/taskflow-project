@@ -154,7 +154,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 <span id="enter-hint" class="enter-hint"><kbd class="enter-hint-kbd">↵</kbd></span>
 </div>
 <!-- Preview de parsing -->
-<div id="input-preview" class="hidden mt-2 flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200/50 bg-stone-50/70 px-3 py-2 dark:border-neutral-700/40 dark:bg-neutral-900/60">
+<div id="input-preview" class="hidden mt-2 flex flex-wrap items-center gap-2 px-2">
   <span id="preview-due" class="hidden text-[11px] text-blue-600 dark:text-blue-400 font-medium"></span>
   <span id="preview-priority" class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">Media</span>
   <span id="preview-category" class="inline-flex items-center gap-1 rounded-full border border-stone-200/60 bg-stone-50 px-2.5 py-0.5 text-[11px] font-medium text-stone-500 dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-400">
@@ -190,11 +190,11 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 </form>
 <!-- Selectores clásicos (colapsables) -->
 <div id="classic-selectors" class="mt-2">
-  <button id="toggle-selectors" type="button" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-400 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-500 hover:border-stone-300 hover:text-stone-600 dark:hover:border-neutral-600 dark:hover:text-neutral-300 transition flex items-center gap-1 mx-auto">
+  <button id="toggle-selectors" type="button" class="text-[11px] text-stone-400 dark:text-neutral-500 hover:text-stone-600 dark:hover:text-neutral-300 transition flex items-center gap-1 mx-auto">
     <span id="selector-arrow" class="transition-transform duration-200 text-[9px]">▸</span>
     Selectores clásicos
   </button>
-  <div id="selector-panel" class="hidden mt-3 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-stone-200/50 bg-white/85 p-3 shadow-[0_8px_30px_rgba(28,25,23,0.04)] dark:border-neutral-700/40 dark:bg-neutral-900/80">
+  <div id="selector-panel" class="hidden mt-2 flex flex-wrap items-center justify-center gap-2">
     <div class="relative">
       <label for="task-duedate" class="sr-only">Fecha límite</label>
       <input id="task-duedate" type="date" class="appearance-none rounded-full border border-stone-200/80 bg-white px-4 py-2 text-xs text-stone-600 transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:ring-neutral-600">

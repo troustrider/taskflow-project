@@ -75,34 +75,25 @@ const EXAMPLE_TASKS = Object.freeze([
 
 const CLASSES = Object.freeze({
   /* Badge tokens: shared height (h-[22px]) + text-[11px] for uniform row */
-  badgeBase: "inline-flex items-center h-[22px] border text-[10px] leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-  priorityBase: "inline-flex items-center h-[22px] rounded-full border px-2 text-[10px] font-semibold leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  badgeBase: "inline-flex items-center h-[22px] text-[11px] leading-none",
+  priorityBase: "inline-flex items-center h-[22px] rounded-full border px-2.5 text-[11px] font-semibold leading-none",
   priority: {
     Alta:  "border-red-200/80 bg-red-50 text-red-600 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-400",
     Media: "border-stone-200/80 bg-stone-100 text-stone-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400",
     Baja:  "border-stone-200/60 bg-white text-stone-400 dark:border-neutral-700/60 dark:bg-neutral-900 dark:text-neutral-500",
   },
-  categoryBase: "inline-flex items-center gap-1.5 h-[22px] rounded-full border px-2 text-[10px] font-medium leading-none tracking-[0.01em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-  projectBadge: "inline-flex items-center gap-1.5 h-[22px] rounded-md border px-2 text-[10px] font-semibold leading-none tracking-[0.01em] cursor-pointer transition-colors duration-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+  categoryBase: "inline-flex items-center gap-1.5 h-[22px] rounded-full border px-2.5 text-[11px] font-medium leading-none",
+  projectBadge: "inline-flex items-center gap-1.5 h-[22px] rounded-md border px-2 text-[11px] font-semibold leading-none cursor-pointer transition-colors duration-150",
   taskCard: {
-    pending:   "group relative grid gap-2.5 rounded-xl border border-stone-200/70 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,25,23,0.04)] transition duration-200 ease-out hover:-translate-y-0.5 hover:border-stone-300/80 hover:shadow-[0_8px_20px_rgba(28,25,23,0.05)] sm:grid-cols-[minmax(0,1fr)_minmax(332px,max-content)] sm:items-start sm:px-4 dark:border-neutral-700/50 dark:bg-neutral-900 dark:hover:border-neutral-600 dark:hover:shadow-[0_8px_20px_rgba(0,0,0,0.2)]",
-    completed: "group relative grid gap-2.5 rounded-xl border border-stone-200/50 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,25,23,0.03)] transition duration-200 ease-out opacity-55 hover:opacity-85 sm:grid-cols-[minmax(0,1fr)_minmax(332px,max-content)] sm:items-start dark:border-neutral-700/40 dark:bg-neutral-900",
+    pending:   "group relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 rounded-xl border border-stone-200/60 bg-white px-4 py-3 transition duration-200 ease-out hover:border-stone-300/80 dark:border-neutral-700/50 dark:bg-neutral-900 dark:hover:border-neutral-600",
+    completed: "group relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 rounded-xl border border-stone-200/40 bg-white px-4 py-3 transition duration-200 ease-out opacity-50 hover:opacity-80 dark:border-neutral-700/40 dark:bg-neutral-900 dark:hover:border-neutral-600",
   },
-  taskMain: "flex min-w-0 items-start gap-3",
-  taskContent: "min-w-0 space-y-0.5",
-  taskMetaText: "flex flex-wrap items-center gap-1 text-[10px] text-stone-400 dark:text-neutral-500 font-mono-ui",
-  detailCue: "inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-stone-200/70 bg-stone-50/90 px-1 text-[8px] font-semibold text-stone-500 dark:border-neutral-700/70 dark:bg-neutral-800/90 dark:text-neutral-400",
-  taskSide: "flex min-w-0 shrink-0 flex-col gap-2 pt-0.5 sm:min-w-[332px] sm:max-w-[360px] sm:items-end sm:pt-0",
-  badgeRail: "badge-rail flex min-h-[22px] w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap sm:justify-end",
-  badgeGroup: "badge-group flex shrink-0 items-center gap-1",
-  actionRail: "flex flex-wrap items-center gap-1 rounded-lg bg-stone-100/85 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] sm:justify-end dark:bg-neutral-800/85 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
   checkButtonBase: "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-[10px] font-bold transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600",
   checkButton: {
     pending:   "border-stone-200/80 bg-white text-stone-300 hover:border-amber-400 hover:text-amber-500 hover:bg-amber-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-600 dark:hover:border-neutral-500 dark:hover:text-neutral-300",
     completed: "border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
   },
-  actionButton: "task-actions inline-flex min-h-7 items-center justify-center rounded-md border border-stone-200/80 bg-white px-2.5 py-1 text-[10px] font-medium text-stone-500 shadow-[0_1px_2px_rgba(28,25,23,0.05)] transition duration-150 ease-out hover:border-stone-300 hover:bg-stone-50 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700/80 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-950 dark:hover:text-neutral-200 dark:focus:ring-neutral-600",
-  actionButtonDetails: "border-amber-200/80 bg-amber-50/80 text-amber-700 hover:border-amber-300 hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-950/20 dark:text-amber-300 dark:hover:border-amber-600 dark:hover:bg-amber-950/30",
+  actionButton: "task-actions rounded-lg px-2 py-1 text-[11px] font-medium text-stone-400 transition duration-150 ease-out hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 dark:focus:ring-neutral-600",
   emptyState: "rounded-xl border border-dashed border-stone-200/50 bg-white px-4 py-8 text-sm text-stone-400 text-center dark:border-neutral-700/40 dark:bg-neutral-900 dark:text-neutral-600",
   filterPill: {
     active: "border-amber-400 bg-amber-50 text-amber-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200",
@@ -111,7 +102,7 @@ const CLASSES = Object.freeze({
   filterPillBase: "category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600",
   editInput: "w-full min-w-[200px] rounded-lg border border-stone-200/80 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:focus:ring-neutral-600",
   dueBadge: {
-    base:    "inline-flex items-center gap-1 h-[22px] rounded-md border px-2 text-[9px] font-mono-ui leading-none tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+    base:    "inline-flex items-center gap-1 h-[22px] rounded-md border px-2 text-[10px] font-mono-ui leading-none",
     overdue: "border-red-300/80 bg-red-50 text-red-600 font-semibold dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-400",
     today:   "border-blue-200/80 bg-blue-50 text-blue-600 font-semibold dark:border-blue-800/50 dark:bg-blue-950/30 dark:text-blue-400",
     future:  "border-stone-300/80 bg-stone-100 text-stone-500 font-medium dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-500",
@@ -272,49 +263,12 @@ const TaskService = {
     return { ok: true };
   },
   setCompleted(id, c) { this.tasks = this.tasks.map(t => t.id === id ? { ...t, completed: c, completedAt: c ? Date.now() : null } : t); },
-  completeTasks(ids) {
-    const set = new Set(ids);
-    if (set.size === 0) return false;
-    const completedAt = Date.now();
-    let changed = false;
-    this.tasks = this.tasks.map(t => {
-      if (!set.has(t.id) || t.completed) return t;
-      changed = true;
-      return { ...t, completed: true, completedAt };
-    });
-    return changed;
-  },
   remove(id) { const i = this.tasks.findIndex(t => t.id === id); if (i === -1) return { removed: null, index: -1 }; const [r] = this.tasks.splice(i, 1); return { removed: r, index: i }; },
   insertAt(task, idx) { this.tasks.splice(Math.min(idx, this.tasks.length), 0, task); },
   completeAll() { this.tasks = this.tasks.map(t => t.completed ? t : { ...t, completed: true, completedAt: Date.now() }); },
-  clearCompleted(ids = null) {
-    if (!ids) {
-      this.tasks = this.tasks.filter(t => !t.completed);
-      return;
-    }
-    const set = new Set(ids);
-    this.tasks = this.tasks.filter(t => !t.completed || !set.has(t.id));
-  },
+  clearCompleted() { this.tasks = this.tasks.filter(t => !t.completed); },
   updateTask(id, u) { this.tasks = this.tasks.map(t => t.id === id ? { ...t, ...u } : t); },
   reorder(fi, ti) { if (fi === ti) return; const [m] = this.tasks.splice(fi, 1); this.tasks.splice(ti, 0, m); },
-  reorderVisible(visibleIds, movedId, targetId = null) {
-    if (!visibleIds.includes(movedId)) return false;
-    const visibleSet = new Set(visibleIds);
-    const movedTask = this.tasks.find(t => t.id === movedId);
-    if (!movedTask) return false;
-
-    const reorderedVisible = this.tasks.filter(t => visibleSet.has(t.id) && t.id !== movedId);
-    const targetIndex = targetId ? reorderedVisible.findIndex(t => t.id === targetId) : -1;
-    if (targetIndex === -1) reorderedVisible.push(movedTask);
-    else reorderedVisible.splice(targetIndex, 0, movedTask);
-
-    const nextVisibleIds = reorderedVisible.map(t => t.id);
-    if (nextVisibleIds.join("|") === visibleIds.join("|")) return false;
-
-    let visibleCursor = 0;
-    this.tasks = this.tasks.map(t => visibleSet.has(t.id) ? reorderedVisible[visibleCursor++] : t);
-    return true;
-  },
 
   computeStats() {
     let pending = 0, completed = 0; const byCategory = {};
@@ -365,7 +319,6 @@ const UIState = {
   lastAddedTaskId: null, editingTaskId: null, expandedTaskId: null,
   doneExpanded: false, searchDebounceTimer: null,
   focusMode: false, focusIndex: 0, selectorsExpanded: false,
-  visibleTaskIds: { now: [], next: [], done: [] },
 };
 
 /* ═══════════════════════════════════════════
@@ -403,59 +356,6 @@ const Search = {
   },
 };
 
-const ShortcutHints = {
-  _isMac() {
-    return /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || "");
-  },
-  _format(key, { shift = false } = {}) {
-    return this._isMac()
-      ? `${shift ? "⌘⇧" : "⌘"}${key.toUpperCase()}`
-      : `${shift ? "Ctrl Shift " : "Ctrl "}${key.toUpperCase()}`;
-  },
-  apply() {
-    const searchHint = DOM.get("search-kbd-hint")?.querySelector("kbd");
-    if (searchHint) searchHint.textContent = this._format("k");
-
-    const rows = DOM.get("sidebar-left")?.querySelectorAll("kbd");
-    if (!rows || rows.length < 5) return;
-    rows[0].textContent = this._format("k");
-    rows[1].textContent = this._format("f");
-    rows[2].textContent = this._format("c", { shift: true });
-    rows[3].textContent = this._format("x", { shift: true });
-    rows[4].textContent = "Esc";
-  },
-};
-
-const FormVisualOrder = {
-  apply() {
-    const taskInput = DOM.get("task-input");
-    if (taskInput) taskInput.placeholder = "Escribe una tarea… (@fecha /proyecto #categoría !prioridad)";
-
-    const preview = DOM.get("input-preview");
-    if (preview) {
-      const previewOrder = ["preview-due", "preview-project", "preview-category", "preview-priority", "preview-text"];
-      for (const id of previewOrder) {
-        const node = DOM.get(id);
-        if (node) preview.appendChild(node);
-      }
-    }
-
-    const panel = DOM.get("selector-panel");
-    if (panel) {
-      const fieldIds = ["task-duedate", "task-project", "task-category", "task-priority"];
-      const fields = fieldIds
-        .map(id => DOM.get(id)?.closest(".relative"))
-        .filter(Boolean);
-      for (const field of fields) panel.appendChild(field);
-    }
-
-    const welcomeExample = document.querySelector("#welcome-section .grid > div:first-child p:last-child");
-    if (welcomeExample) {
-      welcomeExample.innerHTML = 'Usa <kbd class="font-mono-ui text-amber-700">@viernes</kbd> <kbd class="font-mono-ui text-indigo-500">/proyecto</kbd> <kbd class="font-mono-ui text-amber-600">#trabajo</kbd> <kbd class="font-mono-ui text-red-500">!alta</kbd>';
-    }
-  },
-};
-
 /* ═══════════════════════════════════════════
    GREETING / WELCOME / PROGRESS
    ═══════════════════════════════════════════ */
@@ -470,15 +370,9 @@ const Greeting = {
     return { title: "Buenas noches", sub: "Así va tu día." };
   },
   update() {
-    const t = DOM.get("hero-greeting"); const u = DOM.get("hero-greeting-sub");
-    if (!t) return;
-    if (TaskService.count > 0) {
-      const st = TaskService.computeStats();
-      const p = st.total === 0 ? 0 : Math.round((st.completed / st.total) * 100);
-      const tx = this._getText(p, st.pending);
-      t.textContent = tx.title;
-      if (u) u.textContent = tx.sub;
-    }
+    const s = DOM.get("greeting-section"); const t = DOM.get("hero-greeting"); const u = DOM.get("hero-greeting-sub");
+    if (!s || !t) return; s.classList.toggle("hidden", TaskService.count === 0);
+    if (TaskService.count > 0) { const st = TaskService.computeStats(); const p = st.total === 0 ? 0 : Math.round((st.completed/st.total)*100); const tx = this._getText(p, st.pending); t.textContent = tx.title; if (u) u.textContent = tx.sub; }
   },
 };
 
@@ -490,11 +384,15 @@ const Welcome = {
     return { title: "Prepárate para mañana", sub: "Deja tus tareas listas para empezar el día con ventaja." };
   },
   update() {
-    const tx = this._getText();
-    const g = DOM.get("welcome-greeting");
-    const u = DOM.get("welcome-sub");
-    if (g) g.textContent = tx.title;
-    if (u) u.textContent = tx.sub;
+    const s = DOM.get("welcome-section"); if (!s) return;
+    const show = TaskService.count === 0 && !Search.getQuery();
+    s.classList.toggle("hidden", !show);
+    const pills = DOM.categoryPillsSection; if (pills) pills.style.display = show ? "none" : "";
+    if (show) {
+      DOM.get("now-section")?.classList.add("hidden"); DOM.get("next-section")?.classList.add("hidden"); DOM.get("done-section")?.classList.add("hidden");
+      const tx = this._getText(); const g = DOM.get("welcome-greeting"); const u = DOM.get("welcome-sub");
+      if (g) g.textContent = tx.title; if (u) u.textContent = tx.sub;
+    } else { DOM.get("next-section")?.classList.remove("hidden"); DOM.get("done-section")?.classList.remove("hidden"); }
   },
 };
 
@@ -609,17 +507,17 @@ const TaskRenderer = {
     wrapper.addEventListener("dragend", () => wrapper.style.opacity = "1");
     const card = document.createElement("div"); card.className = this.cardClasses(completed);
     if (task.priority === "Alta" && !completed) card.classList.add("priority-high");
-    card.append(this._buildMain(task, completed), this._buildAside(task, completed));
+    card.append(this._buildLeft(task, completed), this._buildRight(task, completed));
     if (task.id === UIState.lastAddedTaskId && !completed) this._animateIn(card);
     wrapper.appendChild(card);
     if (UIState.expandedTaskId === task.id && !completed) wrapper.appendChild(TaskDetail.createPanel(task));
     return wrapper;
   },
 
-  _buildMain(task, completed) {
-    const wrap = document.createElement("div"); wrap.className = CLASSES.taskMain;
+  _buildLeft(task, completed) {
+    const wrap = document.createElement("div"); wrap.className = "flex min-w-0 items-center gap-3";
     const chk = this._button({ action: completed ? "restore" : "complete", id: task.id, className: this.checkClasses(completed), html: completed ? "✓" : "", ariaLabel: completed ? "Marcar como pendiente" : "Marcar como completada" });
-    const tw = document.createElement("div"); tw.className = CLASSES.taskContent;
+    const tw = document.createElement("div"); tw.className = "min-w-0";
     if (UIState.editingTaskId === task.id) {
       const inp = document.createElement("input"); inp.dataset.role = "edit-text"; inp.value = task.text; inp.className = CLASSES.editInput; tw.appendChild(inp);
     } else {
@@ -627,20 +525,19 @@ const TaskRenderer = {
       if (sq && !completed) { p.className = "truncate text-sm text-stone-700 dark:text-neutral-200"; p.innerHTML = Utils.highlightText(task.text, sq); }
       else { p.className = completed ? "truncate text-sm text-stone-400 line-through dark:text-neutral-500" : "truncate text-sm text-stone-700 dark:text-neutral-200"; p.textContent = task.text; }
       tw.appendChild(p);
-      const meta = document.createElement("span"); meta.className = CLASSES.taskMetaText;
-      meta.textContent = completed ? `Hecha ${Utils.relativeTime(task.completedAt)}` : Utils.relativeTime(task.createdAt);
-      if (task.notes && !completed && UIState.expandedTaskId !== task.id) {
-        const cue = document.createElement("span");
-        cue.className = CLASSES.detailCue;
-        cue.textContent = "···";
-        cue.title = "La tarea tiene detalles ocultos";
-        cue.setAttribute("aria-label", "La tarea tiene detalles ocultos");
-        meta.append(document.createTextNode(" · "), cue);
+      const meta = document.createElement("span"); meta.className = "text-[10px] text-stone-300 dark:text-neutral-600 font-mono-ui flex items-center gap-1";
+      meta.textContent = Utils.relativeTime(completed ? task.completedAt : task.createdAt);
+      if (task.dueDate && !completed) {
+        const dueSep = document.createTextNode(" \u00b7 ");
+        const dueSpan = document.createElement("span");
+        dueSpan.textContent = Utils.formatDueDate(task.dueDate);
+        dueSpan.className = Utils.isOverdue(task.dueDate) ? "text-red-500 dark:text-red-400 font-semibold" : Utils.isDueToday(task.dueDate) ? "text-blue-600 dark:text-blue-400 font-semibold" : "";
+        meta.append(dueSep, dueSpan);
       }
       tw.appendChild(meta);
       if (task.notes && !completed) {
         const notePreview = document.createElement("p");
-        notePreview.className = "notes-preview text-[9px] text-stone-400/70 dark:text-neutral-500/70 italic truncate cursor-pointer";
+        notePreview.className = "notes-preview text-[10px] text-stone-400/70 dark:text-neutral-500/70 italic truncate mt-0.5 cursor-pointer";
         const firstLine = task.notes.split("\n")[0].trim();
         notePreview.textContent = firstLine.length > 50 ? firstLine.slice(0, 50) + "\u2026" : firstLine;
         notePreview.title = "Click para ver detalles";
@@ -760,107 +657,6 @@ const TaskRenderer = {
     return wrap;
   },
 
-  _buildAside(task, completed) {
-    const wrap = document.createElement("div");
-    wrap.className = CLASSES.taskSide;
-    wrap.append(this._buildBadges(task, completed), this._buildActions(task, completed));
-    return wrap;
-  },
-
-  _buildBadges(task, completed) {
-    const wrap = document.createElement("div");
-    wrap.className = CLASSES.badgeRail;
-    const scheduleGroup = document.createElement("div");
-    scheduleGroup.className = CLASSES.badgeGroup;
-    const contextGroup = document.createElement("div");
-    contextGroup.className = CLASSES.badgeGroup;
-
-    if (task.dueDate && !completed) {
-      const variant = Utils.isOverdue(task.dueDate)
-        ? CLASSES.dueBadge.overdue
-        : Utils.isDueToday(task.dueDate) ? CLASSES.dueBadge.today : CLASSES.dueBadge.future;
-      const db = document.createElement("span");
-      db.className = `${CLASSES.dueBadge.base} ${variant}`;
-      db.textContent = Utils.formatDueDate(task.dueDate);
-      scheduleGroup.appendChild(db);
-    }
-
-    const cb = document.createElement("span");
-    const catClasses = CATEGORY_BADGE_CLASSES[task.category] || CATEGORY_BADGE_CLASSES.Gestiones;
-    cb.className = `${CLASSES.categoryBase} ${catClasses}`;
-    const cd = document.createElement("span");
-    cd.className = "w-1.5 h-1.5 rounded-full shrink-0";
-    cd.style.background = CATEGORY_COLORS[task.category] || "#999";
-    const cl = document.createElement("span");
-    cl.textContent = task.category;
-    cb.append(cd, cl);
-    contextGroup.appendChild(cb);
-
-    const prb = document.createElement("span");
-    prb.className = this.priorityClasses(task.priority);
-    prb.textContent = task.priority;
-    contextGroup.appendChild(prb);
-
-    if (task.project) {
-      const pColor = projectColor(task.project);
-      const pb = document.createElement("button");
-      pb.type = "button";
-      pb.className = CLASSES.projectBadge;
-      pb.style.borderColor = pColor + "40";
-      pb.style.background = pColor + "12";
-      pb.style.color = pColor;
-      const pbDot = document.createElement("span");
-      pbDot.className = "w-1.5 h-1.5 rounded-sm shrink-0";
-      pbDot.style.background = pColor;
-      const pbLabel = document.createElement("span");
-      pbLabel.className = "truncate max-w-[84px] sm:max-w-[96px]";
-      pbLabel.textContent = task.project;
-      pb.append(pbDot, pbLabel);
-      pb.title = `Proyecto: ${task.project} (click para filtrar)`;
-      pb.addEventListener("click", (e) => {
-        e.stopPropagation();
-        UIState.projectFilter = task.project;
-        App.render();
-      });
-      scheduleGroup.appendChild(pb);
-    }
-
-    if (scheduleGroup.childElementCount > 0) wrap.appendChild(scheduleGroup);
-    wrap.appendChild(contextGroup);
-    return wrap;
-  },
-
-  _buildActions(task, completed) {
-    const isEd = !completed && UIState.editingTaskId === task.id;
-    const wrap = document.createElement("div");
-    wrap.className = CLASSES.actionRail;
-    const hasHiddenDetails = !completed && task.notes && UIState.expandedTaskId !== task.id;
-
-    if (!completed) {
-      if (!isEd) {
-        const detailBtn = this._button({
-          action: "toggle-detail", id: task.id, className: CLASSES.actionButton,
-          text: UIState.expandedTaskId === task.id ? "Ocultar" : "Detalles",
-        });
-        if (hasHiddenDetails) detailBtn.className = `${CLASSES.actionButton} ${CLASSES.actionButtonDetails}`;
-        wrap.append(detailBtn);
-        wrap.append(this._button({
-          action: "edit", id: task.id, className: CLASSES.actionButton, text: "Editar",
-        }));
-      } else {
-        wrap.append(this._button({
-          action: "edit-save", id: task.id, className: CLASSES.actionButton, text: "Guardar",
-        }));
-        wrap.append(this._button({
-          action: "edit-cancel", id: task.id, className: CLASSES.actionButton, text: "Cancelar",
-        }));
-      }
-    }
-
-    wrap.append(this._button({ action: "delete", id: task.id, className: CLASSES.actionButton, text: "Borrar" }));
-    return wrap;
-  },
-
   _animateIn(el) {
     el.style.opacity = "0"; el.style.transform = "translateY(8px)";
     requestAnimationFrame(() => { el.style.transition = `opacity ${CONFIG.ANIMATION_MS}ms ease, transform ${CONFIG.ANIMATION_MS}ms ease`; el.style.opacity = "1"; el.style.transform = "translateY(0)"; });
@@ -892,27 +688,18 @@ const Animations = {
 };
 
 const DragDrop = {
-  _srcId: null, _srcSection: null,
-  handleStart(e) {
-    const li = e.target.closest("[data-id]");
-    if (!li) return;
-    this._srcId = li.dataset.id;
-    const pl = li.closest("[data-section]");
-    this._srcSection = pl ? pl.dataset.section : null;
-  },
+  _srcIndex: null, _srcSection: null,
+  handleStart(e) { const li = e.target.closest("[data-id]"); if (!li) return; this._srcIndex = TaskService.tasks.findIndex(t => t.id === li.dataset.id); const pl = li.closest("[data-section]"); this._srcSection = pl ? pl.dataset.section : null; },
   handleEnter(e) { const l = e.target.closest("[data-section]"); if (l && this._srcSection && l.dataset.section !== this._srcSection) l.classList.add("drag-over"); },
   handleLeave(e) { const l = e.target.closest("[data-section]"); if (l && !l.contains(e.relatedTarget)) l.classList.remove("drag-over"); },
   handleDrop(e) {
     e.preventDefault(); document.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
-    const tl = e.target.closest("[data-section]"); if (!tl || !this._srcId) { this._reset(); return; }
-    const d = tl.dataset.section; const s = this._srcSection; const tid = this._srcId; if (!tid) { this._reset(); return; }
+    const tl = e.target.closest("[data-section]"); if (!tl || this._srcIndex === null) { this._reset(); return; }
+    const d = tl.dataset.section; const s = this._srcSection; const tid = TaskService.tasks[this._srcIndex]?.id; if (!tid) { this._reset(); return; }
     if (s !== d) { this._cross(s, d, tid); this._reset(); return; }
-    const visibleIds = UIState.visibleTaskIds[d] || [];
-    if (!visibleIds.includes(tid)) { this._reset(); return; }
-    const li = e.target.closest("[data-id]");
-    if (li?.dataset.id === tid) { this._reset(); return; }
-    const targetId = li?.dataset.id && li.dataset.id !== tid ? li.dataset.id : null;
-    if (TaskService.reorderVisible(visibleIds, tid, targetId)) App.commit();
+    const li = e.target.closest("[data-id]"); if (!li) { this._reset(); return; }
+    const di = TaskService.tasks.findIndex(t => t.id === li.dataset.id);
+    if (di !== -1 && di !== this._srcIndex) { TaskService.reorder(this._srcIndex, di); App.commit(); }
     this._reset();
   },
   _cross(s, d, id) {
@@ -923,7 +710,7 @@ const DragDrop = {
     else if (s==="next" && d==="now") TaskService.updateTask(id, { priority: "Alta" });
     App.commit();
   },
-  _reset() { this._srcId = null; this._srcSection = null; },
+  _reset() { this._srcIndex = null; this._srcSection = null; },
 };
 
 /* ═══════════════════════════════════════════
@@ -1075,52 +862,26 @@ const ListActions = {
 
 const App = {
   commit() { TaskService.save(); this.render(); },
-  _getViewState() {
-    const query = Search.getQuery();
-    const hasQuery = Boolean(query);
-    const { now, next, done } = TaskService.getVisible(query, UIState.categoryFilter, UIState.projectFilter);
-    const showWelcome = TaskService.count === 0 && !hasQuery;
-    return {
-      hasQuery,
-      now,
-      next,
-      done,
-      showWelcome,
-      showGreeting: !showWelcome && TaskService.count > 0,
-      showNow: !showWelcome && (now.length > 0 || hasQuery),
-      showNext: !showWelcome,
-      showDone: !showWelcome,
-      emptySearchMessage: "No encontrÃ© nada con esa bÃºsqueda.",
-    };
-  },
   render() {
-    const view = this._getViewState();
-    UIState.visibleTaskIds = { now: view.now.map(t => t.id), next: view.next.map(t => t.id), done: view.done.map(t => t.id) };
-    const { now, next, done } = view;
-    const hq = view.hasQuery;
+    const q = Search.getQuery(); const hq = Boolean(q);
+    const { now, next, done } = TaskService.getVisible(q, UIState.categoryFilter, UIState.projectFilter);
     const es = "No encontré nada con esa búsqueda.";
-    this._updateFilterPills(); Progress.update(); Greeting.update(); Welcome.update();
+    this._updateFilterPills(); Progress.update(); Greeting.update();
 
     const pp = DOM.get("active-project-pill");
     if (pp) { if (UIState.projectFilter && UIState.projectFilter !== "all") { pp.classList.remove("hidden"); pp.textContent = `${UIState.projectFilter} ✕`; } else { pp.classList.add("hidden"); } }
 
     const dc = DOM.get("done-count"); if (dc) dc.textContent = TaskService.tasks.filter(t => t.completed).length;
-    const cb = DOM.get("clear-search"); if (cb) cb.classList.toggle("hidden", !view.hasQuery);
+    const cb = DOM.get("clear-search"); if (cb) cb.classList.toggle("hidden", !hq);
     TaskRenderer.renderList(DOM.get("next-list"), next, { completed: false, emptyMessage: hq ? es : "Añade una tarea arriba para empezar." });
     TaskRenderer.renderList(DOM.get("now-list"), now, { completed: false, emptyMessage: hq ? es : "Nada urgente ahora mismo." });
     const dl = DOM.get("done-list");
     if (UIState.doneExpanded) { dl?.classList.remove("hidden"); TaskRenderer.renderList(dl, done, { completed: true, emptyMessage: hq ? es : "Todavía no has completado ninguna tarea." }); }
     else { dl?.classList.add("hidden"); if (dl) dl.innerHTML = ""; }
-    const nv = now.length > 0 || hq;
-    DOM.get("welcome-section")?.classList.toggle("hidden", !view.showWelcome);
-    DOM.get("greeting-section")?.classList.toggle("hidden", !view.showGreeting);
-    DOM.get("now-section")?.classList.toggle("hidden", !view.showNow);
-    DOM.get("next-section")?.classList.toggle("hidden", !view.showNext);
-    DOM.get("done-section")?.classList.toggle("hidden", !view.showDone);
-    const pills = DOM.categoryPillsSection; if (pills) pills.style.display = view.showWelcome ? "none" : "";
+    const nv = now.length > 0 || hq; DOM.get("now-section")?.classList.toggle("hidden", !nv);
     const cn = DOM.get("complete-all-now"); const cx = DOM.get("complete-all-next");
-    if (cn && cx) { cn.classList.toggle("hidden", !view.showNow); cx.classList.toggle("hidden", view.showNow); }
-    UIState.lastAddedTaskId = null; Sidebar.update();
+    if (cn && cx) { cn.classList.toggle("hidden", !nv); cx.classList.toggle("hidden", nv); }
+    UIState.lastAddedTaskId = null; Welcome.update(); Sidebar.update();
     const classicDl = DOM.get("classic-project-options");
     if (classicDl) { classicDl.innerHTML = ""; for (const n of TaskService.getAllProjectNames()) { const o = document.createElement("option"); o.value = n; classicDl.appendChild(o); } }
   },
@@ -1131,18 +892,6 @@ const App = {
     });
   },
   _bindEvents() {
-    const completeVisible = (...sections) => {
-      const ids = [...new Set(sections.flatMap(section => UIState.visibleTaskIds[section] || []))];
-      if (ids.length === 0) return;
-      if (TaskService.completeTasks(ids)) this.commit();
-    };
-    const clearVisibleDone = () => {
-      const ids = UIState.visibleTaskIds.done || [];
-      if (ids.length === 0) return;
-      TaskService.clearCompleted(ids);
-      this.commit();
-    };
-
     DOM.get("task-form")?.addEventListener("submit", e => {
       e.preventDefault(); const inp = DOM.get("task-input"); const raw = Utils.safeTrim(inp?.value); if (!raw) return;
       if (inp) inp.setCustomValidity("");
@@ -1183,17 +932,17 @@ const App = {
       l.addEventListener("dragstart", e => DragDrop.handleStart(e)); l.addEventListener("dragenter", e => DragDrop.handleEnter(e));
       l.addEventListener("dragleave", e => DragDrop.handleLeave(e)); l.addEventListener("click", e => ListActions.handle(e));
     });
-    DOM.get("clear-completed")?.addEventListener("click", () => clearVisibleDone());
-    DOM.get("complete-all-now")?.addEventListener("click", () => completeVisible("now"));
-    DOM.get("complete-all-next")?.addEventListener("click", () => completeVisible("next"));
-    DOM.get("sidebar-complete-all")?.addEventListener("click", () => completeVisible("now", "next"));
-    DOM.get("sidebar-clear-done")?.addEventListener("click", () => clearVisibleDone());
+    DOM.get("clear-completed")?.addEventListener("click", () => { TaskService.clearCompleted(); this.commit(); });
+    DOM.get("complete-all-now")?.addEventListener("click", () => { TaskService.completeAll(); this.commit(); });
+    DOM.get("complete-all-next")?.addEventListener("click", () => { TaskService.completeAll(); this.commit(); });
+    DOM.get("sidebar-complete-all")?.addEventListener("click", () => { TaskService.completeAll(); this.commit(); });
+    DOM.get("sidebar-clear-done")?.addEventListener("click", () => { TaskService.clearCompleted(); this.commit(); });
     DOM.get("undo-toast-btn")?.addEventListener("click", () => UndoToast.undo());
     DOM.get("load-examples")?.addEventListener("click", () => { for (const ex of EXAMPLE_TASKS) TaskService.add(ex.text, ex.category, ex.priority, { dueDate: ex.dueDate, project: ex.project, notes: ex.notes || "" }); this.commit(); });
     Keyboard.init();
   },
   init() {
-    Theme.load(); TaskService.load(); this._bindEvents(); ShortcutHints.apply(); FormVisualOrder.apply(); Location.fetch();
+    Theme.load(); TaskService.load(); this._bindEvents(); Location.fetch();
     setInterval(() => Location._applyEverywhere(), CONFIG.CLOCK_INTERVAL_MS); Sidebar.build();
     const ht = DOM.get("time-location"); if (ht) ht.textContent = Location.formatTimeLocation();
     this.render();
