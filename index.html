@@ -33,9 +33,9 @@
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5.5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
   </span>
   <input id="search-input" type="text" placeholder="Buscar tareas…" autocomplete="off"
-    class="header-search w-full rounded-lg border border-stone-200/60 bg-stone-100/50 pl-9 pr-16 py-1.5 text-sm text-stone-600 placeholder-stone-400
-    transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/30
-    dark:border-neutral-700/50 dark:bg-neutral-900/50 dark:text-neutral-200 dark:placeholder-neutral-500 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:bg-neutral-900 dark:focus:ring-neutral-600">
+    class="surface-field header-search w-full rounded-lg pl-9 pr-16 py-1.5 text-sm
+    transition duration-200 ease-out hover:border-stone-300 focus:bg-white focus:outline-none
+    dark:hover:border-neutral-600 dark:focus:bg-neutral-900">
   <span id="search-kbd-hint" class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1">
     <kbd class="rounded border border-stone-200/80 bg-stone-50 px-1.5 py-0.5 text-[10px] font-mono-ui text-stone-400 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-500">⌘K</kbd>
   </span>
@@ -43,20 +43,20 @@
 </div>
 <div class="flex items-center gap-2 shrink-0">
 <button id="focus-toggle" type="button" aria-label="Modo focus" aria-controls="focus-overlay" aria-pressed="false"
-class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200/80 bg-white text-sm text-stone-400
+class="surface-interactive surface-neutral inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm
 transition duration-200 ease-out hover:border-amber-400 hover:text-amber-600 active:scale-95
 focus:outline-none focus:ring-2 focus:ring-amber-400/40
-dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-500 dark:hover:border-neutral-500 dark:hover:text-neutral-200 dark:focus:ring-neutral-600"
+dark:hover:border-neutral-500 dark:hover:text-neutral-200 dark:focus:ring-neutral-600"
 title="Modo focus — muestra solo la siguiente tarea">
 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
   <circle cx="8" cy="8" r="7"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="0.5" fill="currentColor"/>
 </svg>
 </button>
 <button id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"
-class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200/80 bg-white text-sm text-stone-500
+class="surface-interactive surface-neutral inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm
 transition duration-200 ease-out hover:border-amber-400 hover:text-amber-600 active:scale-95
 focus:outline-none focus:ring-2 focus:ring-amber-400/40
-dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-500 dark:hover:text-neutral-200 dark:focus:ring-neutral-600">
+dark:hover:border-neutral-500 dark:hover:text-neutral-200 dark:focus:ring-neutral-600">
 <span id="theme-icon" aria-hidden="true">◗</span>
 <span id="theme-text" class="sr-only">Oscuro</span>
 </button>
@@ -77,8 +77,8 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bor
       <p class="text-sm text-stone-400 dark:text-neutral-500 mt-2">No tienes tareas pendientes.</p>
     </div>
     <div id="focus-nav" class="flex items-center gap-3 sm:gap-4 mt-8">
-      <button id="focus-complete-btn" type="button" class="rounded-full border border-amber-300 bg-amber-50 px-4 sm:px-6 py-2 sm:py-2.5 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 active:scale-95 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">Completar</button>
-      <button id="focus-skip-btn" type="button" class="rounded-full border border-stone-200 bg-white px-4 sm:px-6 py-2 sm:py-2.5 text-sm font-medium text-stone-500 transition hover:bg-stone-50 active:scale-95 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800">Saltar →</button>
+      <button id="focus-complete-btn" type="button" class="surface-interactive surface-accent rounded-full px-4 sm:px-6 py-2 sm:py-2.5 text-sm font-semibold transition hover:bg-amber-100 active:scale-95">Completar</button>
+      <button id="focus-skip-btn" type="button" class="surface-interactive surface-neutral rounded-full px-4 sm:px-6 py-2 sm:py-2.5 text-sm font-medium transition hover:bg-stone-50 active:scale-95 dark:hover:bg-neutral-800">Saltar →</button>
     </div>
     <p id="focus-counter" class="text-xs text-stone-300 dark:text-neutral-600 mt-4 font-mono-ui"></p>
   </div>
@@ -89,7 +89,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bor
 <!-- SIDEBAR IZQUIERDO -->
 <aside id="sidebar-left" class="hidden xl:block">
   <div class="sticky top-20 space-y-6">
-    <div class="rounded-2xl border border-stone-200/60 bg-white p-5 dark:border-neutral-700/50 dark:bg-neutral-900">
+    <div class="surface-panel">
       <div class="flex items-center gap-3 mb-4">
         <div class="ring-widget-sm">
           <svg id="progress-ring-svg-sidebar" width="48" height="48" viewBox="0 0 48 48">
@@ -113,7 +113,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bor
         <p id="sidebar-location" class="text-[11px] text-stone-400 dark:text-neutral-500 mt-0.5"></p>
       </div>
     </div>
-    <div class="rounded-2xl border border-stone-200/60 bg-white p-5 dark:border-neutral-700/50 dark:bg-neutral-900">
+    <div class="surface-panel">
       <p class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-3">Atajos</p>
       <div class="space-y-2 text-xs text-stone-500 dark:text-neutral-400">
         <div class="flex items-center justify-between"><span>Buscar</span><kbd class="rounded border border-stone-200 bg-stone-50 px-1.5 py-0.5 font-mono-ui text-[10px] dark:border-neutral-700 dark:bg-neutral-800">Ctrl K</kbd></div>
@@ -160,9 +160,9 @@ class="text-xs font-semibold fill-stone-700 dark:fill-neutral-200" style="font-f
 <div class="relative">
 <label for="task-input" class="sr-only">Texto de la tarea</label>
 <input id="task-input" type="text" placeholder="Escribe una tarea…" autocomplete="off"
-class="w-full rounded-2xl border border-stone-200/80 bg-white px-5 py-3.5 pr-12 text-sm placeholder-stone-400
-transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30
-dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:ring-neutral-600">
+class="surface-field w-full rounded-2xl px-5 py-3.5 pr-12 text-sm
+transition duration-200 ease-out hover:border-stone-300 focus:outline-none
+dark:hover:border-neutral-600">
 <span id="enter-hint" class="enter-hint"><kbd class="enter-hint-kbd">↵</kbd></span>
 </div>
 <!-- Preview de parsing -->
@@ -179,15 +179,15 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-[12px] text-stone-500 dark:text-neutral-400">
   <p class="min-w-0 flex-1">Empieza por el texto. Opcional: <span class="font-mono-ui">@fecha</span> <span class="font-mono-ui">/proyecto</span> <span class="font-mono-ui">#categoria</span> <span class="font-mono-ui">!prioridad</span>.</p>
   <div class="flex items-center gap-2">
-    <button id="toggle-input-help" type="button" aria-expanded="false" aria-controls="input-help" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-500 transition hover:border-stone-300 hover:text-stone-700 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Ver sintaxis</button>
-    <button id="toggle-selectors" type="button" aria-expanded="false" aria-controls="selector-panel" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-500 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-400 hover:border-stone-300 hover:text-stone-700 dark:hover:border-neutral-600 dark:hover:text-neutral-200 transition flex items-center gap-1">
+    <button id="toggle-input-help" type="button" aria-expanded="false" aria-controls="input-help" class="surface-interactive surface-neutral rounded-full px-3 py-1.5 text-[11px] transition hover:border-stone-300 hover:text-stone-700 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Ver sintaxis</button>
+    <button id="toggle-selectors" type="button" aria-expanded="false" aria-controls="selector-panel" class="surface-interactive surface-neutral flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] transition hover:border-stone-300 hover:text-stone-700 dark:hover:border-neutral-600 dark:hover:text-neutral-200">
       <span id="selector-arrow" class="transition-transform duration-200 text-[9px]">></span>
       Campos guiados
     </button>
   </div>
 </div>
 <!-- Tooltip de sintaxis -->
-<div id="input-help" class="hidden absolute left-0 right-0 top-full mt-2 rounded-xl border border-stone-200/60 bg-white p-4 shadow-lg z-10 dark:border-neutral-700/50 dark:bg-neutral-900">
+<div id="input-help" class="hidden absolute left-0 right-0 top-full mt-2 rounded-xl border p-4 shadow-lg z-10">
   <p class="text-xs font-semibold text-stone-600 dark:text-neutral-300 mb-2">Sintaxis rápida</p>
   <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[11px]">
     <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-red-500 dark:text-red-400">!alta</kbd> Prioridad alta</div>
@@ -212,25 +212,25 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 </form>
 <!-- Selectores clásicos (colapsables) -->
 <div id="classic-selectors" class="mt-2">
-  <button id="toggle-selectors-legacy" type="button" hidden aria-hidden="true" class="rounded-full border border-stone-200/70 bg-white/80 px-3 py-1.5 text-[11px] text-stone-400 dark:border-neutral-700/60 dark:bg-neutral-900/70 dark:text-neutral-500 hover:border-stone-300 hover:text-stone-600 dark:hover:border-neutral-600 dark:hover:text-neutral-300 transition flex items-center gap-1 mx-auto">
+  <button id="toggle-selectors-legacy" type="button" hidden aria-hidden="true" class="surface-interactive surface-neutral mx-auto flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] transition hover:border-stone-300 hover:text-stone-600 dark:hover:border-neutral-600 dark:hover:text-neutral-300">
     <span id="selector-arrow" class="transition-transform duration-200 text-[9px]">▸</span>
     Selectores clásicos
   </button>
-  <div id="selector-panel" class="hidden mt-3 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-stone-200/50 bg-white/85 p-3 shadow-[0_8px_30px_rgba(28,25,23,0.04)] dark:border-neutral-700/40 dark:bg-neutral-900/80">
+  <div id="selector-panel" class="hidden mt-3 flex flex-wrap items-center justify-center gap-2 rounded-2xl border p-3 shadow-[0_8px_30px_rgba(28,25,23,0.04)]">
     <div class="relative">
       <label for="task-duedate" class="sr-only">Fecha límite</label>
-      <input id="task-duedate" type="date" class="appearance-none rounded-full border border-stone-200/80 bg-white px-4 py-2 text-xs text-stone-600 transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:ring-neutral-600">
+      <input id="task-duedate" type="date" class="surface-field appearance-none rounded-full px-4 py-2 text-xs transition duration-200 ease-out hover:border-stone-300 focus:outline-none dark:hover:border-neutral-600">
     </div>
     <div class="relative">
       <label for="task-priority" class="sr-only">Prioridad</label>
-      <select id="task-priority" class="appearance-none rounded-full border border-stone-200/80 bg-white px-4 py-2 pr-8 text-xs text-stone-600 transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:ring-neutral-600">
+      <select id="task-priority" class="surface-field appearance-none rounded-full px-4 py-2 pr-8 text-xs transition duration-200 ease-out hover:border-stone-300 focus:outline-none dark:hover:border-neutral-600">
         <option value="Alta">Alta</option><option value="Media" selected>Media</option><option value="Baja">Baja</option>
       </select>
       <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">⌄</span>
     </div>
     <div class="relative">
       <label for="task-category" class="sr-only">Categoría</label>
-      <select id="task-category" class="appearance-none rounded-full border border-stone-200/80 bg-white px-4 py-2 pr-8 text-xs text-stone-600 transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:ring-neutral-600">
+      <select id="task-category" class="surface-field appearance-none rounded-full px-4 py-2 pr-8 text-xs transition duration-200 ease-out hover:border-stone-300 focus:outline-none dark:hover:border-neutral-600">
         <option value="Trabajo">Trabajo</option><option value="Personal" selected>Personal</option><option value="Estudio">Estudio</option>
         <option value="Salud">Salud</option><option value="Gestiones">Gestiones</option>
       </select>
@@ -238,7 +238,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
     </div>
     <div class="relative">
       <label for="task-project" class="sr-only">Proyecto</label>
-      <input id="task-project" type="text" placeholder="Proyecto…" list="classic-project-options" class="appearance-none rounded-full border border-stone-200/80 bg-white px-4 py-2 text-xs text-stone-600 placeholder-stone-400 w-28 transition duration-200 ease-out hover:border-stone-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-500 dark:hover:border-neutral-600 dark:focus:border-neutral-500 dark:focus:ring-neutral-600">
+      <input id="task-project" type="text" placeholder="Proyecto…" list="classic-project-options" class="surface-field appearance-none w-28 rounded-full px-4 py-2 text-xs transition duration-200 ease-out hover:border-stone-300 focus:outline-none dark:hover:border-neutral-600">
       <datalist id="classic-project-options"></datalist>
     </div>
   </div>
@@ -247,7 +247,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 
 <!-- Welcome state -->
 <section id="welcome-section" class="hidden">
-  <div class="rounded-2xl border border-stone-200/60 bg-white px-6 py-14 text-center dark:border-neutral-700/50 dark:bg-neutral-900">
+  <div class="surface-panel px-6 py-14 text-center">
     <svg class="mx-auto mb-5 text-stone-300 dark:text-neutral-600" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
     </svg>
@@ -267,35 +267,35 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
         <p class="text-[11px] text-stone-400 dark:text-neutral-500 mt-0.5">Pulsa <svg class="inline w-3 h-3 -mt-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="7"/><circle cx="8" cy="8" r="3"/></svg> para ver solo la siguiente tarea</p>
       </div>
     </div>
-    <button id="load-examples" type="button" class="mt-8 rounded-full border border-amber-300 bg-amber-50 px-5 py-2.5 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 active:scale-95 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">Probar con tareas de ejemplo</button>
+    <button id="load-examples" type="button" class="surface-interactive surface-accent mt-8 rounded-full px-5 py-2.5 text-sm font-semibold transition hover:bg-amber-100 active:scale-95">Probar con tareas de ejemplo</button>
   </div>
 </section>
 
 <section id="category-pills-section" class="grid grid-cols-3 gap-1.5 sm:grid-cols-6 sm:gap-2 xl:hidden">
-<button type="button" data-category-filter="all" class="category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600">Todas</button>
-<button type="button" data-category-filter="Trabajo" class="category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600">Trabajo</button>
-<button type="button" data-category-filter="Personal" class="category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600">Personal</button>
-<button type="button" data-category-filter="Estudio" class="category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600">Estudio</button>
-<button type="button" data-category-filter="Salud" class="category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600">Salud</button>
-<button type="button" data-category-filter="Gestiones" class="category-filter-btn rounded-full border px-2 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-neutral-600">Gestiones</button>
+<button type="button" data-category-filter="all" class="category-filter-btn filter-pill-btn">Todas</button>
+<button type="button" data-category-filter="Trabajo" class="category-filter-btn filter-pill-btn">Trabajo</button>
+<button type="button" data-category-filter="Personal" class="category-filter-btn filter-pill-btn">Personal</button>
+<button type="button" data-category-filter="Estudio" class="category-filter-btn filter-pill-btn">Estudio</button>
+<button type="button" data-category-filter="Salud" class="category-filter-btn filter-pill-btn">Salud</button>
+<button type="button" data-category-filter="Gestiones" class="category-filter-btn filter-pill-btn">Gestiones</button>
 </section>
 
 <section id="active-filters-summary" class="hidden">
-<div class="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200/60 bg-white/90 px-4 py-3 text-[12px] dark:border-neutral-700/50 dark:bg-neutral-900/90">
+<div class="surface-panel flex flex-wrap items-center gap-2 px-4 py-3 text-[12px]">
 <span class="font-semibold text-stone-600 dark:text-neutral-300">Viendo</span>
 <div id="active-filter-chips" class="flex flex-1 flex-wrap items-center gap-2"></div>
-<button id="clear-active-filters" type="button" class="rounded-full border border-stone-200/70 bg-stone-50 px-3 py-1 text-[11px] font-medium text-stone-500 transition hover:border-stone-300 hover:text-stone-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Limpiar</button>
+<button id="clear-active-filters" type="button" class="surface-interactive surface-neutral rounded-full px-3 py-1 text-[11px] font-medium transition hover:border-stone-300 hover:text-stone-700 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Limpiar</button>
 </div>
 </section>
 
 <section id="now-section" class="space-y-3">
-<button id="active-project-pill" type="button" class="hidden rounded-full border border-indigo-300 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 dark:hover:bg-indigo-950/50 mb-2"></button>
+<button id="active-project-pill" type="button" class="surface-interactive surface-accent hidden mb-2 rounded-full px-3 py-1 text-xs font-medium transition hover:bg-indigo-100 dark:hover:bg-indigo-950/50"></button>
 <div class="flex items-center justify-between">
 <div>
 <h2 class="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-neutral-300">Ahora</h2>
 <p class="mt-1 text-[12px] text-stone-500 dark:text-neutral-400">Alta prioridad, vence hoy o esta atrasada.</p>
 </div>
-<button id="complete-all-now" type="button" class="complete-all-btn rounded-lg px-3 py-1.5 text-xs font-medium text-stone-400 transition duration-200 ease-out hover:text-stone-700 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:text-neutral-500 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Completar todas</button>
+<button id="complete-all-now" type="button" class="complete-all-btn surface-interactive surface-neutral rounded-lg px-3 py-1.5 text-xs font-medium transition duration-200 ease-out hover:text-stone-700 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Completar todas</button>
 </div>
 <ul id="now-list" data-section="now" class="space-y-2"></ul>
 </section>
@@ -306,7 +306,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 <h2 class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500">Pendiente</h2>
 <p class="mt-1 text-[12px] text-stone-500 dark:text-neutral-400">Tareas planificadas para despues.</p>
 </div>
-<button id="complete-all-next" type="button" class="complete-all-btn hidden rounded-lg px-3 py-1.5 text-xs font-medium text-stone-400 transition duration-200 ease-out hover:text-stone-700 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:text-neutral-500 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Completar todas</button>
+<button id="complete-all-next" type="button" class="complete-all-btn surface-interactive surface-neutral hidden rounded-lg px-3 py-1.5 text-xs font-medium transition duration-200 ease-out hover:text-stone-700 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Completar todas</button>
 </div>
 <ul id="next-list" data-section="next" class="space-y-2"></ul>
 </section>
@@ -317,7 +317,7 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 <span id="done-arrow" class="transition-transform duration-200">▸</span>
 Hecho <span id="done-count" class="font-mono-ui">0</span>
 </button>
-<button id="clear-completed" type="button" class="rounded-lg px-3 py-1.5 text-xs font-medium text-stone-300 transition duration-200 ease-out hover:text-stone-600 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:text-neutral-600 dark:hover:text-neutral-300 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Vaciar</button>
+<button id="clear-completed" type="button" class="surface-interactive surface-neutral rounded-lg px-3 py-1.5 text-xs font-medium transition duration-200 ease-out hover:text-stone-600 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:hover:text-neutral-300 dark:hover:bg-neutral-800 dark:focus:ring-neutral-600">Vaciar</button>
 </div>
 <ul id="done-list" data-section="done" class="space-y-2 hidden"></ul>
 </section>
@@ -327,24 +327,24 @@ Hecho <span id="done-count" class="font-mono-ui">0</span>
 <!-- SIDEBAR DERECHO -->
 <aside id="sidebar-right" class="hidden xl:block">
   <div class="sticky top-20 space-y-6">
-    <div class="rounded-2xl border border-stone-200/60 bg-white p-5 dark:border-neutral-700/50 dark:bg-neutral-900">
+    <div class="surface-panel">
       <p class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-1">Categorías</p>
       <p class="text-[10px] text-stone-300 dark:text-neutral-600 mb-3">Tipo de actividad</p>
       <div id="sidebar-category-filters" class="space-y-1.5"></div>
     </div>
-    <div id="sidebar-projects" class="hidden rounded-2xl border border-stone-200/60 bg-white p-5 dark:border-neutral-700/50 dark:bg-neutral-900">
+    <div id="sidebar-projects" class="surface-panel hidden">
       <p class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-1">Proyectos</p>
       <p class="text-[10px] text-stone-300 dark:text-neutral-600 mb-3">Agrupación libre · se crean al asignar</p>
       <div class="sidebar-project-list space-y-1.5"></div>
     </div>
-    <div class="rounded-2xl border border-stone-200/60 bg-white p-5 dark:border-neutral-700/50 dark:bg-neutral-900">
+    <div class="surface-panel">
       <p class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-3">Acciones</p>
       <div class="space-y-2">
-        <button id="sidebar-complete-all" type="button" class="w-full rounded-lg border border-stone-200/60 bg-stone-50 px-3 py-2 text-xs font-medium text-stone-500 transition duration-200 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Completar todas</button>
-        <button id="sidebar-clear-done" type="button" class="w-full rounded-lg border border-stone-200/60 bg-stone-50 px-3 py-2 text-xs font-medium text-stone-500 transition duration-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:border-neutral-700/50 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Vaciar completadas</button>
+        <button id="sidebar-complete-all" type="button" class="surface-interactive surface-neutral w-full rounded-lg px-3 py-2 text-xs font-medium transition duration-200 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Completar todas</button>
+        <button id="sidebar-clear-done" type="button" class="surface-interactive surface-neutral w-full rounded-lg px-3 py-2 text-xs font-medium transition duration-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:border-neutral-600 dark:hover:text-neutral-200">Vaciar completadas</button>
       </div>
     </div>
-    <div class="rounded-2xl border border-stone-200/60 bg-white p-5 dark:border-neutral-700/50 dark:bg-neutral-900">
+    <div class="surface-panel">
       <p class="text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-neutral-500 mb-3">Resumen</p>
       <div class="space-y-2">
         <div class="flex items-center justify-between text-xs"><span class="text-stone-500 dark:text-neutral-400">Total</span><span id="sidebar-total" class="font-semibold text-stone-700 dark:text-neutral-200 font-mono-ui">0</span></div>

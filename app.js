@@ -105,8 +105,6 @@ const EXAMPLE_TASKS = Object.freeze([
    ═══════════════════════════════════════════ */
 
 const CLASSES = Object.freeze({
-  /* Badge tokens: shared height (h-[22px]) + text-[11px] for uniform row */
-  badgeBase: "inline-flex items-center h-[24px] border text-[11px] leading-none tracking-[0.01em] backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
   priorityBase: "inline-flex items-center h-[24px] rounded-full border px-2.5 text-[11px] font-semibold leading-none tracking-[0.01em] backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
   priority: {
     Alta:  "border-red-200/90 bg-red-50/90 text-red-700 dark:border-red-300/10 dark:bg-red-300/6 dark:text-red-200",
@@ -139,8 +137,12 @@ const CLASSES = Object.freeze({
     active: "border-amber-300/90 bg-amber-50/90 text-amber-800 shadow-[0_8px_18px_rgba(183,121,31,0.12)] dark:border-white/10 dark:bg-white/[0.045] dark:text-stone-100",
     inactive: "border-stone-200/75 bg-white/72 text-stone-500 hover:border-stone-300 hover:bg-white/90 hover:text-stone-700 dark:border-white/8 dark:bg-white/[0.03] dark:text-stone-400 dark:hover:border-white/12 dark:hover:text-stone-200",
   },
-  filterPillBase: "category-filter-btn rounded-full border px-2.5 py-1.5 text-[11px] sm:text-xs font-medium transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-amber-300/30",
-  editInput: "w-full min-w-[200px] rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30",
+  filterPillBase: "category-filter-btn filter-pill-btn focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-amber-300/30",
+  editInput: "detail-field min-w-[200px] focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-amber-300/30",
+  detailPanel: "task-detail-panel mt-2 rounded-[20px] border p-4 space-y-3",
+  detailLabel: "detail-label",
+  detailField: "detail-field focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-amber-300/30",
+  detailTextarea: "detail-field detail-textarea placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:focus:ring-amber-300/30",
   dueBadge: {
     base:    "inline-flex items-center gap-1 h-[24px] rounded-xl border px-2.5 text-[10px] font-mono-ui leading-none tracking-[0.02em] backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
     overdue: "border-red-200/90 bg-red-50/90 text-red-700 font-semibold dark:border-red-300/10 dark:bg-red-300/6 dark:text-red-200",
@@ -803,14 +805,14 @@ const TaskDetail = {
    */
   createPanel(task) {
     const panel = document.createElement("div");
-    panel.className = "task-detail-panel mt-2 rounded-[20px] border p-4 space-y-3";
+    panel.className = CLASSES.detailPanel;
     panel.dataset.detailFor = task.id;
 
     const r1 = document.createElement("div"); r1.className = "flex flex-wrap gap-3";
     const dw = document.createElement("div"); dw.className = "flex-1 min-w-[140px]";
-    dw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Fecha limite</label>`;
+    dw.innerHTML = `<label class="${CLASSES.detailLabel}">Fecha limite</label>`;
     const di = document.createElement("input"); di.type = "date";
-    di.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
+    di.className = CLASSES.detailField;
     di.value = task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "";
     di.addEventListener("change", () => {
       void App.patchTask(
@@ -822,9 +824,9 @@ const TaskDetail = {
     dw.appendChild(di);
 
     const pw = document.createElement("div"); pw.className = "flex-1 min-w-[140px]";
-    pw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Proyecto</label>`;
+    pw.innerHTML = `<label class="${CLASSES.detailLabel}">Proyecto</label>`;
     const pi = document.createElement("input"); pi.type = "text"; pi.placeholder = "Ej: Mudanza, Sprint 14…";
-    pi.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 placeholder-stone-400 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:placeholder-stone-500 dark:focus:ring-amber-300/30";
+    pi.className = CLASSES.detailField;
     pi.value = task.project || ""; pi.setAttribute("list", "project-options-" + task.id);
     const dl = document.createElement("datalist"); dl.id = "project-options-" + task.id;
     for (const n of TaskService.getAllProjectNames()) { const o = document.createElement("option"); o.value = n; dl.appendChild(o); }
@@ -837,9 +839,9 @@ const TaskDetail = {
 
     const r2 = document.createElement("div"); r2.className = "flex flex-wrap gap-3";
     const cw = document.createElement("div"); cw.className = "flex-1 min-w-[120px]";
-    cw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Categoria</label>`;
+    cw.innerHTML = `<label class="${CLASSES.detailLabel}">Categoria</label>`;
     const cs = document.createElement("select");
-    cs.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
+    cs.className = CLASSES.detailField;
     for (const c of CATEGORIES) { const o = document.createElement("option"); o.value = c; o.textContent = c; if (c === task.category) o.selected = true; cs.appendChild(o); }
     cs.addEventListener("change", () => {
       void App.patchTask(task.id, { category: cs.value }, "Actualizando categoria...");
@@ -847,9 +849,9 @@ const TaskDetail = {
     cw.appendChild(cs);
 
     const prw = document.createElement("div"); prw.className = "flex-1 min-w-[100px]";
-    prw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Prioridad</label>`;
+    prw.innerHTML = `<label class="${CLASSES.detailLabel}">Prioridad</label>`;
     const ps = document.createElement("select");
-    ps.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
+    ps.className = CLASSES.detailField;
     for (const p of PRIORITIES) { const o = document.createElement("option"); o.value = p; o.textContent = p; if (p === task.priority) o.selected = true; ps.appendChild(o); }
     ps.addEventListener("change", () => {
       void App.patchTask(task.id, { priority: ps.value }, "Actualizando prioridad...");
@@ -857,9 +859,9 @@ const TaskDetail = {
     prw.appendChild(ps); r2.append(cw, prw);
 
     const nw = document.createElement("div");
-    nw.innerHTML = `<label class="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">Notas</label>`;
+    nw.innerHTML = `<label class="${CLASSES.detailLabel}">Notas</label>`;
     const ta = document.createElement("textarea");
-    ta.className = "w-full min-h-[84px] resize-y rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 placeholder-stone-400 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:placeholder-stone-500 dark:focus:ring-amber-300/30";
+    ta.className = CLASSES.detailTextarea;
     ta.placeholder = "Añade notas, detalles, enlaces…"; ta.value = task.notes || ""; ta.maxLength = CONFIG.MAX_NOTES_LENGTH;
     ta.addEventListener("blur", () => {
       void App.patchTask(task.id, { notes: ta.value }, "Guardando notas...");
