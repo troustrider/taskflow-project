@@ -3,11 +3,8 @@
   "buildCommand": "npm run build:css",
   "outputDirectory": ".",
   "installCommand": "npm install && cd server && npm install",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/server/src/index.js" }
-  ],
   "functions": {
-    "server/src/index.js": {
+    "api/[...all].js": {
       "includeFiles": "server/**"
     }
   }
