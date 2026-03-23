@@ -66,7 +66,7 @@ taskflow-project/
 
 ## Cómo funciona
 
-El frontend gestiona toda la interfaz: formulario con sintaxis rápida (`@viernes #trabajo !alta /proyecto`), filtros por categoría y proyecto, drag-and-drop entre secciones (Ahora / Siguiente / Completadas), Focus Mode, tema claro/oscuro, y geolocalización.
+El frontend gestiona toda la interfaz: formulario con sintaxis rápida (`@viernes #trabajo !alta /proyecto`), filtros por categoría y proyecto, drag-and-drop entre secciones (Ahora / Pendiente / Hecho), Focus Mode, tema claro/oscuro, y geolocalización.
 
 Al cargar la página, el frontend pide las tareas al backend con `GET /api/v1/tasks`. Las operaciones individuales usan el CRUD real de la API: `POST` para crear, `PATCH` para editar y completar, y `DELETE` para borrar. El endpoint `PUT /api/v1/tasks` se reserva para sincronizaciones masivas como reordenación, vaciado de completadas, deshacer borrados y carga de tareas de ejemplo. En ese sync masivo, el backend valida y normaliza la shape completa de cada tarea (`id`, `text`, `category`, `priority`, `completed`, `createdAt`, `completedAt`, `dueDate`, `notes` y `project`). El backend almacena las tareas en un array en memoria — se pierden al reiniciar el servidor porque aún no hay base de datos.
 
@@ -215,11 +215,12 @@ El `errorHandler` nunca expone stack traces ni nombres de variables al exterior.
 
 El frontend eliminó toda dependencia de `localStorage` para las tareas. La persistencia ahora pasa por el backend: `TaskStore` en `app.js` habla con el servidor a través de `src/api/client.js` usando `fetch` asíncrono.
 
-La UI gestiona tres estados de red:
+La UI gestiona cuatro estados de red:
 
 1. **Carga** — Spinner a pantalla completa con "Conectando con el servidor…" mientras la petición viaja.
-2. **Éxito** — Se oculta el spinner y se renderizan las tareas.
-3. **Error** — Banner rojo fijo con el mensaje del servidor y un botón "Reintentar" que vuelve a intentar la conexión.
+2. **Sincronización en curso** — Badge flotante con "Sincronizando cambios…" mientras una operación asíncrona sigue pendiente.
+3. **Éxito** — Se oculta el spinner y se renderizan las tareas.
+4. **Error** — Banner rojo fijo con el mensaje del servidor y un botón "Reintentar" que vuelve a intentar la conexión.
 
 `localStorage` solo se conserva para la preferencia de tema (claro/oscuro), y `sessionStorage` se usa como caché temporal de ubicación durante la sesión. Ninguno de los dos se usa para persistir tareas.
 
@@ -234,7 +235,7 @@ El proyecto se despliega como aplicación full-stack en Vercel:
 
 ## Decisiones de implementación
 
-- **`<aside>` sustituido por anillo de progreso SVG** — El rediseño eliminó el sidebar clásico por decisión de diseño. Las estadísticas se muestran en un panel lateral con anillo visual de progreso.
+- **`<aside>` mantenido con rediseño visual** — La interfaz sigue usando paneles laterales (`aside`) y muestra el progreso mediante un anillo SVG integrado en el sidebar y en la vista móvil.
 - **Tailwind vía npm en vez de CDN** — Permite usar Tailwind v4 con `@import`, compilación local y minificación en producción.
 - **`css/output.css` como artefacto generado** — Vercel lo regenera en cada despliegue con `npm run build:css`. No debe editarse manualmente; la fuente de verdad es `input.css`.
 - **Colección Postman incluida** — La entrega incorpora una colección exportable con casos `200`, `201`, `204`, `400`, `404` y `500` para dejar trazabilidad de las pruebas manuales exigidas.

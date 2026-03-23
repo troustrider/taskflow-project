@@ -203,7 +203,7 @@ Crea una nueva tarea.
 
 ### PUT /api/v1/tasks
 
-Sincronización masiva: reemplaza todas las tareas del servidor con el array enviado por el frontend. Existe porque el frontend mantiene su propio estado en memoria y lo sincroniza completo tras cada cambio.
+Sincronización masiva: reemplaza todas las tareas del servidor con el array enviado por el frontend. Existe para operaciones masivas del cliente, como reordenación, vaciado de completadas, deshacer borrados o carga de tareas de ejemplo, mientras que las operaciones individuales usan `POST`, `PATCH` y `DELETE`.
 
 **Request body:** Array de objetos de tarea con shape completa.
 
@@ -291,11 +291,12 @@ El frontend eliminó toda dependencia de `localStorage` para tareas. `TaskStore`
 | Eliminar una tarea | `apiEliminarTarea(id)` | DELETE /api/v1/tasks/:id |
 | Sincronización masiva | `apiSincronizarTareas(tasks)` | PUT /api/v1/tasks |
 
-La UI gestiona tres estados de red:
+La UI gestiona cuatro estados de red:
 
 1. **Carga** — Spinner con "Conectando con el servidor…" mientras se espera la respuesta.
-2. **Éxito** — Se oculta el spinner y se renderizan las tareas.
-3. **Error** — Banner rojo con el mensaje de error y botón "Reintentar".
+2. **Sincronización en curso** — Badge flotante con "Sincronizando cambios…" mientras una operación sigue pendiente.
+3. **Éxito** — Se oculta el spinner y se renderizan las tareas.
+4. **Error** — Banner rojo con el mensaje de error y botón "Reintentar".
 
 Fuera de la persistencia de tareas, el navegador solo conserva preferencias auxiliares como el tema visual y una caché temporal de ubicación durante la sesión.
 
