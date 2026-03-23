@@ -1,138 +1,241 @@
 # TaskFlow
 
-Aplicacion web de gestion de tareas construida con `vanilla JS` y `Tailwind CSS v4`. El objetivo del proyecto es ofrecer una UI limpia y rapida para organizar tareas por prioridad, categoria, proyecto y fecha limite, manteniendo un despliegue estatico sencillo en Vercel.
+Aplicación de gestión de tareas construida como proyecto del bootcamp InfraOps de Corner Estudios.
 
-## Stack
+Frontend en vanilla JavaScript + Tailwind CSS v4. Backend en Node.js + Express 5. Persistencia en memoria (sin base de datos). Desplegado en Vercel.
 
-- Frontend: HTML5, CSS, JavaScript ES2022 (`"use strict"`)
-- Estilos: Tailwind CSS v4 mediante `@tailwindcss/cli`
-- Persistencia: `localStorage` y `sessionStorage`
-- Deploy: Vercel con build CSS via `npm run build:css`
+**Demo en producción:** [https://taskflow-project-jet.vercel.app](https://taskflow-project-jet.vercel.app)
 
-## Puesta en marcha
+**Documentación interactiva de la API (Swagger):** [https://taskflow-project-jet.vercel.app/api/docs](https://taskflow-project-jet.vercel.app/api/docs)
 
-Requisitos:
+**Repositorio:** [https://github.com/troustrider/taskflow-project](https://github.com/troustrider/taskflow-project)
 
-- Node.js 20 o superior
+---
 
-Comandos:
+## Arquitectura del proyecto
+
+```
+taskflow-project/
+├── index.html                  # Punto de entrada del frontend
+├── app.js                      # Lógica completa de la aplicación (modular, ~95 KB)
+├── input.css                   # Archivo fuente de Tailwind CSS
+├── css/
+│   └── output.css              # CSS compilado (generado por Tailwind, en .gitignore)
+├── src/
+│   └── api/
+│       └── client.js           # Capa de red del frontend (fetch async → API REST)
+├── server/                     # Backend Express (Fase 3)
+│   ├── .env                    # Variables de entorno (excluido del repo)
+│   ├── package.json
+│   └── src/
+│       ├── index.js            # Servidor Express + middlewares + Swagger UI
+│       ├── config/
+│       │   ├── env.js          # Carga y validación de variables de entorno
+│       │   └── swagger.js      # Especificación OpenAPI 3.0
+│       ├── services/
+│       │   └── task.service.js # Lógica de negocio pura (sin HTTP)
+│       ├── controllers/
+│       │   └── task.controller.js  # Validación defensiva y orquestación HTTP
+│       └── routes/
+│           └── task.routes.js  # Mapeo verbos HTTP → controladores + anotaciones @openapi
+├── docs/
+│   ├── backend-api.md          # Referencia: Axios, Postman, Sentry, Swagger
+│   ├── design/
+│   │   └── wireframe-taskflow.svg
+│   └── ai/                     # Reflexiones y experimentos con IA
+├── vercel.json                 # Configuración de despliegue (frontend + backend serverless)
+├── tailwind.config.js
+├── package.json                # Dependencias del frontend (Tailwind)
+└── README.md
+```
+
+## Stack tecnológico
+
+**Frontend:** HTML5, vanilla JavaScript (ES2022+), Tailwind CSS v4 (compilado vía CLI).
+
+**Backend:** Node.js, Express 5, cors, dotenv. Documentación interactiva con swagger-jsdoc + swagger-ui-express.
+
+**Desarrollo:** nodemon (recarga automática del servidor), Tailwind CLI en modo watch.
+
+**Despliegue:** Vercel — frontend como archivos estáticos, backend como Serverless Function.
+
+## Cómo funciona
+
+El frontend gestiona toda la interfaz: formulario con sintaxis rápida (`@viernes #trabajo !alta /proyecto`), filtros por categoría y proyecto, drag-and-drop entre secciones (Ahora / Siguiente / Completadas), Focus Mode, tema claro/oscuro, y geolocalización.
+
+Al cargar la página, el frontend pide las tareas al backend con `GET /api/v1/tasks`. Las operaciones individuales usan el CRUD real de la API: `POST` para crear, `PATCH` para editar y completar, y `DELETE` para borrar. El endpoint `PUT /api/v1/tasks` se reserva para sincronizaciones masivas como reordenación, vaciado de completadas, deshacer borrados y carga de tareas de ejemplo. El backend almacena las tareas en un array en memoria — se pierden al reiniciar el servidor porque aún no hay base de datos.
+
+La capa de red (`src/api/client.js`) usa `fetch` con rutas relativas (`/api/v1/tasks`), así funciona igual en `localhost:3000` que en el despliegue de Vercel sin tocar código.
+
+## Instalación y ejecución local
 
 ```bash
+# 1. Clonar el repositorio
+git clone https://github.com/troustrider/taskflow-project.git
+cd taskflow-project
+
+# 2. Instalar dependencias del frontend (Tailwind)
 npm install
+
+# 3. Instalar dependencias del backend
+cd server
+npm install
+
+# 4. Crear archivo de variables de entorno
+echo "PORT=3000" > .env
+echo "NODE_ENV=development" >> .env
+
+# 5. Arrancar el servidor (sirve frontend + API desde el mismo puerto)
+npm run dev
+```
+
+Abrir `http://localhost:3000` en el navegador. Toda la aplicación (frontend + API) corre desde ahí. La documentación Swagger está en `http://localhost:3000/api/docs`.
+
+Para compilar CSS en paralelo durante el desarrollo (otra terminal, desde la raíz):
+
+```bash
 npm run dev:css
-npm run build:css
 ```
 
-El despliegue actual depende de `css/output.css`, generado a partir de `input.css`.
+## API REST
 
-## Funcionalidades principales
+Base URL: `/api/v1/tasks`
 
-- Alta de tareas con categoria, prioridad, fecha limite y proyecto.
-- Parser de entrada rapida con tokens `@fecha`, `#categoria`, `!prioridad` y `/proyecto`.
-- Edicion inline del texto principal.
-- Panel de detalle inline para fecha, proyecto, categoria, prioridad y notas.
-- Agrupacion en tres vistas: `Ahora`, `Pendiente` y `Hecho`.
-- Filtros por categoria y proyecto.
-- Busqueda con debounce.
-- Drag and drop entre listas.
-- Undo al borrar tareas.
-- Focus mode para recorrer tareas pendientes una a una.
-- Tema claro/oscuro persistente.
-- Geolocalizacion con cache en sesion para mostrar hora y ciudad.
+| Método | Ruta | Descripción | Código éxito |
+|---|---|---|---|
+| GET | `/api/v1/tasks` | Listar todas las tareas | 200 |
+| GET | `/api/v1/tasks/:id` | Obtener tarea por UUID | 200 |
+| POST | `/api/v1/tasks` | Crear tarea nueva | 201 |
+| PUT | `/api/v1/tasks` | Sincronización masiva | 200 |
+| PATCH | `/api/v1/tasks/:id` | Actualización parcial | 200 |
+| DELETE | `/api/v1/tasks/:id` | Eliminar tarea | 204 |
 
-## Arquitectura de `app.js`
+Documentación interactiva completa con esquemas, ejemplos y "Try it out" en [`/api/docs`](https://taskflow-project-jet.vercel.app/api/docs) (Swagger UI).
 
-El archivo esta organizado por modulos con responsabilidades separadas:
+Pruebas de integración documentadas con Postman en `docs/postman/taskflow-api.postman_collection.json` y `docs/postman/taskflow-api-tests.md`.
 
-- `CONFIG`, `CATEGORIES`, paletas y clases: constantes de la app.
-- `DOM`: cache de nodos y accesos recurrentes.
-- `Utils`: helpers puros de texto, fechas, resaltado y formato.
-- `InputParser`: interpreta tokens del input rapido.
-- `TaskStore`: capa de persistencia.
-- `TaskService`: logica de negocio sin DOM.
-- `UIState`: estado de interfaz.
-- `Theme`, `Location`, `Search`, `ShortcutHints`, `FormVisualOrder`: modulos de soporte de UI.
-- `Greeting`, `Welcome`, `Progress`, `Sidebar`, `FocusMode`, `UndoToast`: modulos de experiencia y contexto.
-- `TaskDetail` y `TaskRenderer`: construccion y renderizado del DOM.
-- `Animations`, `DragDrop`, `Keyboard`, `ListActions`: interaccion.
-- `App`: orquestacion general, listeners, persistencia y render.
+### Ejemplos con curl
 
-Flujo principal:
+**Crear una tarea:**
 
-```text
-App.commit() -> TaskService.save() -> App.render()
+```bash
+curl -X POST http://localhost:3000/api/v1/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Estudiar para el examen", "category": "Estudio", "priority": "Alta"}'
 ```
 
-## Persistencia
-
-Claves usadas actualmente:
-
-- `taskflow_tasks_v13`
-- `taskflow_theme_v12`
-- `taskflow_location`
-
-Forma de una tarea:
+Respuesta 201:
 
 ```json
 {
-  "id": "uuid",
-  "text": "Revisar PR del backend",
-  "category": "Trabajo",
+  "id": "a1b2c3d4-...",
+  "text": "Estudiar para el examen",
+  "category": "Estudio",
   "priority": "Alta",
   "completed": false,
-  "createdAt": 1711000000000,
+  "createdAt": 1710850000000,
   "completedAt": null,
-  "dueDate": 1711086400000,
-  "notes": "Pendiente validar casos borde",
-  "project": "Sprint 14"
+  "dueDate": null,
+  "notes": "",
+  "project": null
 }
 ```
 
-## Estructura del proyecto
+**Error 400 — POST sin texto:**
 
-```text
-.
-|-- app.js
-|-- index.html
-|-- input.css
-|-- css/
-|   `-- output.css
-|-- package.json
-|-- tailwind.config.js
-|-- vercel.json
-|-- backup/
-|-- docs/
-|   |-- ai/
-|   `-- design/
-|-- server/
-`-- tests/
+```bash
+curl -X POST http://localhost:3000/api/v1/tasks \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
-Notas:
+Respuesta: `{"error":"El texto es obligatorio y debe tener al menos 3 caracteres."}`
 
-- `docs/` contiene material historico del bootcamp sobre uso de IA y referencia de proceso; no forma parte del runtime de la app.
-- `backup/` guarda snapshots del proyecto.
-- `tests/` esta reservado, pero ahora mismo la validacion es manual.
+**Error 404 — DELETE de tarea que no existe:**
 
-## Validacion manual recomendada
+```bash
+curl -X DELETE http://localhost:3000/api/v1/tasks/id-inventado
+```
 
-- Crear una tarea simple y comprobar que aparece en `Pendiente`.
-- Crear una tarea `!alta` o con fecha de hoy y comprobar que aparece en `Ahora`.
-- Usar `@viernes #trabajo /sprint14 !alta` y verificar parser y preview.
-- Editar una tarea y validar limites, vacios y duplicados.
-- Abrir `Detalles`, cambiar fecha/proyecto/notas y recargar para comprobar persistencia.
-- Completar, restaurar y borrar una tarea comprobando animaciones y undo.
-- Filtrar por categoria y proyecto, y despues limpiar filtros.
-- Probar drag and drop entre `Ahora`, `Pendiente` y `Hecho`.
-- Activar focus mode y recorrer varias tareas.
-- Cambiar el tema y recargar.
-- Ejecutar `npm run build:css` antes de desplegar.
+Respuesta: `{"error":"Recurso no encontrado"}`
 
-## Deploy
+**Error 500 — JSON mal formado:**
 
-El despliegue esperado sigue siendo el mismo:
+```bash
+curl -X POST http://localhost:3000/api/v1/tasks \
+  -H "Content-Type: application/json" \
+  -d 'esto no es json'
+```
 
-- Build: `npm run build:css`
-- Hosting estatico: Vercel
+Respuesta: `{"error":"Error interno del servidor"}`
 
-No hay dependencias de backend activas para el flujo actual del frontend.
+## Arquitectura del backend
+
+El backend sigue separación de preocupaciones (SoC) con tres capas unidireccionales:
+
+```
+Petición HTTP → Ruta → Controlador → Servicio → Datos (array en memoria)
+                                                    ↓
+Respuesta HTTP ← Controlador ←─────────────── Resultado
+```
+
+**Rutas** (`task.routes.js`) — Capa "tonta". Conecta verbos HTTP con el controlador correspondiente. No toma decisiones lógicas. Incluye las anotaciones `@openapi` para Swagger.
+
+**Controladores** (`task.controller.js`) — Extraen datos de `req.body` y `req.params`, aplican validaciones defensivas con sentencias `if`, invocan al servicio si los datos son correctos, y devuelven la respuesta HTTP con el código adecuado (201 para creación, 204 para borrado, 400 si la validación falla).
+
+**Servicios** (`task.service.js`) — Lógica de negocio pura en JavaScript. No conocen Express, HTTP, `req` ni `res`. Lanzan errores estándar (`throw new Error("NOT_FOUND")`) que los controladores capturan con `try/catch` y pasan al middleware de errores con `next(err)`.
+
+## Middlewares
+
+El servidor procesa cada petición a través de estos middlewares, en orden:
+
+1. **`cors()`** — Permite peticiones cross-origin (necesario cuando frontend y backend corren en puertos o dominios distintos).
+2. **`express.json()`** — Parsea cuerpos JSON y los deja en `req.body`. Si el JSON es inválido, el error lo recoge el `errorHandler`.
+3. **`express.static()`** — Sirve los archivos estáticos del frontend (HTML, JS, CSS) desde la raíz del proyecto.
+4. **`logger`** (personalizado) — Registra cada petición en consola: método, ruta, código de respuesta y duración en milisegundos.
+5. **`swagger-ui`** — Monta la documentación interactiva de la API en `/api/docs`.
+6. **`errorHandler`** (4 parámetros) — Red de seguridad final. Recoge errores que los controladores pasan con `next(err)`. Si el mensaje es `NOT_FOUND`, responde 404. Cualquier otro error → `console.error(err)` + respuesta 500 con mensaje genérico, sin filtrar detalles técnicos al cliente.
+
+## Manejo de errores
+
+| Tipo | Código HTTP | Quién responde | Ejemplo |
+|---|---|---|---|
+| Datos inválidos del cliente | 400 | Controlador (directamente) | POST sin texto, categoría inválida |
+| Recurso no encontrado | 404 | errorHandler (via `next(err)`) | DELETE de ID que no existe |
+| Error inesperado del servidor | 500 | errorHandler (via `next(err)`) | JSON mal formado, error de runtime |
+
+El `errorHandler` nunca expone stack traces ni nombres de variables al exterior. Solo devuelve mensajes genéricos en los 500.
+
+## Conexión frontend ↔ backend
+
+El frontend eliminó toda dependencia de `localStorage` para las tareas. La persistencia ahora pasa por el backend: `TaskStore` en `app.js` habla con el servidor a través de `src/api/client.js` usando `fetch` asíncrono.
+
+La UI gestiona tres estados de red:
+
+1. **Carga** — Spinner a pantalla completa con "Conectando con el servidor…" mientras la petición viaja.
+2. **Éxito** — Se oculta el spinner y se renderizan las tareas.
+3. **Error** — Banner rojo fijo con el mensaje del servidor y un botón "Reintentar" que vuelve a intentar la conexión.
+
+`localStorage` solo se conserva para la preferencia de tema (claro/oscuro), que es del navegador del usuario y no tiene que ver con los datos de tareas.
+
+## Despliegue en Vercel
+
+El proyecto se despliega como aplicación full-stack en Vercel:
+
+- **Frontend** — Archivos estáticos servidos desde la raíz. El CSS se compila con `npm run build:css` como build command.
+- **Backend** — `server/src/index.js` se ejecuta como Serverless Function. Las peticiones a `/api/*` se redirigen al backend vía `rewrites` en `vercel.json`.
+- **Variables de entorno** — `PORT` y `NODE_ENV` se configuran en el dashboard de Vercel (Settings → Environment Variables). El módulo `env.js` detecta el entorno Vercel para no exigir `PORT` (la plataforma lo gestiona internamente).
+- **`app.listen()` condicional** — Solo se ejecuta en local. En Vercel, `index.js` exporta `module.exports = app` y la plataforma maneja el ciclo HTTP.
+
+## Desviaciones del enunciado
+
+- **`<aside>` sustituido por anillo de progreso SVG** — El rediseño eliminó el sidebar clásico por decisión de diseño. Las estadísticas se muestran en un panel lateral con anillo visual de progreso.
+- **Tailwind vía npm en vez de CDN** — Permite usar Tailwind v4 con `@import`, compilación local y minificación en producción.
+- **`css/output.css` en `.gitignore`** — Vercel lo regenera en cada despliegue con `npm run build:css`. Así se evitan conflictos de versionado con un archivo generado.
+- **Colección Postman incluida** — La entrega incorpora una colección exportable con casos `200`, `201`, `204`, `400`, `404` y `500` para dejar trazabilidad de las pruebas manuales exigidas.
+
+## Documentación adicional
+
+- [`server/README.md`](server/README.md) — Documentación detallada del backend: arquitectura por capas, endpoints con ejemplos request/response, validaciones, pruebas de integración, y configuración de Swagger.
+- [`docs/backend-api.md`](docs/backend-api.md) — Referencia sobre Axios, Postman, Sentry y Swagger: qué son, qué problema resuelven y por qué se usan.
+- [`docs/postman/taskflow-api-tests.md`](docs/postman/taskflow-api-tests.md) — Secuencia de pruebas manuales con Postman y resultados esperados para la entrega.

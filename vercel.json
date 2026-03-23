@@ -1,5 +1,14 @@
 {
-  "buildCommand": "npm run build",
+  "version": 2,
+  "buildCommand": "npm run build:css",
   "outputDirectory": ".",
-  "installCommand": "npm install"
+  "installCommand": "npm install && cd server && npm install",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/server/src/index.js" }
+  ],
+  "functions": {
+    "server/src/index.js": {
+      "includeFiles": "server/**"
+    }
+  }
 }

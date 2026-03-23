@@ -1,8 +1,12 @@
 # TaskFlow API — Backend
 
-API REST para gestionar tareas del proyecto TaskFlow, construida con Node.js y Express.
+API REST para gestionar tareas del proyecto TaskFlow, construida con Node.js y Express 5.
 
-> **Estado actual**: Fases A y B completadas. Persistencia en memoria (sin base de datos). Pendiente: middleware global de errores (Fase C), conexión del frontend (Fase D).
+**API en producción:** [https://taskflow-project-jet.vercel.app/api/v1/tasks](https://taskflow-project-jet.vercel.app/api/v1/tasks)
+
+**Documentación Swagger:** [https://taskflow-project-jet.vercel.app/api/docs](https://taskflow-project-jet.vercel.app/api/docs)
+
+> Fases A, B, C y D completadas + Bonus (Swagger). Frontend conectado al backend con gestión de estados de red. Persistencia en memoria (sin base de datos — las tareas se pierden al reiniciar el servidor). Desplegado en Vercel como Serverless Function.
 
 ---
 
@@ -13,64 +17,119 @@ server/
 ├── .env                        # Variables de entorno (excluido del repo)
 ├── package.json
 └── src/
-    ├── index.js                # Punto de entrada — crea el servidor Express
+    ├── index.js                # Punto de entrada — Express + middlewares + Swagger UI
     ├── config/
-    │   └── env.js              # Carga y valida variables de entorno
+    │   ├── env.js              # Carga y valida variables de entorno (fail fast)
+    │   └── swagger.js          # Especificación OpenAPI 3.0 con swagger-jsdoc
     ├── services/
-    │   └── task.service.js     # Lógica de negocio pura (toca los datos)
+    │   └── task.service.js     # Lógica de negocio pura (sin HTTP)
     ├── controllers/
-    │   └── task.controller.js  # Valida peticiones y orquesta respuestas HTTP
+    │   └── task.controller.js  # Validación defensiva y orquestación HTTP
     └── routes/
-        └── task.routes.js      # Mapea URLs y verbos HTTP a controladores
+        └── task.routes.js      # Verbos HTTP → controladores + anotaciones @openapi
 ```
 
 ## Arquitectura por capas
 
-La aplicación sigue el principio de separación de preocupaciones (SoC) con tres capas unidireccionales:
+El backend sigue separación de preocupaciones (SoC) con tres capas unidireccionales:
 
 ```
-Petición HTTP → Ruta → Controlador → Servicio → Datos
-                                                   ↓
-Respuesta HTTP ← Controlador ←──────────────── Resultado
+Petición HTTP → Ruta → Controlador → Servicio → Datos (array en memoria)
+                                                    ↓
+Respuesta HTTP ← Controlador ←─────────────── Resultado
 ```
 
-**Ruta** (`task.routes.js`): Escucha la red. Conecta un verbo HTTP y una URL con el controlador adecuado. No toma decisiones lógicas.
+**Ruta** (`task.routes.js`) — Capa "tonta". Conecta un verbo HTTP y una URL con el controlador adecuado. No toma decisiones lógicas. Contiene las anotaciones `@openapi` que Swagger usa para generar la documentación interactiva.
 
-**Controlador** (`task.controller.js`): Extrae datos de la petición (`req.body`, `req.params`), aplica validaciones defensivas, invoca al servicio y formatea la respuesta HTTP con el código de estado correcto.
+**Controlador** (`task.controller.js`) — Extrae datos de `req.body` y `req.params`, aplica validaciones defensivas con sentencias `if`, invoca al servicio si los datos son correctos, y formatea la respuesta HTTP con el código de estado adecuado.
 
-**Servicio** (`task.service.js`): Contiene la lógica de negocio pura. Trabaja con los datos directamente. No sabe nada de Express, HTTP, `req` ni `res`. Es JavaScript puro.
+**Servicio** (`task.service.js`) — Lógica de negocio pura. No sabe nada de Express, HTTP, `req` ni `res`. Es JavaScript puro, lo que permite escribir tests sin levantar un servidor y reutilizar la lógica si se cambia de framework.
 
 ## Middlewares
 
-El servidor usa tres middlewares globales que procesan cada petición en orden:
+El servidor procesa cada petición a través de estos middlewares, en orden:
 
-1. **`cors()`** — Permite peticiones desde otros orígenes (necesario para que el frontend en un puerto distinto pueda comunicarse con el backend).
-2. **`express.json()`** — Parsea el cuerpo de las peticiones JSON y lo coloca en `req.body`.
-3. **`logger`** (personalizado) — Registra en consola cada petición con su método, ruta, código de respuesta y duración en milisegundos.
+1. **`cors()`** — Permite peticiones cross-origin (necesario cuando frontend y backend corren en puertos distintos o en dominios diferentes).
+2. **`express.json()`** — Parsea el cuerpo de peticiones JSON y lo deja disponible en `req.body`. Si el JSON es inválido, el error lo recoge el `errorHandler`.
+3. **`express.static()`** — Sirve los archivos estáticos del frontend (HTML, JS, CSS) desde la carpeta raíz del proyecto. Esto permite acceder a toda la aplicación desde `http://localhost:3000`.
+4. **`logger`** (personalizado) — Registra cada petición en consola con método, ruta, código de respuesta y duración en milisegundos. Se suscribe al evento `finish` del stream de respuesta para medir el tiempo total.
+5. **`swagger-ui`** — Monta la documentación interactiva de la API en `/api/docs` usando `swagger-ui-express` con la especificación generada por `swagger-jsdoc`.
+6. **`errorHandler`** (4 parámetros) — Red de seguridad final. Recoge cualquier error no gestionado que los controladores pasen con `next(err)`. Mapea errores conocidos a códigos HTTP y oculta detalles técnicos al cliente.
+
+## Manejo de errores
+
+El sistema gestiona errores en dos niveles:
+
+**Errores de validación (400):** El controlador detecta datos mal formados antes de invocar al servicio y responde directamente con `res.status(400).json(...)`. El middleware de errores no interviene.
+
+**Errores de negocio y errores inesperados:** El servicio lanza excepciones con `throw`. El controlador las atrapa en un `catch` y las pasa con `next(err)`. El middleware global `errorHandler` las recibe y decide el código HTTP:
+
+```
+Servicio: throw → Controlador: catch → next(err) → errorHandler
+```
+
+| Tipo de error | Código HTTP | Quién responde | Ejemplo |
+|---|---|---|---|
+| Datos inválidos del cliente | 400 | Controlador (directamente) | POST sin texto, categoría inválida |
+| Recurso no encontrado | 404 | errorHandler (via `next`) | DELETE de ID inexistente |
+| Error inesperado del servidor | 500 | errorHandler (via `next`) | JSON mal formado, error de runtime |
+
+El `errorHandler` nunca filtra detalles técnicos (stack traces, nombres de variables) al cliente. Solo envía mensajes genéricos en las respuestas 500.
 
 ## Configuración y variables de entorno
 
-Las variables de entorno se definen en `server/.env` (no se sube al repositorio):
+Las variables de entorno se definen en `server/.env` (excluido del repositorio vía `.gitignore`):
 
 ```
 PORT=3000
 NODE_ENV=development
 ```
 
-El módulo `src/config/env.js` carga estas variables con `dotenv` y **lanza un error si `PORT` no está definido**, impidiendo que el servidor arranque sin configuración (principio fail fast).
+El módulo `src/config/env.js` carga estas variables con `dotenv` y lanza un error si `PORT` no está definido en entorno local, impidiendo que el servidor arranque sin configuración (principio fail fast). En entornos serverless (Vercel), donde la plataforma gestiona el puerto internamente, se usa un valor por defecto sin lanzar error.
+
+## Documentación Swagger (Bonus)
+
+La API cuenta con documentación interactiva generada automáticamente a partir de anotaciones `@openapi` en los archivos de rutas.
+
+**Acceso local:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+
+**Acceso en producción:** [https://taskflow-project-jet.vercel.app/api/docs](https://taskflow-project-jet.vercel.app/api/docs)
+
+**Implementación:**
+- `src/config/swagger.js` — Define la especificación OpenAPI 3.0 con schemas reutilizables (Task, TaskInput, TaskUpdate, Error).
+- `src/routes/task.routes.js` — Cada endpoint incluye anotaciones `@openapi` con parámetros, cuerpos de petición, respuestas y ejemplos.
+- `src/index.js` — Monta `swagger-ui-express` en la ruta `/api/docs`.
+
+La documentación incluye "Try it out" para probar cada endpoint directamente desde el navegador.
 
 ## Instalación y ejecución
 
 ```bash
 cd server
 npm install
-npm run dev      # Desarrollo (con nodemon, recarga automática)
+
+# Crear .env si no existe
+echo "PORT=3000" > .env
+echo "NODE_ENV=development" >> .env
+
+npm run dev      # Desarrollo (nodemon, recarga automática)
 npm start        # Producción
 ```
 
+Una vez corriendo, abrir `http://localhost:3000` para la aplicación completa y `http://localhost:3000/api/docs` para la documentación Swagger.
+
+## Despliegue en Vercel
+
+El backend se despliega como Serverless Function:
+
+- `vercel.json` redirige las peticiones `/api/*` a `server/src/index.js`.
+- `index.js` exporta `module.exports = app` y solo llama a `app.listen()` en local (no en Vercel).
+- `env.js` detecta el entorno Vercel (`VERCEL=1`) para no exigir `PORT`.
+- Las variables de entorno se configuran en Vercel Dashboard → Settings → Environment Variables.
+
 ## API REST — Endpoints
 
-Base URL: `http://localhost:3000/api/v1/tasks`
+Base URL: `/api/v1/tasks`
 
 ### GET /api/v1/tasks
 
@@ -86,29 +145,21 @@ Devuelve todas las tareas.
     "priority": "Alta",
     "completed": false,
     "createdAt": 1710850000000,
-    "completedAt": null
+    "completedAt": null,
+    "dueDate": 1710936400000,
+    "notes": "Capítulos 3 y 4",
+    "project": "Sprint 14"
   }
 ]
 ```
 
 ### GET /api/v1/tasks/:id
 
-Devuelve una tarea por su ID.
+Devuelve una tarea por su UUID.
 
-**Respuesta 200:**
-```json
-{
-  "id": "a1b2c3d4-...",
-  "text": "Estudiar para el examen",
-  "category": "Estudio",
-  "priority": "Alta",
-  "completed": false,
-  "createdAt": 1710850000000,
-  "completedAt": null
-}
-```
+**Respuesta 200:** Objeto de tarea individual.
 
-**Respuesta 404** (ID no existe):
+**Respuesta 404:**
 ```json
 { "error": "Recurso no encontrado" }
 ```
@@ -122,96 +173,169 @@ Crea una nueva tarea.
 {
   "text": "Preparar presentación",
   "category": "Trabajo",
-  "priority": "Alta"
+  "priority": "Alta",
+  "dueDate": 1710936400000,
+  "notes": "Incluir gráficos de Q1",
+  "project": "Sprint 14"
 }
 ```
 
-**Campos obligatorios:** `text` (string, mínimo 3 caracteres).
-**Campos opcionales:** `category` (por defecto "Personal"), `priority` (por defecto "Media").
+| Campo | Tipo | Obligatorio | Valor por defecto |
+|---|---|---|---|
+| text | string (min 3 chars) | Sí | — |
+| category | string | No | "Personal" |
+| priority | string | No | "Media" |
+| dueDate | number (timestamp) o null | No | null |
+| notes | string | No | "" |
+| project | string o null | No | null |
 
-**Categorías válidas:** Trabajo, Personal, Estudio, Proyectos, Salud, Errands.
+**Categorías válidas:** Trabajo, Personal, Estudio, Salud, Gestiones.
+
 **Prioridades válidas:** Alta, Media, Baja.
 
-**Respuesta 201:**
-```json
-{
-  "id": "e5f6g7h8-...",
-  "text": "Preparar presentación",
-  "category": "Trabajo",
-  "priority": "Alta",
-  "completed": false,
-  "createdAt": 1710850100000,
-  "completedAt": null
-}
-```
+**Respuesta 201:** Tarea creada con ID generado por el servidor.
 
-**Respuesta 400** (validación fallida):
+**Respuesta 400:**
 ```json
 { "error": "El texto es obligatorio y debe tener al menos 3 caracteres." }
 ```
 
+### PUT /api/v1/tasks
+
+Sincronización masiva: reemplaza todas las tareas del servidor con el array enviado por el frontend. Existe porque el frontend mantiene su propio estado en memoria y lo sincroniza completo tras cada cambio.
+
+**Request body:** Array de objetos de tarea.
+
+**Respuesta 200:** Array resultante.
+
+**Respuesta 400:**
+```json
+{ "error": "El cuerpo debe ser un array de tareas." }
+```
+
 ### PATCH /api/v1/tasks/:id
 
-Actualiza parcialmente una tarea existente. Solo se modifican los campos enviados.
+Actualiza parcialmente una tarea. Solo modifica los campos incluidos en el cuerpo.
 
-**Request body** (todos opcionales, al menos uno obligatorio):
+**Request body** (al menos un campo):
 ```json
-{
-  "completed": true
-}
+{ "completed": true }
 ```
 
-**Respuesta 200:**
-```json
-{
-  "id": "a1b2c3d4-...",
-  "text": "Estudiar para el examen",
-  "category": "Estudio",
-  "priority": "Alta",
-  "completed": true,
-  "createdAt": 1710850000000,
-  "completedAt": 1710850200000
-}
-```
+**Respuesta 200:** Tarea actualizada.
 
-**Respuesta 400** (sin campos o datos inválidos):
-```json
-{ "error": "Debes enviar al menos un campo para actualizar." }
-```
+**Respuesta 400:** Datos inválidos o ningún campo enviado.
 
-**Respuesta 404** (ID no existe):
-```json
-{ "error": "Recurso no encontrado" }
-```
+**Respuesta 404:** ID no existe.
 
 ### DELETE /api/v1/tasks/:id
 
-Elimina una tarea por su ID.
+Elimina una tarea por su UUID.
 
 **Respuesta 204:** Sin cuerpo (éxito).
 
-**Respuesta 404** (ID no existe):
+**Respuesta 404:**
 ```json
 { "error": "Recurso no encontrado" }
 ```
 
 ## Validaciones defensivas
 
-El controlador aplica validaciones en la frontera de red antes de que los datos lleguen al servicio:
+El controlador aplica validaciones en la frontera de red, antes de que los datos lleguen al servicio:
 
-- `text`: obligatorio, tipo string, mínimo 3 caracteres tras trim.
-- `category`: si se envía, debe ser una de las categorías válidas.
-- `priority`: si se envía, debe ser una de las prioridades válidas.
-- `completed`: si se envía, debe ser boolean (`true`/`false`).
+| Campo | Regla |
+|---|---|
+| text | Obligatorio, tipo string, mínimo 3 caracteres tras trim |
+| category | Si se envía, debe ser una de las categorías válidas |
+| priority | Si se envía, debe ser una de las prioridades válidas |
+| completed | Si se envía, debe ser booleano estricto (true/false) |
+| dueDate | Opcional, timestamp numérico o null |
+| notes | Opcional, string |
+| project | Opcional, string o null |
 
-Si alguna validación falla, el servidor responde con HTTP 400 y un mensaje descriptivo del error. Los datos nunca llegan al servicio si no son correctos.
+Si alguna validación falla, el servidor responde con HTTP 400 y un mensaje descriptivo. Los datos nunca llegan al servicio si no son correctos.
+
+## Conexión frontend ↔ backend
+
+El frontend eliminó toda dependencia de `localStorage` para tareas. `TaskStore` en `app.js` habla con el backend a través de `src/api/client.js`:
+
+| Operación frontend | Función client.js | Endpoint |
+|---|---|---|
+| Cargar tareas al iniciar | `apiCargarTareas()` | GET /api/v1/tasks |
+| Crear una tarea | `apiCrearTarea(data)` | POST /api/v1/tasks |
+| Actualizar una tarea | `apiActualizarTarea(id, data)` | PATCH /api/v1/tasks/:id |
+| Eliminar una tarea | `apiEliminarTarea(id)` | DELETE /api/v1/tasks/:id |
+| Sincronización masiva | `apiSincronizarTareas(tasks)` | PUT /api/v1/tasks |
+
+La UI gestiona tres estados de red:
+
+1. **Carga** — Spinner con "Conectando con el servidor…" mientras se espera la respuesta.
+2. **Éxito** — Se oculta el spinner y se renderizan las tareas.
+3. **Error** — Banner rojo con el mensaje de error y botón "Reintentar".
+
+## Pruebas de integración
+
+La entrega incluye una colección real de Postman en `../docs/postman/taskflow-api.postman_collection.json` y una guía breve en `../docs/postman/taskflow-api-tests.md`. Los ejemplos `curl` se conservan como apoyo rápido desde terminal, pero las pruebas manuales pedidas en la consigna quedan documentadas con Postman.
+
+### Prueba 1 — Crear y recuperar (201 + 200)
+
+```bash
+curl -X POST http://localhost:3000/api/v1/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Tarea de prueba", "category": "Trabajo", "priority": "Alta"}'
+```
+**Resultado:** 201 — Tarea creada con ID generado.
+
+```bash
+curl http://localhost:3000/api/v1/tasks
+```
+**Resultado:** 200 — Array con la tarea.
+
+### Prueba 2 — Error 400: POST sin texto
+
+```bash
+curl -X POST http://localhost:3000/api/v1/tasks \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+**Resultado:** 400 — `{"error":"El texto es obligatorio y debe tener al menos 3 caracteres."}`
+
+**Quién responde:** El controlador directamente (no pasa por `errorHandler`).
+
+### Prueba 3 — Error 404: DELETE con ID inexistente
+
+```bash
+curl -X DELETE http://localhost:3000/api/v1/tasks/id-inventado
+```
+**Resultado:** 404 — `{"error":"Recurso no encontrado"}`
+
+**Flujo:** Servicio lanza `throw new Error("NOT_FOUND")` → controlador lo captura en `catch` → `next(err)` → `errorHandler` responde 404.
+
+### Prueba 4 — Error 500: JSON mal formado
+
+```bash
+curl -X POST http://localhost:3000/api/v1/tasks \
+  -H "Content-Type: application/json" \
+  -d 'esto no es json'
+```
+**Resultado:** 500 — `{"error":"Error interno del servidor"}`
+
+**Flujo:** `express.json()` falla al parsear → `errorHandler` lo recoge → responde 500 con mensaje genérico, sin filtrar detalles técnicos.
 
 ## Dependencias
 
 **Producción:**
-- `express` — Framework web para Node.js
-- `cors` — Middleware para permitir peticiones cross-origin
-- `dotenv` — Carga variables de entorno desde `.env`
+
+| Paquete | Versión | Propósito |
+|---|---|---|
+| express | ^5.2.1 | Framework web para Node.js |
+| cors | ^2.8.6 | Middleware para peticiones cross-origin |
+| dotenv | ^17.3.1 | Carga variables de entorno desde .env |
+| swagger-jsdoc | ^6.2.8 | Genera especificación OpenAPI desde comentarios JSDoc |
+| swagger-ui-express | ^5.0.1 | Monta documentación interactiva en /api/docs |
 
 **Desarrollo:**
-- `nodemon` — Reinicia el servidor automáticamente al guardar cambios
+
+| Paquete | Versión | Propósito |
+|---|---|---|
+| nodemon | ^3.1.14 | Reinicia el servidor automáticamente al guardar cambios |

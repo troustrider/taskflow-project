@@ -11,6 +11,18 @@
 </head>
 
 <body>
+<!--
+  Data attributes used by app.js for event delegation and rendering:
+    data-section="now|next|done"  — Identifies each task list for drag-drop and bulk actions.
+    data-id="<uuid>"              — Unique task identifier on each <li>; used by actions and drag-drop.
+    data-action="<verb>"          — Action buttons inside task cards (complete, restore, delete,
+                                    toggle-detail, edit, edit-save, edit-cancel).
+    data-role="edit-text"         — Marks the inline-edit <input> so Keyboard can detect it.
+    data-category-filter="<cat>"  — Category filter pills ("all" | category name).
+    data-sidebar-filter="<cat>"   — Sidebar category filter buttons (mirrors category-filter).
+    data-clear-filter="<key>"     — Active-filter chip removal (query | category | project).
+    data-detail-for="<uuid>"      — Links a detail panel <div> to its parent task.
+-->
 
 <header class="sticky top-0 z-30 border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-lg dark:border-neutral-800/70 dark:bg-neutral-950/90">
 <div class="mx-auto flex max-w-7xl items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2.5 sm:py-3 xl:px-10">
@@ -178,24 +190,24 @@ dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-500 dark:ho
 <div id="input-help" class="hidden absolute left-0 right-0 top-full mt-2 rounded-xl border border-stone-200/60 bg-white p-4 shadow-lg z-10 dark:border-neutral-700/50 dark:bg-neutral-900">
   <p class="text-xs font-semibold text-stone-600 dark:text-neutral-300 mb-2">Sintaxis rápida</p>
   <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[11px]">
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-700 dark:text-amber-300">@hoy</kbd> Fecha para hoy</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-700 dark:text-amber-300">@mañana</kbd> Fecha mañana</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-700 dark:text-amber-300">@viernes</kbd> Día de la semana</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-700 dark:text-amber-300">@15mar</kbd> Fecha concreta</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-red-500 dark:text-red-400">!alta</kbd> Prioridad alta</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-stone-400 dark:text-stone-500">!baja</kbd> Prioridad baja</div>
     <div class="col-span-2 border-t border-stone-100 dark:border-neutral-800 mt-1 pt-1.5"></div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-red-500">!alta</kbd> Prioridad alta</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-stone-400">!baja</kbd> Prioridad baja</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-orange-600 dark:text-orange-400">#trabajo</kbd> Categoría</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-blue-600 dark:text-blue-400">#personal</kbd> Categoría</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-violet-600 dark:text-violet-400">#estudio</kbd> Categoría</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-pink-600 dark:text-pink-400">#salud</kbd> Categoría</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-stone-500 dark:text-stone-400">#gestiones</kbd> Categoría</div>
     <div class="col-span-2 border-t border-stone-100 dark:border-neutral-800 mt-1 pt-1.5"></div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-600 dark:text-amber-400">#trabajo</kbd> Categoría</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-600 dark:text-amber-400">#personal</kbd> Categoría</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-600 dark:text-amber-400">#estudio</kbd> Categoría</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-600 dark:text-amber-400">#salud</kbd> Categoría</div>
-    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-amber-600 dark:text-amber-400">#gestiones</kbd> Categoría</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-teal-600 dark:text-teal-400">@hoy</kbd> Fecha para hoy</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-teal-600 dark:text-teal-400">@mañana</kbd> Fecha mañana</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-teal-600 dark:text-teal-400">@viernes</kbd> Día de la semana</div>
+    <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-teal-600 dark:text-teal-400">@15mar</kbd> Fecha concreta</div>
     <div class="col-span-2 border-t border-stone-100 dark:border-neutral-800 mt-1 pt-1.5"></div>
     <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-indigo-500 dark:text-indigo-400">/mudanza</kbd> Proyecto</div>
     <div class="text-stone-500 dark:text-neutral-400"><kbd class="font-mono-ui text-indigo-500 dark:text-indigo-400">/sprint14</kbd> Proyecto</div>
   </div>
-  <p class="text-[10px] text-stone-300 dark:text-neutral-600 mt-3">Los proyectos se crean al asignarlos · Categorías y proyectos son independientes</p>
+  <p class="text-[10px] text-stone-400 dark:text-neutral-600 mt-3">Los proyectos se crean al asignarlos · Categorías y proyectos son independientes</p>
 </div>
 </form>
 <!-- Selectores clásicos (colapsables) -->
@@ -354,6 +366,26 @@ Hecho <span id="done-count" class="font-mono-ui">0</span>
   <button id="undo-toast-btn" type="button" class="undo-toast-action">Deshacer</button>
 </div>
 
+<!-- Banner de error de red -->
+<div id="network-error" class="hidden fixed top-0 left-0 right-0 z-50 bg-red-600 text-white text-center text-sm py-2 px-4" role="alert">
+  <span id="network-error-msg">Error de conexión con el servidor</span>
+  <button id="network-retry" type="button" class="ml-3 underline font-medium hover:text-red-100">Reintentar</button>
+</div>
+
+<!-- Indicador de peticiones en curso -->
+<div id="network-pending" class="hidden fixed bottom-4 right-4 z-50 rounded-full border border-stone-200/80 bg-white/95 px-4 py-2 text-xs font-medium text-stone-600 shadow-lg backdrop-blur dark:border-white/10 dark:bg-neutral-900/95 dark:text-stone-200" aria-live="polite">
+  <span id="network-pending-msg">Sincronizando cambios...</span>
+</div>
+
+<!-- Indicador de carga inicial -->
+<div id="loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-stone-50/95 dark:bg-neutral-950/95">
+  <div class="text-center">
+    <div class="inline-block h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-amber-500 dark:border-neutral-600 dark:border-t-amber-400"></div>
+    <p class="mt-3 text-sm text-stone-500 dark:text-neutral-400">Conectando con el servidor…</p>
+  </div>
+</div>
+
+<script src="src/api/client.js" defer></script>
 <script src="app.js" defer></script>
 </body>
 </html>

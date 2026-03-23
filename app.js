@@ -13,7 +13,7 @@
  *   - FECHA LÍMITE (@): Fecha de vencimiento. Tareas vencidas o de hoy → "Ahora".
  *   - NOTAS: Texto libre ampliado, editable desde el panel de detalle inline.
  *
- * Badge hierarchy (psicología de la atención):
+ * Badge hierarchy:
  *   1. Fecha  — rounded-md, font-mono (urgencia temporal, sistema 1)
  *   2. Prioridad — rounded-full, color semáforo (señal cromática)
  *   3. Categoría — rounded-full, dot ● circular + fondo neutro
@@ -25,7 +25,7 @@
    ═══════════════════════════════════════════ */
 
 const CONFIG = Object.freeze({
-  STORAGE_KEY: "taskflow_tasks_v13", THEME_KEY: "taskflow_theme_v12", LOCATION_CACHE_KEY: "taskflow_location",
+  THEME_KEY: "taskflow_theme_v12", LOCATION_CACHE_KEY: "taskflow_location",
   MAX_TASK_LENGTH: 300, MAX_NOTES_LENGTH: 2000, MAX_PROJECT_LENGTH: 30,
   UNDO_TIMEOUT_MS: 4000, SEARCH_DEBOUNCE_MS: 150, LOCATION_TIMEOUT_MS: 5000,
   ANIMATION_MS: 220, CLOCK_INTERVAL_MS: 60000,
@@ -49,7 +49,7 @@ const CATEGORY_COLORS_DARK = Object.freeze({
   Gestiones: "#697384",
 });
 
-/** Tailwind classes for tinted category badges — each category gets its own identity. */
+/** Clases Tailwind para badges de categoría tintados — cada categoría tiene su propia identidad visual. */
 const CATEGORY_BADGE_CLASS = "border-stone-200/80 bg-stone-50/90 text-stone-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-200";
 const PRIORITIES = Object.freeze(["Alta", "Media", "Baja"]);
 
@@ -165,15 +165,30 @@ const DOM = {
    ═══════════════════════════════════════════ */
 
 const Utils = {
+  /** Recorta cualquier valor a string, devolviendo "" para valores nulos. */
   safeTrim(v) { return (v ?? "").toString().trim(); },
+
+  /** Normaliza texto para detección de duplicados: recorta, colapsa espacios y pasa a minúsculas. */
   normalizeText(t) { return this.safeTrim(t).replace(/\s+/g, " ").toLowerCase(); },
+
+  /** Devuelve la fecha de hoy en formato legible en español, ej: "viernes 21 de marzo". */
   formatDate() {
     const d = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
     const m = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
     const n = new Date(); return `${d[n.getDay()]} ${n.getDate()} de ${m[n.getMonth()]}`;
   },
+
+  /** Devuelve la hora actual formateada como HH:MM (24 h, locale español). */
   formatTime() { return new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }); },
+
+  /** Devuelve la hora actual (0-23) para el saludo contextual. */
   currentHour() { return new Date().getHours(); },
+
+  /**
+   * Convierte un timestamp en una cadena relativa legible (español).
+   * @param {number|null} ts — Milisegundos desde Unix epoch
+   * @returns {string} e.g. "ahora", "hace 3 min", "hace 2 h", "hace 5 d", "14 mar"
+   */
   relativeTime(ts) {
     if (!ts) return ""; const diff = Date.now() - ts;
     const mins = Math.floor(diff / 60000); const hrs = Math.floor(diff / 3600000); const days = Math.floor(diff / 86400000);
@@ -182,15 +197,35 @@ const Utils = {
     const d = new Date(ts); const mo = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
     return `${d.getDate()} ${mo[d.getMonth()]}`;
   },
+
+  /**
+   * Envuelve las coincidencias de búsqueda en elementos <mark> para resaltado visual.
+   * @param {string} text — Texto crudo de la tarea
+   * @param {string} q   — Consulta de búsqueda actual (mín 2 caracteres para activar)
+   * @returns {string} HTML con las coincidencias resaltadas
+   */
   highlightText(text, q) {
     if (!q || q.length < 2) return this._escapeHtml(text);
     return this._escapeHtml(text).replace(new RegExp(`(${this._escapeRegex(q)})`, "gi"), '<mark class="search-highlight">$1</mark>');
   },
+
+  /** @private Escapa entidades HTML para prevenir XSS en contenido dinámico. */
   _escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; },
+  /** @private Escapa caracteres especiales de regex en cadenas del usuario. */
   _escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); },
+
+  /** Trunca un timestamp a medianoche (00:00:00.000) para comparaciones por fecha. */
   startOfDay(ts) { const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime(); },
+  /** Devuelve true si el timestamp corresponde a la fecha de hoy. */
   isDueToday(ts) { return ts && this.startOfDay(ts) === this.startOfDay(Date.now()); },
+  /** Devuelve true si el timestamp es anterior a hoy (tarea vencida). */
   isOverdue(ts) { return ts && this.startOfDay(ts) < this.startOfDay(Date.now()); },
+
+  /**
+   * Formatea un timestamp de fecha límite en una etiqueta corta y contextual.
+   * @param {number|null} ts — Milisegundos Unix epoch
+   * @returns {string} "hoy", "mañana", "ayer", "vie 21 mar", or "21 mar"
+   */
   formatDueDate(ts) {
     if (!ts) return "";
     const diff = (this.startOfDay(ts) - this.startOfDay(Date.now())) / 86400000;
@@ -200,6 +235,13 @@ const Utils = {
     const mo = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
     return diff > 1 && diff <= 6 ? `${days[d.getDay()]} ${d.getDate()} ${mo[d.getMonth()]}` : `${d.getDate()} ${mo[d.getMonth()]}`;
   },
+
+  /**
+   * Parsea un token @fecha del input rápido y lo convierte en timestamp.
+   * Soporta: @hoy, @mañana, @viernes (próxima ocurrencia), @15mar, y fechas ISO.
+   * @param {string} token — e.g. "@hoy", "@viernes", "@15mar"
+   * @returns {number|null} Timestamp a medianoche o null si no se reconoce
+   */
   parseDateToken(token) {
     const t = token.toLowerCase().replace("@", "");
     if (t === "hoy" || t === "today") return this.startOfDay(Date.now());
@@ -229,7 +271,7 @@ const InputParser = {
     "!baja":"Baja","!low":"Baja","!b":"Baja","!3":"Baja",
   },
   /**
-   * Extracts smart tokens from the quick-add input while keeping the form UX unchanged.
+   * Extrae tokens inteligentes del input rápido manteniendo la UX del formulario.
    * @param {string} raw
    * @returns {{ text: string, category: (string|null), priority: (string|null), dueDate: (number|null), project: (string|null) }}
    */
@@ -269,11 +311,50 @@ const InputParser = {
    ═══════════════════════════════════════════ */
 
 const TaskStore = {
-  load() {
-    try { const r = localStorage.getItem(CONFIG.STORAGE_KEY); const p = r ? JSON.parse(r) : []; return Array.isArray(p) ? p.map(t => this._normalize(t)) : []; }
-    catch { return []; }
+  async load() {
+    try {
+      const tasks = await apiCargarTareas();
+      return Array.isArray(tasks) ? tasks.map(t => this._normalize(t)) : [];
+    } catch (err) {
+      console.error('Error cargando tareas del servidor:', err);
+      throw err;
+    }
   },
-  save(tasks) { localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(tasks)); },
+  async create(taskData) {
+    try {
+      const task = await apiCrearTarea(taskData);
+      return this._normalize(task);
+    } catch (err) {
+      console.error('Error creando tarea en el servidor:', err);
+      throw err;
+    }
+  },
+  async update(id, updates) {
+    try {
+      const task = await apiActualizarTarea(id, updates);
+      return this._normalize(task);
+    } catch (err) {
+      console.error('Error actualizando tarea en el servidor:', err);
+      throw err;
+    }
+  },
+  async remove(id) {
+    try {
+      await apiEliminarTarea(id);
+    } catch (err) {
+      console.error('Error eliminando tarea en el servidor:', err);
+      throw err;
+    }
+  },
+  async sync(tasks) {
+    try {
+      const syncedTasks = await apiSincronizarTareas(tasks);
+      return Array.isArray(syncedTasks) ? syncedTasks.map(t => this._normalize(t)) : [];
+    } catch (err) {
+      console.error('Error sincronizando con el servidor:', err);
+      throw err;
+    }
+  },
   _normalize(t) {
     const o = { id: t.id ?? crypto.randomUUID(), text: t.text ?? "", category: t.category ?? "Personal", priority: t.priority ?? "Media",
       completed: Boolean(t.completed), createdAt: t.createdAt ?? Date.now(), completedAt: t.completedAt ?? null,
@@ -284,13 +365,36 @@ const TaskStore = {
 };
 
 /* ═══════════════════════════════════════════
+   NETWORK UI — Estados de carga y error
+   ═══════════════════════════════════════════ */
+
+const NetworkUI = {
+  showLoading() { DOM.get("loading-overlay")?.classList.remove("hidden"); },
+  hideLoading() { DOM.get("loading-overlay")?.classList.add("hidden"); },
+  showPending(message = "Sincronizando cambios...") {
+    const badge = DOM.get("network-pending");
+    const text = DOM.get("network-pending-msg");
+    if (text) text.textContent = message;
+    if (badge) badge.classList.remove("hidden");
+  },
+  hidePending() { DOM.get("network-pending")?.classList.add("hidden"); },
+  showError(msg) {
+    const banner = DOM.get("network-error");
+    const msgEl = DOM.get("network-error-msg");
+    if (banner) banner.classList.remove("hidden");
+    if (msgEl) msgEl.textContent = msg || "Error de conexión con el servidor";
+  },
+  hideError() { DOM.get("network-error")?.classList.add("hidden"); },
+};
+
+/* ═══════════════════════════════════════════
    TASK SERVICE
    ═══════════════════════════════════════════ */
 
 const TaskService = {
   tasks: [],
-  load() { this.tasks = TaskStore.load(); },
-  save() { TaskStore.save(this.tasks); },
+  async load() { this.tasks = await TaskStore.load(); },
+  async save() { this.tasks = await TaskStore.sync(this.tasks); },
 
   _validateText(text, currentId = null) {
     const trimmed = Utils.safeTrim(text);
@@ -301,9 +405,12 @@ const TaskService = {
     if (duplicate) return { ok: false, error: "DUPLICATE" };
     return { ok: true, text: trimmed };
   },
+  validateText(id, text) {
+    return this._validateText(text, id);
+  },
 
   /**
-   * Creates a task and inserts it at the top of the store.
+   * Crea una tarea y la inserta al inicio del array.
    * @param {string} text
    * @param {string} category
    * @param {string} priority
@@ -317,11 +424,49 @@ const TaskService = {
     this.tasks.unshift(task);
     return { ok: true, task };
   },
+  async createRemote(text, category, priority, { dueDate = null, notes = "", project = null } = {}) {
+    const validation = this._validateText(text);
+    if (!validation.ok) return validation;
+
+    const createdTask = await TaskStore.create({
+      text: validation.text,
+      category,
+      priority,
+      dueDate,
+      notes,
+      project,
+    });
+
+    this.tasks.unshift(createdTask);
+    return { ok: true, task: createdTask };
+  },
   updateText(id, text) {
     const validation = this._validateText(text, id);
     if (!validation.ok) return validation;
     this.tasks = this.tasks.map(t => t.id === id ? { ...t, text: validation.text } : t);
     return { ok: true };
+  },
+  async patchRemote(id, updates) {
+    const index = this.tasks.findIndex(t => t.id === id);
+    if (index === -1) throw new Error("NOT_FOUND");
+
+    if (updates.text !== undefined) {
+      const validation = this._validateText(updates.text, id);
+      if (!validation.ok) return validation;
+      updates = { ...updates, text: validation.text };
+    }
+
+    const previousTask = structuredClone(this.tasks[index]);
+    this.tasks[index] = { ...this.tasks[index], ...updates };
+
+    try {
+      const updatedTask = await TaskStore.update(id, updates);
+      this.tasks[index] = updatedTask;
+      return { ok: true, task: updatedTask };
+    } catch (err) {
+      this.tasks[index] = previousTask;
+      throw err;
+    }
   },
   setCompleted(id, c) { this.tasks = this.tasks.map(t => t.id === id ? { ...t, completed: c, completedAt: c ? Date.now() : null } : t); },
   completeTasks(ids) {
@@ -337,6 +482,20 @@ const TaskService = {
     return changed;
   },
   remove(id) { const i = this.tasks.findIndex(t => t.id === id); if (i === -1) return { removed: null, index: -1 }; const [r] = this.tasks.splice(i, 1); return { removed: r, index: i }; },
+  async removeRemote(id) {
+    const removal = this.remove(id);
+    if (!removal.removed) {
+      throw new Error("NOT_FOUND");
+    }
+
+    try {
+      await TaskStore.remove(id);
+      return removal;
+    } catch (err) {
+      this.insertAt(removal.removed, removal.index);
+      throw err;
+    }
+  },
   insertAt(task, idx) { this.tasks.splice(Math.min(idx, this.tasks.length), 0, task); },
   completeAll() { this.tasks = this.tasks.map(t => t.completed ? t : { ...t, completed: true, completedAt: Date.now() }); },
   clearCompleted(ids = null) {
@@ -374,7 +533,7 @@ const TaskService = {
     return { total: this.tasks.length, pending, completed, byCategory };
   },
   /**
-   * Splits the filtered collection into the three sections rendered by the UI.
+   * Divide la colección filtrada en las tres secciones que renderiza la UI.
    * @param {string} query
    * @param {string} categoryFilter
    * @param {string} projectFilter
@@ -418,6 +577,22 @@ const TaskService = {
    UI STATE
    ═══════════════════════════════════════════ */
 
+/**
+ * Estado mutable de la UI — fuente única de verdad para flags transitorios de vista.
+ * Mutado directamente por event handlers; leído por App.render() para decidir qué mostrar.
+ *
+ * @property {string}  categoryFilter     — Filtro de categoría activo ("all" | category name)
+ * @property {string}  projectFilter      — Filtro de proyecto activo ("all" | project name)
+ * @property {string|null} lastAddedTaskId — ID de la tarea recién creada (dispara animación de entrada, se resetea tras render)
+ * @property {string|null} editingTaskId   — ID de la tarea en modo edición inline
+ * @property {string|null} expandedTaskId  — ID de la tarea cuyo panel de detalle está abierto
+ * @property {boolean} doneExpanded        — Si la sección "Completadas" está expandida o colapsada
+ * @property {number|null} searchDebounceTimer — Handle de setTimeout para el debounce de búsqueda
+ * @property {boolean} focusMode           — Si el overlay de Focus Mode está activo
+ * @property {number}  focusIndex          — Índice de la tarea mostrada en Focus Mode
+ * @property {boolean} selectorsExpanded   — Si el panel de selectores guiados está abierto
+ * @property {object}  visibleTaskIds      — { now: string[], next: string[], done: string[] } — IDs renderizados en cada sección (usado por drag-drop y acciones masivas)
+ */
 const UIState = {
   categoryFilter: "all", projectFilter: "all",
   lastAddedTaskId: null, editingTaskId: null, expandedTaskId: null,
@@ -604,7 +779,7 @@ const UndoToast = {
     this._timer = setTimeout(() => this.hide(), CONFIG.UNDO_TIMEOUT_MS);
   },
   hide() { DOM.get("undo-toast")?.classList.remove("visible"); if (this._timer) { clearTimeout(this._timer); this._timer = null; } this._task = null; this._index = null; },
-  undo() { if (!this._task) return; TaskService.insertAt(this._task, this._index ?? 0); App.commit(); this.hide(); },
+  undo() { if (!this._task) return; TaskService.insertAt(this._task, this._index ?? 0); void App.commit("Restaurando tarea..."); this.hide(); },
 };
 
 /* ═══════════════════════════════════════════
@@ -613,7 +788,7 @@ const UndoToast = {
 
 const TaskDetail = {
   /**
-   * Builds the inline detail editor shown below an expanded task card.
+   * Construye el editor de detalle inline que se muestra bajo una tarjeta expandida.
    * @param {object} task
    * @returns {HTMLDivElement}
    */
@@ -628,7 +803,13 @@ const TaskDetail = {
     const di = document.createElement("input"); di.type = "date";
     di.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
     di.value = task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "";
-    di.addEventListener("change", () => { TaskService.updateTask(task.id, { dueDate: di.value ? Utils.startOfDay(Date.parse(di.value+"T00:00:00")) : null }); App.commit(); });
+    di.addEventListener("change", () => {
+      void App.patchTask(
+        task.id,
+        { dueDate: di.value ? Utils.startOfDay(Date.parse(di.value + "T00:00:00")) : null },
+        "Actualizando fecha limite..."
+      );
+    });
     dw.appendChild(di);
 
     const pw = document.createElement("div"); pw.className = "flex-1 min-w-[140px]";
@@ -641,8 +822,7 @@ const TaskDetail = {
     pi.addEventListener("change", () => {
       const value = normalizeProjectName(pi.value);
       pi.value = value || "";
-      TaskService.updateTask(task.id, { project: value });
-      App.commit();
+      void App.patchTask(task.id, { project: value }, "Actualizando proyecto...");
     });
     pw.append(pi, dl); r1.append(dw, pw);
 
@@ -652,7 +832,9 @@ const TaskDetail = {
     const cs = document.createElement("select");
     cs.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
     for (const c of CATEGORIES) { const o = document.createElement("option"); o.value = c; o.textContent = c; if (c === task.category) o.selected = true; cs.appendChild(o); }
-    cs.addEventListener("change", () => { TaskService.updateTask(task.id, { category: cs.value }); App.commit(); });
+    cs.addEventListener("change", () => {
+      void App.patchTask(task.id, { category: cs.value }, "Actualizando categoria...");
+    });
     cw.appendChild(cs);
 
     const prw = document.createElement("div"); prw.className = "flex-1 min-w-[100px]";
@@ -660,7 +842,9 @@ const TaskDetail = {
     const ps = document.createElement("select");
     ps.className = "w-full rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:focus:ring-amber-300/30";
     for (const p of PRIORITIES) { const o = document.createElement("option"); o.value = p; o.textContent = p; if (p === task.priority) o.selected = true; ps.appendChild(o); }
-    ps.addEventListener("change", () => { TaskService.updateTask(task.id, { priority: ps.value }); App.commit(); });
+    ps.addEventListener("change", () => {
+      void App.patchTask(task.id, { priority: ps.value }, "Actualizando prioridad...");
+    });
     prw.appendChild(ps); r2.append(cw, prw);
 
     const nw = document.createElement("div");
@@ -668,7 +852,9 @@ const TaskDetail = {
     const ta = document.createElement("textarea");
     ta.className = "w-full min-h-[84px] resize-y rounded-xl border border-stone-200/85 bg-white/88 px-3 py-2 text-sm text-stone-800 placeholder-stone-400 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-100 dark:placeholder-stone-500 dark:focus:ring-amber-300/30";
     ta.placeholder = "Añade notas, detalles, enlaces…"; ta.value = task.notes || ""; ta.maxLength = CONFIG.MAX_NOTES_LENGTH;
-    ta.addEventListener("blur", () => { TaskService.updateTask(task.id, { notes: ta.value }); TaskService.save(); });
+    ta.addEventListener("blur", () => {
+      void App.patchTask(task.id, { notes: ta.value }, "Guardando notas...");
+    });
     nw.appendChild(ta);
     panel.append(r1, r2, nw);
     return panel;
@@ -736,7 +922,7 @@ const TaskRenderer = {
   },
 
   /**
-   * Creates the DOM node for a task, including inline details when expanded.
+   * Crea el nodo DOM de una tarea, incluyendo el panel de detalle si está expandida.
    * @param {object} task
    * @param {boolean} [completed=false]
    * @returns {HTMLLIElement}
@@ -978,16 +1164,27 @@ const TaskRenderer = {
 
 const Animations = {
   complete(li, id) {
-    const card = li?.querySelector(":scope > div:first-child"); if (!card) { TaskService.setCompleted(id, true); App.commit(); return; }
+    const card = li?.querySelector(":scope > div:first-child");
+    if (!card) {
+      void App.patchTask(id, { completed: true, completedAt: Date.now() }, "Marcando tarea como completada...");
+      return;
+    }
     card.style.transition = `opacity ${CONFIG.ANIMATION_MS}ms ease, transform ${CONFIG.ANIMATION_MS}ms ease`; card.style.opacity = "0"; card.style.transform = "translateY(-6px)";
-    setTimeout(() => { TaskService.setCompleted(id, true); App.commit(); }, CONFIG.ANIMATION_MS);
+    setTimeout(() => {
+      void App.patchTask(id, { completed: true, completedAt: Date.now() }, "Marcando tarea como completada...");
+    }, CONFIG.ANIMATION_MS);
   },
   delete(li, id) {
     const card = li?.querySelector(":scope > div:first-child"); if (!card) { this._doDelete(id); return; }
     card.style.transition = `opacity ${CONFIG.ANIMATION_MS}ms ease, transform ${CONFIG.ANIMATION_MS}ms ease`; card.style.opacity = "0"; card.style.transform = "scale(0.95) translateY(-4px)";
     setTimeout(() => this._doDelete(id), CONFIG.ANIMATION_MS);
   },
-  _doDelete(id) { const { removed, index } = TaskService.remove(id); App.commit(); if (removed) UndoToast.show(removed, index); },
+  async _doDelete(id) {
+    const result = await App.deleteTask(id);
+    if (result.ok && result.removed) {
+      UndoToast.show(result.removed, result.index);
+    }
+  },
 };
 
 const DragDrop = {
@@ -1011,7 +1208,7 @@ const DragDrop = {
     const li = e.target.closest("[data-id]");
     if (li?.dataset.id === tid) { this._reset(); return; }
     const targetId = li?.dataset.id && li.dataset.id !== tid ? li.dataset.id : null;
-    if (TaskService.reorderVisible(visibleIds, tid, targetId)) App.commit();
+    if (TaskService.reorderVisible(visibleIds, tid, targetId)) void App.commit("Reordenando tareas...");
     this._reset();
   },
   _cross(s, d, id) {
@@ -1020,7 +1217,7 @@ const DragDrop = {
     else if (s==="done" && d==="next") { const t = TaskService.tasks.find(t=>t.id===id); TaskService.updateTask(id, { completed:false, completedAt:null, priority: t?.priority==="Alta"?"Media":(t?.priority??"Media") }); }
     else if (s==="now" && d==="next") TaskService.updateTask(id, { priority: "Media" });
     else if (s==="next" && d==="now") TaskService.updateTask(id, { priority: "Alta" });
-    App.commit();
+    void App.commit("Actualizando tareas...");
   },
   _reset() { this._srcId = null; this._srcSection = null; },
 };
@@ -1123,7 +1320,22 @@ const FocusMode = {
     this._lastFocused?.focus?.();
   },
   toggle() { if (UIState.focusMode) this.close(); else this.open(); },
-  completeCurrent() { const t = this._tasks[UIState.focusIndex]; if (!t) return; TaskService.setCompleted(t.id, true); TaskService.save(); this._tasks = TaskService.getPendingForFocus(); if (UIState.focusIndex >= this._tasks.length) UIState.focusIndex = 0; this._render(); },
+  async completeCurrent() {
+    const t = this._tasks[UIState.focusIndex];
+    if (!t) return;
+
+    const result = await App.patchTask(
+      t.id,
+      { completed: true, completedAt: Date.now() },
+      "Actualizando tarea..."
+    );
+
+    if (!result.ok) return;
+
+    this._tasks = TaskService.getPendingForFocus();
+    if (UIState.focusIndex >= this._tasks.length) UIState.focusIndex = 0;
+    this._render();
+  },
   skipCurrent() { UIState.focusIndex = (UIState.focusIndex + 1) % Math.max(1, this._tasks.length); this._render(); },
   _render() {
     const card = DOM.get("focus-card"); const empty = DOM.get("focus-empty"); const nav = DOM.get("focus-nav"); const counter = DOM.get("focus-counter");
@@ -1156,14 +1368,29 @@ const FocusMode = {
    KEYBOARD / LIST ACTIONS
    ═══════════════════════════════════════════ */
 
+/**
+ * Keyboard — Atajos globales y gestión de teclas en edición inline.
+ *
+ * Atajos (modificadores Cmd/Ctrl):
+ *   Ctrl/⌘ + K          → Enfocar campo de búsqueda
+ *   Ctrl/⌘ + F          → Alternar Focus Mode (solo cuando no hay input/textarea activo)
+ *   Ctrl/⌘ + Shift + C  → Completar todas las tareas pendientes
+ *   Ctrl/⌘ + Shift + X  → Vaciar todas las tareas completadas
+ *   Escape              → Cerrar overlay / panel / edición / búsqueda (prioridad en cascada)
+ *
+ * Edición inline:
+ *   Enter   → Guardar edición
+ *   Escape  → Cancelar edición
+ */
 const Keyboard = {
   init() { document.addEventListener("keydown", e => this._global(e)); document.addEventListener("keydown", e => this._edit(e)); },
+  /** @private Gestiona atajos globales (búsqueda, focus mode, acciones masivas, cascada de escape). */
   _global(e) {
     const mod = e.ctrlKey || e.metaKey;
     if (mod && e.key === "k") { e.preventDefault(); Search.focus(); return; }
     if (mod && e.key === "f" && !document.activeElement?.matches("input, textarea")) { e.preventDefault(); FocusMode.toggle(); return; }
-    if (mod && e.shiftKey && e.key === "C") { e.preventDefault(); if (TaskService.hasPending()) { TaskService.completeAll(); App.commit(); } return; }
-    if (mod && e.shiftKey && e.key === "X") { e.preventDefault(); if (TaskService.hasCompleted()) { TaskService.clearCompleted(); App.commit(); } return; }
+    if (mod && e.shiftKey && e.key === "C") { e.preventDefault(); if (TaskService.hasPending()) { TaskService.completeAll(); void App.commit("Completando tareas..."); } return; }
+    if (mod && e.shiftKey && e.key === "X") { e.preventDefault(); if (TaskService.hasCompleted()) { TaskService.clearCompleted(); void App.commit("Eliminando tareas completadas..."); } return; }
     if (e.key !== "Escape") return;
     if (UIState.focusMode) { FocusMode.close(); return; }
     if (UIState.expandedTaskId) { UIState.expandedTaskId = null; App.render(); return; }
@@ -1177,8 +1404,18 @@ const Keyboard = {
     if (!UIState.editingTaskId || !document.activeElement?.matches('input[data-role="edit-text"]')) return;
     if (e.key === "Escape") { UIState.editingTaskId = null; App.render(); return; }
     if (e.key !== "Enter") return;
-    const r = TaskService.updateText(UIState.editingTaskId, document.activeElement.value);
-    if (!r.ok) return; UIState.editingTaskId = null; App.commit();
+    const validation = TaskService.validateText(UIState.editingTaskId, document.activeElement.value);
+    if (!validation.ok) return;
+    void (async () => {
+      const r = await App.patchTask(
+        UIState.editingTaskId,
+        { text: validation.text },
+        "Guardando texto..."
+      );
+      if (!r.ok) return;
+      UIState.editingTaskId = null;
+      App.render();
+    })();
   },
 };
 
@@ -1188,16 +1425,33 @@ const ListActions = {
     const { action, id } = btn.dataset; if (!id) return; const li = btn.closest("li");
     switch (action) {
       case "complete": Animations.complete(li, id); break;
-      case "restore": TaskService.setCompleted(id, false); App.commit(); break;
+      case "restore": void App.patchTask(id, { completed: false, completedAt: null }, "Restaurando tarea..."); break;
       case "delete": Animations.delete(li, id); break;
       case "toggle-detail": UIState.expandedTaskId = UIState.expandedTaskId === id ? null : id; App.render(); break;
       case "edit": UIState.editingTaskId = id; App.render(); setTimeout(() => document.querySelector(`li[data-id="${id}"] input[data-role="edit-text"]`)?.focus(), 0); break;
       case "edit-cancel": UIState.editingTaskId = null; App.render(); break;
       case "edit-save": {
         const inp = li?.querySelector('input[data-role="edit-text"]');
-        const r = TaskService.updateText(id, inp?.value ?? "");
+        const validation = TaskService.validateText(id, inp?.value ?? "");
+        if (!validation.ok && inp) {
+          inp.setCustomValidity(validation.error === "TOO_LONG" ? `Max ${CONFIG.MAX_TASK_LENGTH} chars.` : validation.error === "DUPLICATE" ? "Ya existe." : "Escribe algo.");
+          inp.reportValidity();
+          return;
+        }
+        void (async () => {
+          const r = await App.patchTask(id, { text: validation.text }, "Guardando texto...");
+          if (!r.ok && inp) {
+            inp.setCustomValidity(r.error === "TOO_LONG" ? `Max ${CONFIG.MAX_TASK_LENGTH} chars.` : r.error === "DUPLICATE" ? "Ya existe." : "Escribe algo.");
+            inp.reportValidity();
+            return;
+          }
+          UIState.editingTaskId = null;
+          App.render();
+        })();
+        break;
+        /*
         if (!r.ok && inp) { inp.setCustomValidity(r.error === "TOO_LONG" ? `Máx ${CONFIG.MAX_TASK_LENGTH} chars.` : r.error === "DUPLICATE" ? "Ya existe." : "Escribe algo."); inp.reportValidity(); return; }
-        UIState.editingTaskId = null; App.commit(); break;
+        */
       }
     }
   },
@@ -1209,9 +1463,82 @@ const ListActions = {
 
 const App = {
   /**
-   * Persists current state and refreshes every rendered section.
+   * Persiste el estado actual en el servidor y refresca todas las secciones renderizadas.
    */
-  commit() { TaskService.save(); this.render(); },
+  async commit(message = "Sincronizando cambios...") {
+    const snapshot = structuredClone(TaskService.tasks);
+    this.render();
+    NetworkUI.showPending(message);
+
+    try {
+      await TaskService.save();
+      NetworkUI.hideError();
+      this.render();
+      return true;
+    } catch (err) {
+      TaskService.tasks = snapshot;
+      NetworkUI.showError(err.message);
+      this.render();
+      return false;
+    } finally {
+      NetworkUI.hidePending();
+    }
+  },
+  async createTask(text, category, priority, options = {}) {
+    NetworkUI.showPending("Guardando tarea...");
+
+    try {
+      const result = await TaskService.createRemote(text, category, priority, options);
+      if (result.ok) {
+        NetworkUI.hideError();
+        this.render();
+      }
+      return result;
+    } catch (err) {
+      NetworkUI.showError(err.message);
+      this.render();
+      return { ok: false, error: err.message };
+    } finally {
+      NetworkUI.hidePending();
+    }
+  },
+  async patchTask(id, updates, pendingMessage = "Guardando cambios...") {
+    NetworkUI.showPending(pendingMessage);
+
+    try {
+      const pendingPatch = TaskService.patchRemote(id, updates);
+      this.render();
+      const result = await pendingPatch;
+      if (result.ok) {
+        NetworkUI.hideError();
+        this.render();
+      }
+      return result;
+    } catch (err) {
+      NetworkUI.showError(err.message);
+      this.render();
+      return { ok: false, error: err.message };
+    } finally {
+      NetworkUI.hidePending();
+    }
+  },
+  async deleteTask(id) {
+    NetworkUI.showPending("Eliminando tarea...");
+
+    try {
+      const pendingDelete = TaskService.removeRemote(id);
+      this.render();
+      const result = await pendingDelete;
+      NetworkUI.hideError();
+      return { ok: true, ...result };
+    } catch (err) {
+      NetworkUI.showError(err.message);
+      this.render();
+      return { ok: false, error: err.message };
+    } finally {
+      NetworkUI.hidePending();
+    }
+  },
   _getViewState() {
     const query = Search.getQuery();
     const hasQuery = Boolean(query);
@@ -1293,7 +1620,7 @@ const App = {
     if (focusBtn) focusBtn.setAttribute("aria-pressed", UIState.focusMode ? "true" : "false");
   },
   /**
-   * Recomputes the active view and updates all dynamic UI fragments.
+   * Recalcula la vista activa y actualiza todos los fragmentos dinámicos de la UI.
    */
   render() {
     const view = this._getViewState();
@@ -1331,29 +1658,46 @@ const App = {
       b.className = `${CLASSES.filterPillBase} ${variant}`;
     });
   },
+  /**
+   * Conecta todos los event listeners del DOM de la aplicación.
+   *
+   * Agrupados por funcionalidad:
+   *   • Task form     — submit, preview del input, enter-hint, ayuda de sintaxis
+   *   • Selectors     — panel de campos guiados
+   *   • Search        — input con debounce, botón limpiar
+   *   • Filters       — pills de categoría, pill de proyecto, chips de filtros activos, limpiar todo
+   *   • Theme         — alternar claro/oscuro
+   *   • Focus Mode    — abrir/cerrar/completar/saltar
+   *   • Task lists    — drag-and-drop + delegación de click
+   *   • Bulk actions  — completar todas, vaciar completadas (ámbito visible)
+   *   • Undo toast    — botón deshacer
+   *   • Welcome       — cargar tareas de ejemplo
+   *   • Click-outside — cerrar tooltip de sintaxis automáticamente
+   *   • Keyboard      — atajos globales (via Keyboard.init)
+   */
   _bindEvents() {
     const completeVisible = (...sections) => {
       const ids = [...new Set(sections.flatMap(section => UIState.visibleTaskIds[section] || []))];
       if (ids.length === 0) return;
-      if (TaskService.completeTasks(ids)) this.commit();
+      if (TaskService.completeTasks(ids)) void this.commit("Sincronizando tareas...");
     };
     const clearVisibleDone = () => {
       const ids = UIState.visibleTaskIds.done || [];
       if (ids.length === 0) return;
       TaskService.clearCompleted(ids);
-      this.commit();
+      void this.commit("Eliminando tareas completadas...");
     };
 
-    DOM.get("task-form")?.addEventListener("submit", e => {
+    DOM.get("task-form")?.addEventListener("submit", async e => {
       e.preventDefault(); const inp = DOM.get("task-input"); const raw = Utils.safeTrim(inp?.value); if (!raw) return;
       if (inp) inp.setCustomValidity("");
       const p = InputParser.parse(raw); const text = p.text; const cat = p.category || DOM.get("task-category")?.value || "Personal"; const pri = p.priority || DOM.get("task-priority")?.value || "Media";
       if (!text) return;
       const dueDate = p.dueDate || (DOM.get("task-duedate")?.value ? Utils.startOfDay(Date.parse(DOM.get("task-duedate").value + "T00:00:00")) : null);
       const project = normalizeProjectName(p.project || DOM.get("task-project")?.value);
-      const r = TaskService.add(text, cat, pri, { dueDate, project });
+      const r = await this.createTask(text, cat, pri, { dueDate, project });
       if (!r.ok) { if (inp) { inp.setCustomValidity(r.error === "TOO_LONG" ? `Máx ${CONFIG.MAX_TASK_LENGTH} chars.` : r.error === "DUPLICATE" ? "Ya existe." : "Escribe algo."); inp.reportValidity(); } return; }
-      UIState.lastAddedTaskId = r.task.id; this.commit();
+      UIState.lastAddedTaskId = r.task.id;
       if (inp) { inp.value = ""; inp.focus(); }
       DOM.get("input-preview")?.classList.add("hidden");
       this._setInputHelpOpen(false);
@@ -1415,17 +1759,50 @@ const App = {
     DOM.get("sidebar-complete-all")?.addEventListener("click", () => completeVisible("now", "next"));
     DOM.get("sidebar-clear-done")?.addEventListener("click", () => clearVisibleDone());
     DOM.get("undo-toast-btn")?.addEventListener("click", () => UndoToast.undo());
-    DOM.get("load-examples")?.addEventListener("click", () => { for (const ex of EXAMPLE_TASKS) TaskService.add(ex.text, ex.category, ex.priority, { dueDate: ex.dueDate, project: ex.project, notes: ex.notes || "" }); this.commit(); });
+    DOM.get("load-examples")?.addEventListener("click", () => {
+      for (const ex of EXAMPLE_TASKS) {
+        TaskService.add(ex.text, ex.category, ex.priority, {
+          dueDate: ex.dueDate,
+          project: ex.project,
+          notes: ex.notes || "",
+        });
+      }
+      void this.commit("Sincronizando tareas de ejemplo...");
+    });
     Keyboard.init();
   },
   /**
-   * Bootstraps theme, data, listeners and the initial render pass.
+   * Inicializa tema, datos, listeners y el primer renderizado.
    */
-  init() {
-    Theme.load(); TaskService.load(); this._bindEvents(); ShortcutHints.apply(); FormVisualOrder.apply(); Location.fetch();
-    setInterval(() => Location._applyEverywhere(), CONFIG.CLOCK_INTERVAL_MS); Sidebar.build();
+  async init() {
+    Theme.load();
+    this._bindEvents();
+    ShortcutHints.apply();
+    FormVisualOrder.apply();
+    Location.fetch();
+    setInterval(() => Location._applyEverywhere(), CONFIG.CLOCK_INTERVAL_MS);
+    Sidebar.build();
     const ht = DOM.get("time-location"); if (ht) ht.textContent = Location.formatTimeLocation();
+    NetworkUI.showLoading();
+    try {
+      await TaskService.load();
+      NetworkUI.hideError();
+    } catch (err) {
+      NetworkUI.showError(err.message);
+    }
+    NetworkUI.hideLoading();
     this.render();
+    DOM.get("network-retry")?.addEventListener("click", async () => {
+      NetworkUI.showLoading();
+      try {
+        await TaskService.load();
+        NetworkUI.hideError();
+      } catch (err) {
+        NetworkUI.showError(err.message);
+      }
+      NetworkUI.hideLoading();
+      this.render();
+    });
   },
 };
 

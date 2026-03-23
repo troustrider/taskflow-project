@@ -1,10 +1,25 @@
 "use strict";
 
-// Persistencia simulada en memoria (sustituirá a una base de datos en el futuro)
+/**
+ * @module services/task.service
+ * @description Capa de servicio — lógica de negocio pura para la gestión de tareas.
+ *
+ * Esta capa NO conoce Express, HTTP, req ni res. Trabaja exclusivamente con
+ * datos JavaScript (arrays y objetos). Esto permite:
+ *   - Escribir tests unitarios sin levantar un servidor.
+ *   - Reutilizar la lógica si se cambia el framework web.
+ *   - Mantener la separación de preocupaciones (SoC) con la capa de controladores.
+ *
+ * Persistencia actual: array en memoria (se perderá al reiniciar el servidor).
+ * En el futuro se sustituirá por una base de datos real.
+ */
+
+/** @type {Array<Object>} Array en memoria que simula la base de datos. */
 let tasks = [];
 
 /**
- * Devuelve todas las tareas.
+ * Devuelve todas las tareas almacenadas.
+ * @returns {Array<Object>} Array completo de tareas.
  */
 function obtenerTodas() {
   return tasks;
@@ -12,7 +27,9 @@ function obtenerTodas() {
 
 /**
  * Busca una tarea por su ID.
- * Si no existe, lanza un error con mensaje "NOT_FOUND".
+ * @param {string} id — UUID de la tarea.
+ * @returns {Object} La tarea encontrada.
+ * @throws {Error} Con mensaje "NOT_FOUND" si el ID no existe.
  */
 function obtenerPorId(id) {
   const task = tasks.find((t) => t.id === id);
@@ -25,8 +42,15 @@ function obtenerPorId(id) {
 }
 
 /**
- * Crea una nueva tarea y la añade al array.
- * Devuelve la tarea creada con su ID generado.
+ * Crea una nueva tarea, le asigna un UUID y la inserta al inicio del array.
+ * @param {Object} data — Datos de la tarea.
+ * @param {string} data.text — Texto de la tarea (obligatorio, ya validado por el controlador).
+ * @param {string} [data.category="Personal"] — Categoría de la tarea.
+ * @param {string} [data.priority="Media"] — Prioridad de la tarea.
+ * @param {number|null} [data.dueDate=null] — Timestamp de la fecha límite.
+ * @param {string} [data.notes=""] — Notas adicionales.
+ * @param {string|null} [data.project=null] — Nombre del proyecto asociado.
+ * @returns {Object} La tarea creada con su ID generado.
  */
 function crearTarea(data) {
   const nueva = {
@@ -37,6 +61,9 @@ function crearTarea(data) {
     completed: false,
     createdAt: Date.now(),
     completedAt: null,
+    dueDate: data.dueDate ?? null,
+    notes: data.notes ?? "",
+    project: data.project ?? null,
   };
 
   tasks.unshift(nueva);
@@ -45,7 +72,18 @@ function crearTarea(data) {
 
 /**
  * Actualiza parcialmente una tarea existente.
- * Si no existe, lanza un error con mensaje "NOT_FOUND".
+ * Solo modifica los campos que se incluyen en el objeto `data`.
+ * @param {string} id — UUID de la tarea a actualizar.
+ * @param {Object} data — Campos a modificar (todos opcionales).
+ * @param {string} [data.text] — Nuevo texto.
+ * @param {string} [data.category] — Nueva categoría.
+ * @param {string} [data.priority] — Nueva prioridad.
+ * @param {boolean} [data.completed] — Nuevo estado de completado.
+ * @param {number|null} [data.dueDate] — Nueva fecha límite.
+ * @param {string} [data.notes] — Nuevas notas.
+ * @param {string|null} [data.project] — Nuevo proyecto.
+ * @returns {Object} La tarea actualizada.
+ * @throws {Error} Con mensaje "NOT_FOUND" si el ID no existe.
  */
 function actualizarTarea(id, data) {
   const task = obtenerPorId(id);
@@ -57,13 +95,17 @@ function actualizarTarea(id, data) {
     task.completed = data.completed;
     task.completedAt = data.completed ? Date.now() : null;
   }
+  if (data.dueDate !== undefined) task.dueDate = data.dueDate;
+  if (data.notes !== undefined) task.notes = data.notes;
+  if (data.project !== undefined) task.project = data.project;
 
   return task;
 }
 
 /**
  * Elimina una tarea por su ID.
- * Si no existe, lanza un error con mensaje "NOT_FOUND".
+ * @param {string} id — UUID de la tarea a eliminar.
+ * @throws {Error} Con mensaje "NOT_FOUND" si el ID no existe.
  */
 function eliminarTarea(id) {
   const index = tasks.findIndex((t) => t.id === id);
@@ -75,10 +117,21 @@ function eliminarTarea(id) {
   tasks.splice(index, 1);
 }
 
+/**
+ * Reemplaza el array completo de tareas.
+ * Usado por el endpoint PUT /api/v1/tasks para sincronización masiva
+ * desde el frontend (el frontend envía su estado completo al servidor).
+ * @param {Array<Object>} nuevasTareas — Nuevo array de tareas.
+ */
+function reemplazarTodas(nuevasTareas) {
+  tasks = nuevasTareas;
+}
+
 module.exports = {
   obtenerTodas,
   obtenerPorId,
   crearTarea,
   actualizarTarea,
   eliminarTarea,
+  reemplazarTodas,
 };

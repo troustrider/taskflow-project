@@ -1,18 +1,65 @@
 "use strict";
 
+/**
+ * @module controllers/task.controller
+ * @description Capa de controladores — orquesta peticiones HTTP y validaciones.
+ *
+ * Cada función de este módulo:
+ *   1. Extrae los datos de la petición (req.body, req.params).
+ *   2. Aplica validación defensiva en la frontera de red (antes de tocar el servicio).
+ *   3. Invoca al servicio con datos limpios.
+ *   4. Formatea y envía la respuesta HTTP con el código de estado correcto.
+ *
+ * Si la validación falla, responde directamente con 400.
+ * Si el servicio lanza una excepción, la pasa al middleware de errores con next(err).
+ */
+
 const taskService = require("../services/task.service");
 
-// ─── Categorías y prioridades válidas ────────────────────
-const VALID_CATEGORIES = ["Trabajo", "Personal", "Estudio", "Proyectos", "Salud", "Errands"];
+// ─── Valores válidos para validación ─────────────────────
+
+/** @type {string[]} Categorías permitidas por la aplicación. */
+const VALID_CATEGORIES = ["Trabajo", "Personal", "Estudio", "Salud", "Gestiones"];
+
+/** @type {string[]} Niveles de prioridad permitidos. */
 const VALID_PRIORITIES = ["Alta", "Media", "Baja"];
 
+function isPlainObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isValidDueDate(value) {
+  return value === null || (typeof value === "number" && Number.isFinite(value));
+}
+
+function isValidOptionalString(value) {
+  return value === undefined || typeof value === "string";
+}
+
+function isValidOptionalNullableString(value) {
+  return value === undefined || value === null || typeof value === "string";
+}
+
 // ─── GET /api/v1/tasks ───────────────────────────────────
+
+/**
+ * Devuelve todas las tareas.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 function obtenerTodas(req, res) {
   const tasks = taskService.obtenerTodas();
   res.json(tasks);
 }
 
 // ─── GET /api/v1/tasks/:id ───────────────────────────────
+
+/**
+ * Devuelve una tarea por su ID.
+ * @param {import('express').Request} req — req.params.id contiene el UUID.
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next — Pasa errores al middleware global.
+ */
 function obtenerPorId(req, res, next) {
   try {
     const task = taskService.obtenerPorId(req.params.id);
@@ -23,28 +70,61 @@ function obtenerPorId(req, res, next) {
 }
 
 // ─── POST /api/v1/tasks ──────────────────────────────────
+
+/**
+ * Crea una nueva tarea tras validar los datos de entrada.
+ * Responde con 201 (Created) si tiene éxito.
+ * Responde con 400 si la validación falla.
+ * @param {import('express').Request} req — req.body contiene { text, category, priority, dueDate, notes, project }.
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 function crearTarea(req, res, next) {
   try {
-    const { text, category, priority } = req.body;
+    if (!isPlainObject(req.body)) {
+      return res.status(400).json({
+        error: "El cuerpo de la petición debe ser un objeto JSON.",
+      });
+    }
 
-    // Validación defensiva del texto
+    const { text, category, priority, dueDate, notes, project } = req.body;
+
+    // Validación defensiva del texto (campo obligatorio)
     if (!text || typeof text !== "string" || text.trim().length < 3) {
       return res.status(400).json({
         error: "El texto es obligatorio y debe tener al menos 3 caracteres.",
       });
     }
 
-    // Validación de categoría (si se envía)
+    // Validación de categoría (opcional, pero si se envía debe ser válida)
     if (category && !VALID_CATEGORIES.includes(category)) {
       return res.status(400).json({
         error: `Categoría no válida. Opciones: ${VALID_CATEGORIES.join(", ")}`,
       });
     }
 
-    // Validación de prioridad (si se envía)
+    // Validación de prioridad (opcional, pero si se envía debe ser válida)
     if (priority && !VALID_PRIORITIES.includes(priority)) {
       return res.status(400).json({
         error: `Prioridad no válida. Opciones: ${VALID_PRIORITIES.join(", ")}`,
+      });
+    }
+
+    if (!isValidDueDate(dueDate ?? null)) {
+      return res.status(400).json({
+        error: "La fecha límite debe ser un timestamp numérico o null.",
+      });
+    }
+
+    if (!isValidOptionalString(notes)) {
+      return res.status(400).json({
+        error: "Las notas deben ser un texto.",
+      });
+    }
+
+    if (!isValidOptionalNullableString(project)) {
+      return res.status(400).json({
+        error: "El proyecto debe ser un texto o null.",
       });
     }
 
@@ -52,6 +132,9 @@ function crearTarea(req, res, next) {
       text: text.trim(),
       category,
       priority,
+      dueDate: dueDate ?? null,
+      notes: notes?.trim() ?? "",
+      project: project?.trim() || null,
     });
 
     res.status(201).json(nueva);
@@ -61,12 +144,31 @@ function crearTarea(req, res, next) {
 }
 
 // ─── PATCH /api/v1/tasks/:id ─────────────────────────────
+
+/**
+ * Actualiza parcialmente una tarea existente.
+ * Solo modifica los campos incluidos en el cuerpo de la petición.
+ * Responde con 200 y la tarea actualizada.
+ * @param {import('express').Request} req — req.params.id + req.body con campos a modificar.
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 function actualizarTarea(req, res, next) {
   try {
-    const { text, category, priority, completed } = req.body;
+    if (!isPlainObject(req.body)) {
+      return res.status(400).json({
+        error: "El cuerpo de la petición debe ser un objeto JSON.",
+      });
+    }
 
-    // Validar que se envía al menos un campo
-    if (text === undefined && category === undefined && priority === undefined && completed === undefined) {
+    const { text, category, priority, completed, dueDate, notes, project } = req.body;
+
+    // Validar que se envía al menos un campo para actualizar
+    if (
+      text === undefined && category === undefined && priority === undefined &&
+      completed === undefined && dueDate === undefined && notes === undefined &&
+      project === undefined
+    ) {
       return res.status(400).json({
         error: "Debes enviar al menos un campo para actualizar.",
       });
@@ -93,10 +195,28 @@ function actualizarTarea(req, res, next) {
       });
     }
 
-    // Validar completed si se envía
+    // Validar completed si se envía (debe ser booleano estricto)
     if (completed !== undefined && typeof completed !== "boolean") {
       return res.status(400).json({
         error: "El campo completed debe ser true o false.",
+      });
+    }
+
+    if (dueDate !== undefined && !isValidDueDate(dueDate)) {
+      return res.status(400).json({
+        error: "La fecha límite debe ser un timestamp numérico o null.",
+      });
+    }
+
+    if (!isValidOptionalString(notes)) {
+      return res.status(400).json({
+        error: "Las notas deben ser un texto.",
+      });
+    }
+
+    if (!isValidOptionalNullableString(project)) {
+      return res.status(400).json({
+        error: "El proyecto debe ser un texto o null.",
       });
     }
 
@@ -105,6 +225,9 @@ function actualizarTarea(req, res, next) {
       category,
       priority,
       completed,
+      dueDate,
+      notes: notes?.trim(),
+      project: project === undefined ? undefined : (project?.trim() || null),
     });
 
     res.json(actualizada);
@@ -113,7 +236,47 @@ function actualizarTarea(req, res, next) {
   }
 }
 
+// ─── PUT /api/v1/tasks ───────────────────────────────────
+
+/**
+ * Sincronización masiva: reemplaza todas las tareas del servidor
+ * con el array enviado por el frontend.
+ *
+ * Este endpoint existe porque el frontend mantiene su propio estado
+ * en memoria y lo sincroniza completo con cada commit(). En el futuro,
+ * con una base de datos real, se sustituiría por operaciones individuales.
+ *
+ * Responde con 200 y el array resultante.
+ * @param {import('express').Request} req — req.body debe ser un Array de tareas.
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+function sincronizarTodas(req, res, next) {
+  try {
+    const tasks = req.body;
+
+    if (!Array.isArray(tasks)) {
+      return res.status(400).json({
+        error: "El cuerpo debe ser un array de tareas.",
+      });
+    }
+
+    taskService.reemplazarTodas(tasks);
+    res.json(taskService.obtenerTodas());
+  } catch (err) {
+    next(err);
+  }
+}
+
 // ─── DELETE /api/v1/tasks/:id ────────────────────────────
+
+/**
+ * Elimina una tarea por su ID.
+ * Responde con 204 (No Content) si tiene éxito — sin cuerpo de respuesta.
+ * @param {import('express').Request} req — req.params.id contiene el UUID.
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 function eliminarTarea(req, res, next) {
   try {
     taskService.eliminarTarea(req.params.id);
@@ -128,5 +291,6 @@ module.exports = {
   obtenerPorId,
   crearTarea,
   actualizarTarea,
+  sincronizarTodas,
   eliminarTarea,
 };
