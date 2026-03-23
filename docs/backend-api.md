@@ -1,6 +1,6 @@
 # Herramientas de desarrollo y documentación de APIs
 
-Documento de referencia sobre herramientas profesionales mencionadas en el enunciado de la Fase 3 del bootcamp InfraOps.
+Documento de referencia sobre herramientas habituales al trabajar con APIs y despliegues web.
 
 ---
 
@@ -12,7 +12,7 @@ Documento de referencia sobre herramientas profesionales mencionadas en el enunc
 
 **Por qué se usa:** Simplifica el código de peticiones HTTP. Características principales: transformación automática de JSON, interceptores para añadir headers (como tokens de autenticación) a todas las peticiones, cancelación de peticiones, timeouts configurables, y mejor gestión de errores (lanza excepciones con códigos 4xx/5xx directamente).
 
-**Por qué no lo usamos en TaskFlow:** El enunciado especifica JavaScript puro (vanilla JS). Usamos `fetch` nativo con un wrapper propio (`apiRequest` en `src/api/client.js`) que resuelve las mismas incomodidades sin añadir dependencias.
+**Por qué no lo usamos en TaskFlow:** En este proyecto se ha optado por JavaScript puro (vanilla JS). Usamos `fetch` nativo con un wrapper propio (`apiRequest` en `src/api/client.js`) que resuelve las mismas incomodidades sin añadir dependencias.
 
 **Instalación:** `npm install axios`
 
@@ -46,7 +46,7 @@ const { data: nueva } = await axios.post('http://localhost:3000/api/v1/tasks', {
 - **curl** — Herramienta de línea de comandos. Más ágil para pruebas puntuales y muy útil para documentar ejemplos reproducibles.
 - **Insomnia** — Alternativa open source a Postman con interfaz similar.
 
-**Cómo lo usamos en TaskFlow:** La entrega incluye una colección Postman exportable para las pruebas manuales pedidas en la consigna, y mantiene ejemplos con `curl` en los README para disponer también de una vía rápida desde terminal.
+**Cómo lo usamos en TaskFlow:** La entrega incluye una colección Postman exportable para documentar las pruebas manuales y mantiene ejemplos con `curl` en los README como apoyo rápido desde terminal.
 
 ---
 

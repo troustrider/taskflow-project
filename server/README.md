@@ -4,7 +4,7 @@ API REST para gestionar tareas del proyecto TaskFlow, construida con Node.js y E
 
 **API en producción:** [https://taskflow-project-jet.vercel.app/api/v1/tasks](https://taskflow-project-jet.vercel.app/api/v1/tasks)
 
-**Documentación Swagger:** [https://taskflow-project-jet.vercel.app/api/docs](https://taskflow-project-jet.vercel.app/api/docs)
+**Documentación Swagger:** [https://taskflow-project-jet.vercel.app/api/docs/](https://taskflow-project-jet.vercel.app/api/docs/)
 
 > Fases A, B, C y D completadas + Bonus (Swagger). Frontend conectado al backend con gestión de estados de red. Persistencia en memoria (sin base de datos — las tareas se pierden al reiniciar el servidor). Desplegado en Vercel como Serverless Function.
 
@@ -93,7 +93,7 @@ La API cuenta con documentación interactiva generada automáticamente a partir 
 
 **Acceso local:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
 
-**Acceso en producción:** [https://taskflow-project-jet.vercel.app/api/docs](https://taskflow-project-jet.vercel.app/api/docs)
+**Acceso en producción:** [https://taskflow-project-jet.vercel.app/api/docs/](https://taskflow-project-jet.vercel.app/api/docs/)
 
 **Implementación:**
 - `src/config/swagger.js` — Define la especificación OpenAPI 3.0 con schemas reutilizables (Task, TaskInput, TaskUpdate, Error).
@@ -122,7 +122,7 @@ Una vez corriendo, abrir `http://localhost:3000` para la aplicación completa y 
 
 El backend se despliega como Serverless Function:
 
-- `vercel.json` redirige las peticiones `/api/*` a `server/src/index.js`.
+- `server/src/index.js` concentra la app Express, y Vercel la expone a través de wrappers serverless dentro de `../api/`.
 - `index.js` exporta `module.exports = app` y solo llama a `app.listen()` en local (no en Vercel).
 - `env.js` detecta el entorno Vercel (`VERCEL=1`) para no exigir `PORT`.
 - Las variables de entorno se configuran en Vercel Dashboard → Settings → Environment Variables.
@@ -273,9 +273,11 @@ La UI gestiona tres estados de red:
 2. **Éxito** — Se oculta el spinner y se renderizan las tareas.
 3. **Error** — Banner rojo con el mensaje de error y botón "Reintentar".
 
+Fuera de la persistencia de tareas, el navegador solo conserva preferencias auxiliares como el tema visual y una caché temporal de ubicación durante la sesión.
+
 ## Pruebas de integración
 
-La entrega incluye una colección real de Postman en `../docs/postman/taskflow-api.postman_collection.json` y una guía breve en `../docs/postman/taskflow-api-tests.md`. Los ejemplos `curl` se conservan como apoyo rápido desde terminal, pero las pruebas manuales pedidas en la consigna quedan documentadas con Postman.
+La documentación incluye una colección real de Postman en `../docs/postman/taskflow-api.postman_collection.json` y una guía breve en `../docs/postman/taskflow-api-tests.md`. Los ejemplos `curl` se conservan como apoyo rápido desde terminal, pero la secuencia principal de pruebas manuales queda documentada con Postman.
 
 ### Prueba 1 — Crear y recuperar (201 + 200)
 

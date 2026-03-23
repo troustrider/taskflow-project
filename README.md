@@ -6,7 +6,7 @@ Frontend en vanilla JavaScript + Tailwind CSS v4. Backend en Node.js + Express 5
 
 **Demo en producción:** [https://taskflow-project-jet.vercel.app](https://taskflow-project-jet.vercel.app)
 
-**Documentación interactiva de la API (Swagger):** [https://taskflow-project-jet.vercel.app/api/docs](https://taskflow-project-jet.vercel.app/api/docs)
+**Documentación interactiva de la API (Swagger):** [https://taskflow-project-jet.vercel.app/api/docs/](https://taskflow-project-jet.vercel.app/api/docs/)
 
 **Repositorio:** [https://github.com/troustrider/taskflow-project](https://github.com/troustrider/taskflow-project)
 
@@ -24,6 +24,14 @@ taskflow-project/
 ├── src/
 │   └── api/
 │       └── client.js           # Capa de red del frontend (fetch async → API REST)
+├── api/                        # Wrappers serverless para Vercel
+│   ├── docs.js
+│   ├── docs/
+│   │   └── [...asset].js
+│   └── v1/
+│       ├── tasks.js
+│       └── tasks/
+│           └── [id].js
 ├── server/                     # Backend Express (Fase 3)
 │   ├── .env                    # Variables de entorno (excluido del repo)
 │   ├── package.json
@@ -42,6 +50,9 @@ taskflow-project/
 │   ├── backend-api.md          # Referencia: Axios, Postman, Sentry, Swagger
 │   ├── design/
 │   │   └── wireframe-taskflow.svg
+│   ├── postman/
+│   │   ├── taskflow-api-tests.md
+│   │   └── taskflow-api.postman_collection.json
 │   └── ai/                     # Reflexiones y experimentos con IA
 ├── vercel.json                 # Configuración de despliegue (frontend + backend serverless)
 ├── tailwind.config.js
@@ -110,7 +121,7 @@ Base URL: `/api/v1/tasks`
 | PATCH | `/api/v1/tasks/:id` | Actualización parcial | 200 |
 | DELETE | `/api/v1/tasks/:id` | Eliminar tarea | 204 |
 
-Documentación interactiva completa con esquemas, ejemplos y "Try it out" en [`/api/docs`](https://taskflow-project-jet.vercel.app/api/docs) (Swagger UI).
+Documentación interactiva completa con esquemas, ejemplos y "Try it out" en [`/api/docs/`](https://taskflow-project-jet.vercel.app/api/docs/) (Swagger UI).
 
 Pruebas de integración documentadas con Postman en `docs/postman/taskflow-api.postman_collection.json` y `docs/postman/taskflow-api-tests.md`.
 
@@ -216,18 +227,18 @@ La UI gestiona tres estados de red:
 2. **Éxito** — Se oculta el spinner y se renderizan las tareas.
 3. **Error** — Banner rojo fijo con el mensaje del servidor y un botón "Reintentar" que vuelve a intentar la conexión.
 
-`localStorage` solo se conserva para la preferencia de tema (claro/oscuro), que es del navegador del usuario y no tiene que ver con los datos de tareas.
+`localStorage` solo se conserva para la preferencia de tema (claro/oscuro), y `sessionStorage` se usa como caché temporal de ubicación durante la sesión. Ninguno de los dos se usa para persistir tareas.
 
 ## Despliegue en Vercel
 
 El proyecto se despliega como aplicación full-stack en Vercel:
 
 - **Frontend** — Archivos estáticos servidos desde la raíz. El CSS se compila con `npm run build:css` como build command.
-- **Backend** — `server/src/index.js` se ejecuta como Serverless Function. Las peticiones a `/api/*` se redirigen al backend vía `rewrites` en `vercel.json`.
+- **Backend** — Express sigue viviendo en `server/src/index.js`, pero en producción se expone a través de funciones serverless explícitas dentro de `api/` (`api/v1/tasks.js`, `api/v1/tasks/[id].js`, `api/docs.js` y `api/docs/[...asset].js`).
 - **Variables de entorno** — `PORT` y `NODE_ENV` se configuran en el dashboard de Vercel (Settings → Environment Variables). El módulo `env.js` detecta el entorno Vercel para no exigir `PORT` (la plataforma lo gestiona internamente).
 - **`app.listen()` condicional** — Solo se ejecuta en local. En Vercel, `index.js` exporta `module.exports = app` y la plataforma maneja el ciclo HTTP.
 
-## Desviaciones del enunciado
+## Decisiones de implementación
 
 - **`<aside>` sustituido por anillo de progreso SVG** — El rediseño eliminó el sidebar clásico por decisión de diseño. Las estadísticas se muestran en un panel lateral con anillo visual de progreso.
 - **Tailwind vía npm en vez de CDN** — Permite usar Tailwind v4 con `@import`, compilación local y minificación en producción.

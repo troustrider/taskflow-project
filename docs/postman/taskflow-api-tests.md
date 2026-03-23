@@ -1,6 +1,6 @@
 # Pruebas de integracion con Postman
 
-La entrega incluye una coleccion real de Postman en `taskflow-api.postman_collection.json` para demostrar los casos que pide la consigna.
+La documentacion incluye una coleccion real de Postman en `taskflow-api.postman_collection.json` para cubrir los casos principales de la API.
 
 ## Como usarla
 
@@ -31,4 +31,6 @@ La entrega incluye una coleccion real de Postman en `taskflow-api.postman_collec
 - Que los errores `400` y `404` incluyen mensajes semanticos.
 - Que el `500` expone solo el mensaje generico `Error interno del servidor`.
 
+## Nota para Thunder Client
 
+Se ha elegido Postman porque permite adjuntar una coleccion exportable y reutilizable dentro del propio repositorio. Si prefieres usar Thunder Client, esta misma secuencia de requests se puede recrear sin problema porque las URLs, los bodies y los codigos esperados ya estan documentados aqui.
