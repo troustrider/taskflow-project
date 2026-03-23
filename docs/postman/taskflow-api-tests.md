@@ -31,6 +31,4 @@ La entrega incluye una coleccion real de Postman en `taskflow-api.postman_collec
 - Que los errores `400` y `404` incluyen mensajes semanticos.
 - Que el `500` expone solo el mensaje generico `Error interno del servidor`.
 
-## Nota para Thunder Client
 
-La consigna permite Postman o Thunder Client. Se ha elegido Postman porque permite adjuntar una coleccion exportable y reutilizable dentro del propio repositorio. Si el profesor prefiere Thunder Client, esta misma secuencia de requests se puede recrear facilmente porque las URLs, bodies y codigos esperados estan ya documentados aqui.
