@@ -3,8 +3,14 @@
   "buildCommand": "npm run build:css",
   "outputDirectory": ".",
   "installCommand": "npm install && cd server && npm install",
+  "rewrites": [
+    { "source": "/api/v1/tasks", "destination": "/api/router?path=v1/tasks" },
+    { "source": "/api/v1/tasks/:id", "destination": "/api/router?path=v1/tasks/:id" },
+    { "source": "/api/docs", "destination": "/api/router?path=docs/" },
+    { "source": "/api/docs/:asset*", "destination": "/api/router?path=docs/:asset*" }
+  ],
   "functions": {
-    "api/**/*.js": {
+    "api/router.js": {
       "includeFiles": "server/**"
     }
   }
