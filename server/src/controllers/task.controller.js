@@ -40,6 +40,72 @@ function isValidOptionalNullableString(value) {
   return value === undefined || value === null || typeof value === "string";
 }
 
+function isValidCompletedAt(value) {
+  return value === null || (typeof value === "number" && Number.isFinite(value));
+}
+
+function validarTareaSincronizada(task, index) {
+  if (!isPlainObject(task)) {
+    return { ok: false, error: `La tarea en la posición ${index} debe ser un objeto JSON.` };
+  }
+
+  if (typeof task.id !== "string" || task.id.trim() === "") {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir un id válido.` };
+  }
+
+  if (typeof task.text !== "string" || task.text.trim().length < 3) {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir un texto de al menos 3 caracteres.` };
+  }
+
+  if (!VALID_CATEGORIES.includes(task.category)) {
+    return { ok: false, error: `La tarea en la posición ${index} tiene una categoría no válida.` };
+  }
+
+  if (!VALID_PRIORITIES.includes(task.priority)) {
+    return { ok: false, error: `La tarea en la posición ${index} tiene una prioridad no válida.` };
+  }
+
+  if (typeof task.completed !== "boolean") {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir completed como booleano.` };
+  }
+
+  if (typeof task.createdAt !== "number" || !Number.isFinite(task.createdAt)) {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir createdAt como timestamp numérico.` };
+  }
+
+  if (!isValidCompletedAt(task.completedAt ?? null)) {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir completedAt como timestamp numérico o null.` };
+  }
+
+  if (!isValidDueDate(task.dueDate ?? null)) {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir dueDate como timestamp numérico o null.` };
+  }
+
+  if (typeof task.notes !== "string") {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir notes como texto.` };
+  }
+
+  if (!isValidOptionalNullableString(task.project ?? null)) {
+    return { ok: false, error: `La tarea en la posición ${index} debe incluir project como texto o null.` };
+  }
+
+  return {
+    ok: true,
+    task: {
+      id: task.id.trim(),
+      text: task.text.trim(),
+      category: task.category,
+      priority: task.priority,
+      completed: task.completed,
+      createdAt: task.createdAt,
+      completedAt: task.completedAt ?? null,
+      dueDate: task.dueDate ?? null,
+      notes: task.notes.trim(),
+      project: task.project === null ? null : task.project?.trim() || null,
+    },
+  };
+}
+
 // ─── GET /api/v1/tasks ───────────────────────────────────
 
 /**
@@ -261,7 +327,17 @@ function sincronizarTodas(req, res, next) {
       });
     }
 
-    taskService.reemplazarTodas(tasks);
+    const normalizedTasks = [];
+
+    for (const [index, task] of tasks.entries()) {
+      const validation = validarTareaSincronizada(task, index);
+      if (!validation.ok) {
+        return res.status(400).json({ error: validation.error });
+      }
+      normalizedTasks.push(validation.task);
+    }
+
+    taskService.reemplazarTodas(normalizedTasks);
     res.json(taskService.obtenerTodas());
   } catch (err) {
     next(err);

@@ -157,7 +157,7 @@ const DOM = {
   _cache: {},
   get(id) { if (!(id in this._cache)) this._cache[id] = document.getElementById(id); return this._cache[id]; },
   get categoryFilterButtons() { if (!this._filterBtns) this._filterBtns = document.querySelectorAll(".category-filter-btn"); return this._filterBtns; },
-  get categoryPillsSection() { if (!this._pillsSection) this._pillsSection = document.querySelector("section.grid.grid-cols-3"); return this._pillsSection; },
+  get categoryPillsSection() { return this.get("category-pills-section"); },
 };
 
 /* ═══════════════════════════════════════════
@@ -779,7 +779,16 @@ const UndoToast = {
     this._timer = setTimeout(() => this.hide(), CONFIG.UNDO_TIMEOUT_MS);
   },
   hide() { DOM.get("undo-toast")?.classList.remove("visible"); if (this._timer) { clearTimeout(this._timer); this._timer = null; } this._task = null; this._index = null; },
-  undo() { if (!this._task) return; TaskService.insertAt(this._task, this._index ?? 0); void App.commit("Restaurando tarea..."); this.hide(); },
+  undo() {
+    if (!this._task) return;
+    const task = this._task;
+    const index = this._index ?? 0;
+    void App.commitMutation(() => {
+      TaskService.insertAt(task, index);
+      return true;
+    }, "Restaurando tarea...");
+    this.hide();
+  },
 };
 
 /* ═══════════════════════════════════════════
@@ -1208,16 +1217,46 @@ const DragDrop = {
     const li = e.target.closest("[data-id]");
     if (li?.dataset.id === tid) { this._reset(); return; }
     const targetId = li?.dataset.id && li.dataset.id !== tid ? li.dataset.id : null;
-    if (TaskService.reorderVisible(visibleIds, tid, targetId)) void App.commit("Reordenando tareas...");
+    void App.commitMutation(
+      () => TaskService.reorderVisible(visibleIds, tid, targetId),
+      "Reordenando tareas..."
+    );
     this._reset();
   },
   _cross(s, d, id) {
-    if ((s==="now"||s==="next") && d==="done") { TaskService.updateTask(id, { completed: true, completedAt: Date.now() }); if (!UIState.doneExpanded) { UIState.doneExpanded = true; const a = DOM.get("done-arrow"); if (a) a.style.transform = "rotate(90deg)"; } }
-    else if (s==="done" && d==="now") TaskService.updateTask(id, { completed: false, completedAt: null, priority: "Alta" });
-    else if (s==="done" && d==="next") { const t = TaskService.tasks.find(t=>t.id===id); TaskService.updateTask(id, { completed:false, completedAt:null, priority: t?.priority==="Alta"?"Media":(t?.priority??"Media") }); }
-    else if (s==="now" && d==="next") TaskService.updateTask(id, { priority: "Media" });
-    else if (s==="next" && d==="now") TaskService.updateTask(id, { priority: "Alta" });
-    void App.commit("Actualizando tareas...");
+    void App.commitMutation(() => {
+      if ((s === "now" || s === "next") && d === "done") {
+        TaskService.updateTask(id, { completed: true, completedAt: Date.now() });
+        if (!UIState.doneExpanded) {
+          UIState.doneExpanded = true;
+          const arrow = DOM.get("done-arrow");
+          if (arrow) arrow.style.transform = "rotate(90deg)";
+        }
+        return true;
+      }
+      if (s === "done" && d === "now") {
+        TaskService.updateTask(id, { completed: false, completedAt: null, priority: "Alta" });
+        return true;
+      }
+      if (s === "done" && d === "next") {
+        const task = TaskService.tasks.find(t => t.id === id);
+        TaskService.updateTask(id, {
+          completed: false,
+          completedAt: null,
+          priority: task?.priority === "Alta" ? "Media" : (task?.priority ?? "Media"),
+        });
+        return true;
+      }
+      if (s === "now" && d === "next") {
+        TaskService.updateTask(id, { priority: "Media" });
+        return true;
+      }
+      if (s === "next" && d === "now") {
+        TaskService.updateTask(id, { priority: "Alta" });
+        return true;
+      }
+      return false;
+    }, "Actualizando tareas...");
   },
   _reset() { this._srcId = null; this._srcSection = null; },
 };
@@ -1389,8 +1428,26 @@ const Keyboard = {
     const mod = e.ctrlKey || e.metaKey;
     if (mod && e.key === "k") { e.preventDefault(); Search.focus(); return; }
     if (mod && e.key === "f" && !document.activeElement?.matches("input, textarea")) { e.preventDefault(); FocusMode.toggle(); return; }
-    if (mod && e.shiftKey && e.key === "C") { e.preventDefault(); if (TaskService.hasPending()) { TaskService.completeAll(); void App.commit("Completando tareas..."); } return; }
-    if (mod && e.shiftKey && e.key === "X") { e.preventDefault(); if (TaskService.hasCompleted()) { TaskService.clearCompleted(); void App.commit("Eliminando tareas completadas..."); } return; }
+    if (mod && e.shiftKey && e.key === "C") {
+      e.preventDefault();
+      if (TaskService.hasPending()) {
+        void App.commitMutation(() => {
+          TaskService.completeAll();
+          return true;
+        }, "Completando tareas...");
+      }
+      return;
+    }
+    if (mod && e.shiftKey && e.key === "X") {
+      e.preventDefault();
+      if (TaskService.hasCompleted()) {
+        void App.commitMutation(() => {
+          TaskService.clearCompleted();
+          return true;
+        }, "Eliminando tareas completadas...");
+      }
+      return;
+    }
     if (e.key !== "Escape") return;
     if (UIState.focusMode) { FocusMode.close(); return; }
     if (UIState.expandedTaskId) { UIState.expandedTaskId = null; App.render(); return; }
@@ -1465,8 +1522,7 @@ const App = {
   /**
    * Persiste el estado actual en el servidor y refresca todas las secciones renderizadas.
    */
-  async commit(message = "Sincronizando cambios...") {
-    const snapshot = structuredClone(TaskService.tasks);
+  async commit(message = "Sincronizando cambios...", rollbackSnapshot = structuredClone(TaskService.tasks)) {
     this.render();
     NetworkUI.showPending(message);
 
@@ -1476,13 +1532,29 @@ const App = {
       this.render();
       return true;
     } catch (err) {
-      TaskService.tasks = snapshot;
+      TaskService.tasks = rollbackSnapshot;
       NetworkUI.showError(err.message);
       this.render();
       return false;
     } finally {
       NetworkUI.hidePending();
     }
+  },
+  async commitMutation(mutator, message = "Sincronizando cambios...") {
+    const snapshot = structuredClone(TaskService.tasks);
+    let shouldPersist = true;
+
+    try {
+      shouldPersist = mutator() !== false;
+    } catch (err) {
+      TaskService.tasks = snapshot;
+      NetworkUI.showError(err.message);
+      this.render();
+      return false;
+    }
+
+    if (!shouldPersist) return false;
+    return this.commit(message, snapshot);
   },
   async createTask(text, category, priority, options = {}) {
     NetworkUI.showPending("Guardando tarea...");
@@ -1679,13 +1751,15 @@ const App = {
     const completeVisible = (...sections) => {
       const ids = [...new Set(sections.flatMap(section => UIState.visibleTaskIds[section] || []))];
       if (ids.length === 0) return;
-      if (TaskService.completeTasks(ids)) void this.commit("Sincronizando tareas...");
+      void this.commitMutation(() => TaskService.completeTasks(ids), "Sincronizando tareas...");
     };
     const clearVisibleDone = () => {
       const ids = UIState.visibleTaskIds.done || [];
       if (ids.length === 0) return;
-      TaskService.clearCompleted(ids);
-      void this.commit("Eliminando tareas completadas...");
+      void this.commitMutation(() => {
+        TaskService.clearCompleted(ids);
+        return true;
+      }, "Eliminando tareas completadas...");
     };
 
     DOM.get("task-form")?.addEventListener("submit", async e => {
@@ -1760,14 +1834,18 @@ const App = {
     DOM.get("sidebar-clear-done")?.addEventListener("click", () => clearVisibleDone());
     DOM.get("undo-toast-btn")?.addEventListener("click", () => UndoToast.undo());
     DOM.get("load-examples")?.addEventListener("click", () => {
-      for (const ex of EXAMPLE_TASKS) {
-        TaskService.add(ex.text, ex.category, ex.priority, {
-          dueDate: ex.dueDate,
-          project: ex.project,
-          notes: ex.notes || "",
-        });
-      }
-      void this.commit("Sincronizando tareas de ejemplo...");
+      void this.commitMutation(() => {
+        let addedCount = 0;
+        for (const ex of EXAMPLE_TASKS) {
+          const result = TaskService.add(ex.text, ex.category, ex.priority, {
+            dueDate: ex.dueDate,
+            project: ex.project,
+            notes: ex.notes || "",
+          });
+          if (result.ok) addedCount++;
+        }
+        return addedCount > 0;
+      }, "Sincronizando tareas de ejemplo...");
     });
     Keyboard.init();
   },

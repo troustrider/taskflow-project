@@ -20,18 +20,12 @@ taskflow-project/
 ├── app.js                      # Lógica completa de la aplicación (modular, ~95 KB)
 ├── input.css                   # Archivo fuente de Tailwind CSS
 ├── css/
-│   └── output.css              # CSS compilado (generado por Tailwind, en .gitignore)
+│   └── output.css              # CSS compilado generado por Tailwind
 ├── src/
 │   └── api/
 │       └── client.js           # Capa de red del frontend (fetch async → API REST)
-├── api/                        # Wrappers serverless para Vercel
-│   ├── docs.js
-│   ├── docs/
-│   │   └── [...asset].js
-│   └── v1/
-│       ├── tasks.js
-│       └── tasks/
-│           └── [id].js
+├── api/
+│   └── router.js               # Wrapper serverless único para Vercel + rewrites desde vercel.json
 ├── server/                     # Backend Express (Fase 3)
 │   ├── .env                    # Variables de entorno (excluido del repo)
 │   ├── package.json
@@ -74,7 +68,7 @@ taskflow-project/
 
 El frontend gestiona toda la interfaz: formulario con sintaxis rápida (`@viernes #trabajo !alta /proyecto`), filtros por categoría y proyecto, drag-and-drop entre secciones (Ahora / Siguiente / Completadas), Focus Mode, tema claro/oscuro, y geolocalización.
 
-Al cargar la página, el frontend pide las tareas al backend con `GET /api/v1/tasks`. Las operaciones individuales usan el CRUD real de la API: `POST` para crear, `PATCH` para editar y completar, y `DELETE` para borrar. El endpoint `PUT /api/v1/tasks` se reserva para sincronizaciones masivas como reordenación, vaciado de completadas, deshacer borrados y carga de tareas de ejemplo. El backend almacena las tareas en un array en memoria — se pierden al reiniciar el servidor porque aún no hay base de datos.
+Al cargar la página, el frontend pide las tareas al backend con `GET /api/v1/tasks`. Las operaciones individuales usan el CRUD real de la API: `POST` para crear, `PATCH` para editar y completar, y `DELETE` para borrar. El endpoint `PUT /api/v1/tasks` se reserva para sincronizaciones masivas como reordenación, vaciado de completadas, deshacer borrados y carga de tareas de ejemplo. En ese sync masivo, el backend valida y normaliza la shape completa de cada tarea (`id`, `text`, `category`, `priority`, `completed`, `createdAt`, `completedAt`, `dueDate`, `notes` y `project`). El backend almacena las tareas en un array en memoria — se pierden al reiniciar el servidor porque aún no hay base de datos.
 
 La capa de red (`src/api/client.js`) usa `fetch` con rutas relativas (`/api/v1/tasks`), así funciona igual en `localhost:3000` que en el despliegue de Vercel sin tocar código.
 
@@ -234,7 +228,7 @@ La UI gestiona tres estados de red:
 El proyecto se despliega como aplicación full-stack en Vercel:
 
 - **Frontend** — Archivos estáticos servidos desde la raíz. El CSS se compila con `npm run build:css` como build command.
-- **Backend** — Express sigue viviendo en `server/src/index.js`, pero en producción se expone a través de funciones serverless explícitas dentro de `api/` (`api/v1/tasks.js`, `api/v1/tasks/[id].js`, `api/docs.js` y `api/docs/[...asset].js`).
+- **Backend** — Express sigue viviendo en `server/src/index.js`, pero en producción Vercel lo expone a través de un único wrapper serverless (`api/router.js`). Las rutas públicas `/api/v1/tasks` y `/api/docs` se redirigen a ese router mediante `rewrites` en `vercel.json`.
 - **Variables de entorno** — `PORT` y `NODE_ENV` se configuran en el dashboard de Vercel (Settings → Environment Variables). El módulo `env.js` detecta el entorno Vercel para no exigir `PORT` (la plataforma lo gestiona internamente).
 - **`app.listen()` condicional** — Solo se ejecuta en local. En Vercel, `index.js` exporta `module.exports = app` y la plataforma maneja el ciclo HTTP.
 
@@ -242,7 +236,7 @@ El proyecto se despliega como aplicación full-stack en Vercel:
 
 - **`<aside>` sustituido por anillo de progreso SVG** — El rediseño eliminó el sidebar clásico por decisión de diseño. Las estadísticas se muestran en un panel lateral con anillo visual de progreso.
 - **Tailwind vía npm en vez de CDN** — Permite usar Tailwind v4 con `@import`, compilación local y minificación en producción.
-- **`css/output.css` en `.gitignore`** — Vercel lo regenera en cada despliegue con `npm run build:css`. Así se evitan conflictos de versionado con un archivo generado.
+- **`css/output.css` como artefacto generado** — Vercel lo regenera en cada despliegue con `npm run build:css`. No debe editarse manualmente; la fuente de verdad es `input.css`.
 - **Colección Postman incluida** — La entrega incorpora una colección exportable con casos `200`, `201`, `204`, `400`, `404` y `500` para dejar trazabilidad de las pruebas manuales exigidas.
 
 ## Documentación adicional

@@ -63,15 +63,41 @@ async function apiRequest(url, options = {}) {
     return null;
   }
 
-  const datos = await respuesta.json();
+  const datos = await parseResponseBody(respuesta);
 
   // Si el código HTTP indica error (400, 404, 500...), lanzamos excepción
   // con el mensaje que envió el servidor para que el frontend lo muestre
   if (!respuesta.ok) {
-    throw new Error(datos.error || "Error desconocido del servidor");
+    const errorMessage =
+      (datos && typeof datos === "object" && typeof datos.error === "string" && datos.error) ||
+      (typeof datos === "string" && datos.trim()) ||
+      `Error HTTP ${respuesta.status}`;
+
+    throw new Error(errorMessage);
   }
 
   return datos;
+}
+
+async function parseResponseBody(respuesta) {
+  const contentType = respuesta.headers.get("content-type") || "";
+  const raw = await respuesta.text();
+
+  if (!raw) return null;
+
+  if (contentType.includes("application/json")) {
+    try {
+      return JSON.parse(raw);
+    } catch (parseError) {
+      return raw;
+    }
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch (parseError) {
+    return raw;
+  }
 }
 
 // ─── Funciones públicas ──────────────────────────────────

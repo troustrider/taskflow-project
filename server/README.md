@@ -122,7 +122,8 @@ Una vez corriendo, abrir `http://localhost:3000` para la aplicación completa y 
 
 El backend se despliega como Serverless Function:
 
-- `server/src/index.js` concentra la app Express, y Vercel la expone a través de wrappers serverless dentro de `../api/`.
+- `server/src/index.js` concentra la app Express, y Vercel la expone a través de un único wrapper serverless en `../api/router.js`.
+- `vercel.json` redirige `/api/v1/tasks` y `/api/docs` hacia ese router con reglas `rewrites`, manteniendo las URLs públicas limpias.
 - `index.js` exporta `module.exports = app` y solo llama a `app.listen()` en local (no en Vercel).
 - `env.js` detecta el entorno Vercel (`VERCEL=1`) para no exigir `PORT`.
 - Las variables de entorno se configuran en Vercel Dashboard → Settings → Environment Variables.
@@ -204,7 +205,20 @@ Crea una nueva tarea.
 
 Sincronización masiva: reemplaza todas las tareas del servidor con el array enviado por el frontend. Existe porque el frontend mantiene su propio estado en memoria y lo sincroniza completo tras cada cambio.
 
-**Request body:** Array de objetos de tarea.
+**Request body:** Array de objetos de tarea con shape completa.
+
+Cada elemento del array debe incluir:
+
+- `id`
+- `text`
+- `category`
+- `priority`
+- `completed`
+- `createdAt`
+- `completedAt`
+- `dueDate`
+- `notes`
+- `project`
 
 **Respuesta 200:** Array resultante.
 
@@ -212,6 +226,8 @@ Sincronización masiva: reemplaza todas las tareas del servidor con el array env
 ```json
 { "error": "El cuerpo debe ser un array de tareas." }
 ```
+
+También responde `400` si alguna tarea del array no cumple la shape esperada o contiene tipos inválidos.
 
 ### PATCH /api/v1/tasks/:id
 
@@ -252,6 +268,14 @@ El controlador aplica validaciones en la frontera de red, antes de que los datos
 | dueDate | Opcional, timestamp numérico o null |
 | notes | Opcional, string |
 | project | Opcional, string o null |
+
+En `PUT /api/v1/tasks`, además de esas reglas, el backend exige una tarea completa y valida también:
+
+| Campo | Regla |
+|---|---|
+| id | Obligatorio, string no vacío |
+| createdAt | Obligatorio, timestamp numérico |
+| completedAt | Obligatorio en la shape, timestamp numérico o null |
 
 Si alguna validación falla, el servidor responde con HTTP 400 y un mensaje descriptivo. Los datos nunca llegan al servicio si no son correctos.
 

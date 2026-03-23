@@ -124,7 +124,7 @@ function eliminarTarea(id) {
  * @param {Array<Object>} nuevasTareas — Nuevo array de tareas.
  */
 function reemplazarTodas(nuevasTareas) {
-  tasks = nuevasTareas;
+  tasks = nuevasTareas.map((task) => ({ ...task }));
 }
 
 module.exports = {
