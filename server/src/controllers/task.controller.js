@@ -308,9 +308,9 @@ function actualizarTarea(req, res, next) {
  * Sincronización masiva: reemplaza todas las tareas del servidor
  * con el array enviado por el frontend.
  *
- * Este endpoint existe porque el frontend mantiene su propio estado
- * en memoria y lo sincroniza completo con cada commit(). En el futuro,
- * con una base de datos real, se sustituiría por operaciones individuales.
+ * Se usa solo para operaciones masivas del frontend, como reordenación,
+ * vaciado de completadas, deshacer borrados o carga de ejemplos.
+ * Las operaciones normales usan POST, PATCH y DELETE.
  *
  * Responde con 200 y el array resultante.
  * @param {import('express').Request} req — req.body debe ser un Array de tareas.

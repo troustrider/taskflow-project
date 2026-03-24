@@ -1,7 +1,7 @@
 # Reflexión sobre IA y programación
 
 Mis conclusiones después de usar herramientas de IA durante
-el desarrollo de TaskFlow. Escrito con mis propias palabras.
+el desarrollo de TaskFlow. 
 
 ---
 

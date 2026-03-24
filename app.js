@@ -3,13 +3,16 @@
 /**
  * TaskFlow — App de gestión de tareas con arquitectura modular
  *
- * Flujo unidireccional: App.commit() → TaskService.save() → App.render()
+ * Flujo principal:
+ *   - Operaciones individuales: App.createTask()/patchTask()/deleteTask() → API REST
+ *   - Operaciones masivas: App.commitMutation()/commit() → TaskService.save() → PUT /api/v1/tasks
  *
  * Conceptos clave:
  *   - CATEGORÍA (#): Tipo fijo de actividad (Trabajo, Personal, Estudio, Salud, Gestiones).
  *     Son las 5 categorías predefinidas. No se crean ni se borran.
  *   - PROYECTO (/): Agrupación temporal y libre creada por el usuario (/mudanza, /sprint14).
- *     Se crean al asignar, desaparecen cuando no hay tareas activas.
+ *     Se crean al asignar, se ocultan del sidebar activo cuando no quedan pendientes,
+ *     pero siguen existiendo en tareas completadas y en el autocompletado.
  *   - FECHA LÍMITE (@): Fecha de vencimiento. Tareas vencidas o de hoy → "Ahora".
  *   - NOTAS: Texto libre ampliado, editable desde el panel de detalle inline.
  *
@@ -442,12 +445,6 @@ const TaskService = {
     this.tasks.unshift(createdTask);
     return { ok: true, task: createdTask };
   },
-  updateText(id, text) {
-    const validation = this._validateText(text, id);
-    if (!validation.ok) return validation;
-    this.tasks = this.tasks.map(t => t.id === id ? { ...t, text: validation.text } : t);
-    return { ok: true };
-  },
   async patchRemote(id, updates) {
     const index = this.tasks.findIndex(t => t.id === id);
     if (index === -1) throw new Error("NOT_FOUND");
@@ -670,43 +667,6 @@ const ShortcutHints = {
     rows[2].textContent = this._format("c", { shift: true });
     rows[3].textContent = this._format("x", { shift: true });
     rows[4].textContent = "Esc";
-  },
-};
-
-const FormVisualOrder = {
-  apply() {
-    const taskInput = DOM.get("task-input");
-    if (taskInput) taskInput.placeholder = "Escribe una tarea…";
-
-    const preview = DOM.get("input-preview");
-    if (preview) {
-      const previewOrder = ["preview-due", "preview-project", "preview-category", "preview-priority", "preview-text"];
-      for (const id of previewOrder) {
-        const node = DOM.get(id);
-        if (node) preview.appendChild(node);
-      }
-    }
-
-    const panel = DOM.get("selector-panel");
-    if (panel) {
-      const fieldIds = ["task-duedate", "task-project", "task-category", "task-priority"];
-      const fields = fieldIds
-        .map(id => DOM.get(id)?.closest(".relative"))
-        .filter(Boolean);
-      for (const field of fields) panel.appendChild(field);
-    }
-
-    const legacySelectorToggle = document.querySelector('#classic-selectors > button#toggle-selectors');
-    if (legacySelectorToggle) {
-      legacySelectorToggle.id = "toggle-selectors-legacy";
-      legacySelectorToggle.hidden = true;
-      legacySelectorToggle.setAttribute("aria-hidden", "true");
-    }
-
-    const welcomeExample = document.querySelector("#welcome-section .grid > div:first-child p:last-child");
-    if (welcomeExample) {
-      welcomeExample.innerHTML = 'Usa <kbd class="font-mono-ui text-amber-700">@viernes</kbd> <kbd class="font-mono-ui text-indigo-500">/proyecto</kbd> <kbd class="font-mono-ui text-amber-600">#trabajo</kbd> <kbd class="font-mono-ui text-red-500">!alta</kbd>';
-    }
   },
 };
 
@@ -984,113 +944,6 @@ const TaskRenderer = {
       }
     }
     wrap.append(chk, tw); return wrap;
-  },
-
-  _buildRight(task, completed) {
-    const isEd = !completed && UIState.editingTaskId === task.id;
-    const wrap = document.createElement("div");
-    wrap.className = "badge-row flex items-center gap-1.5 flex-wrap justify-start sm:justify-end";
-
-    if (!isEd) {
-      // ── Obligatorios (siempre visibles) ──
-      // 1. Prioridad — señal cromática inmediata
-      const prb = document.createElement("span");
-      prb.className = this.priorityClasses(task.priority);
-      prb.textContent = task.priority;
-      wrap.appendChild(prb);
-
-      // 2. Categoría — contexto del tipo de actividad (tintado por categoría)
-      const cb = document.createElement("span");
-      cb.className = `${CLASSES.categoryBase} ${CATEGORY_BADGE_CLASS}`;
-      const cd = document.createElement("span");
-      cd.className = "w-1.5 h-1.5 rounded-full shrink-0";
-      cd.style.background = categoryColor(task.category);
-      const cl = document.createElement("span");
-      cl.textContent = task.category;
-      cb.append(cd, cl);
-      wrap.appendChild(cb);
-
-      // ── Opcionales (solo si existen) ──
-      // 3. Fecha — urgencia temporal
-      if (task.dueDate && !completed) {
-        const variant = Utils.isOverdue(task.dueDate)
-          ? CLASSES.dueBadge.overdue
-          : Utils.isDueToday(task.dueDate) ? CLASSES.dueBadge.today : CLASSES.dueBadge.future;
-        const db = document.createElement("span");
-        db.className = `${CLASSES.dueBadge.base} ${variant}`;
-        db.textContent = Utils.formatDueDate(task.dueDate);
-        wrap.appendChild(db);
-      }
-
-      // 4. Proyecto — agrupación libre
-      if (task.project) {
-        const pColor = projectColor(task.project);
-        const pb = document.createElement("span");
-        pb.className = CLASSES.projectBadge;
-        pb.style.borderColor = pColor + "40";
-        pb.style.background = pColor + "12";
-        pb.style.color = pColor;
-        const pbDot = document.createElement("span");
-        pbDot.className = "w-1.5 h-1.5 rounded-sm shrink-0";
-        pbDot.style.background = pColor;
-        const pbLabel = document.createElement("span");
-        pbLabel.className = "truncate max-w-[100px]";
-        pbLabel.textContent = task.project;
-        pb.append(pbDot, pbLabel);
-        pb.title = `Proyecto: ${task.project} (click para filtrar)`;
-        pb.addEventListener("click", (e) => {
-          e.stopPropagation();
-          setProjectFilter(task.project);
-        });
-        wrap.appendChild(pb);
-      }
-
-      // 5. Indicador de detalles ocultos (notas / fecha / proyecto)
-      const hasHiddenDetails = !completed && (
-        (task.notes && UIState.expandedTaskId !== task.id) ||
-        (task.dueDate && completed) ||
-        task.project || task.notes
-      );
-      if (!completed && task.notes && UIState.expandedTaskId !== task.id) {
-        const hint = document.createElement("button");
-        hint.type = "button";
-        hint.className = "detail-hint inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-stone-200/80 bg-white/80 text-[11px] text-stone-500 shadow-[0_1px_2px_rgba(41,31,20,0.04)] backdrop-blur-sm transition hover:border-amber-300 hover:text-amber-700 hover:bg-amber-50 dark:border-white/10 dark:bg-white/[0.03] dark:text-stone-400 dark:hover:border-amber-300/20 dark:hover:text-amber-100";
-        hint.textContent = "\u2026";
-        hint.title = "Tiene notas \u2014 click para ver";
-        hint.setAttribute("aria-label", "Ver notas de la tarea");
-        hint.addEventListener("click", (e) => {
-          e.stopPropagation();
-          UIState.expandedTaskId = task.id;
-          App.render();
-        });
-        wrap.appendChild(hint);
-      }
-    }
-
-    // Separador visual entre badges y acciones
-    if (!isEd && !completed) {
-      const sep = document.createElement("span");
-      sep.className = "mx-0.5 hidden h-4 w-px shrink-0 bg-stone-200/70 dark:bg-white/8 sm:block";
-      wrap.appendChild(sep);
-    }
-
-    if (!completed) {
-      wrap.append(this._button({
-        action: "toggle-detail", id: task.id, className: CLASSES.actionButton,
-        text: UIState.expandedTaskId === task.id ? "Cerrar" : "Detalles",
-      }));
-      wrap.append(this._button({
-        action: isEd ? "edit-save" : "edit", id: task.id, className: CLASSES.actionButton,
-        text: isEd ? "Guardar" : "Editar",
-      }));
-      if (isEd) {
-        wrap.append(this._button({
-          action: "edit-cancel", id: task.id, className: CLASSES.actionButton, text: "Cancelar",
-        }));
-      }
-    }
-    wrap.append(this._button({ action: "delete", id: task.id, className: CLASSES.actionButton, text: "Borrar" }));
-    return wrap;
   },
 
   _buildAside(task, completed) {
@@ -1858,7 +1711,6 @@ const App = {
     Theme.load();
     this._bindEvents();
     ShortcutHints.apply();
-    FormVisualOrder.apply();
     Location.fetch();
     setInterval(() => Location._applyEverywhere(), CONFIG.CLOCK_INTERVAL_MS);
     Sidebar.build();

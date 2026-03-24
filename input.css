@@ -312,10 +312,6 @@ footer {
   color: var(--accent-strong);
 }
 
-#classic-selectors > button#toggle-selectors-legacy {
-  display: none;
-}
-
 .dark .sidebar-filter-btn {
   color: var(--app-muted);
 }

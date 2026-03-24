@@ -102,6 +102,8 @@ La API cuenta con documentación interactiva generada automáticamente a partir 
 
 La documentación incluye "Try it out" para probar cada endpoint directamente desde el navegador.
 
+En la app completa, la ubicación mostrada en cabecera/sidebar no usa `navigator.geolocation`: se obtiene de servicios externos basados en IP y se cachea en `sessionStorage` del navegador.
+
 ## Instalación y ejecución
 
 ```bash
@@ -314,9 +316,9 @@ curl -X POST http://localhost:3000/api/v1/tasks \
 **Resultado:** 201 — Tarea creada con ID generado.
 
 ```bash
-curl http://localhost:3000/api/v1/tasks
+curl -L http://localhost:3000/api/v1/tasks
 ```
-**Resultado:** 200 — Array con la tarea.
+**Resultado:** 200 — Array con la tarea. Si se llama sin seguir redirects, el servidor puede responder antes con `301` hacia `/api/v1/tasks/`, por eso en `curl` conviene usar `-L`.
 
 ### Prueba 2 — Error 400: POST sin texto
 

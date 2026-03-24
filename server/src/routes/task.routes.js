@@ -111,8 +111,9 @@ router.post("/", taskController.crearTarea);
  *     summary: Sincronización masiva de tareas
  *     description: |
  *       Reemplaza todas las tareas del servidor con el array enviado por el frontend.
- *       Este endpoint existe porque el frontend mantiene su propio estado en memoria
- *       y lo sincroniza completo con cada operación de commit().
+ *       Se reserva para operaciones masivas como reordenación drag-and-drop,
+ *       vaciado de completadas, deshacer borrados o carga de ejemplos.
+ *       Las operaciones normales usan POST, PATCH y DELETE.
  *     tags: [Tareas]
  *     requestBody:
  *       required: true
