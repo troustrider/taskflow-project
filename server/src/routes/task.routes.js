@@ -2,21 +2,12 @@
 
 /**
  * @module routes/task.routes
- * @description Capa de enrutamiento — conecta verbos HTTP y URLs con controladores.
+ * @description Conecta cada verbo HTTP + URL con su controlador.
+ * No tiene lógica de negocio. Montado en index.js bajo /api/v1/tasks.
  *
- * Esta capa es intencionadamente "tonta": no contiene lógica de negocio
- * ni validación. Su única responsabilidad es mapear cada combinación de
- * verbo HTTP + ruta al método correspondiente del controlador.
- *
- * Montado en index.js bajo el prefijo /api/v1/tasks.
- *
- * Endpoints:
- *   GET    /              → obtenerTodas      (listar todas las tareas)
- *   GET    /:id           → obtenerPorId      (obtener una tarea por UUID)
- *   POST   /              → crearTarea        (crear una tarea nueva)
- *   PUT    /              → sincronizarTodas   (sync masivo desde el frontend)
- *   PATCH  /:id           → actualizarTarea   (modificación parcial)
- *   DELETE /:id           → eliminarTarea     (borrar una tarea)
+ * GET    /       → obtenerTodas       POST   /       → crearTarea
+ * GET    /:id    → obtenerPorId       PUT    /       → sincronizarTodas
+ * PATCH  /:id    → actualizarTarea     DELETE /:id    → eliminarTarea
  */
 
 const express = require("express");

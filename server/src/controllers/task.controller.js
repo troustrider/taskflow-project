@@ -2,16 +2,9 @@
 
 /**
  * @module controllers/task.controller
- * @description Capa de controladores — orquesta peticiones HTTP y validaciones.
- *
- * Cada función de este módulo:
- *   1. Extrae los datos de la petición (req.body, req.params).
- *   2. Aplica validación defensiva en la frontera de red (antes de tocar el servicio).
- *   3. Invoca al servicio con datos limpios.
- *   4. Formatea y envía la respuesta HTTP con el código de estado correcto.
- *
- * Si la validación falla, responde directamente con 400.
- * Si el servicio lanza una excepción, la pasa al middleware de errores con next(err).
+ * @description Controladores — reciben las peticiones HTTP, validan los datos
+ * y llaman al servicio. Si los datos no son correctos, responden con 400.
+ * Si el servicio lanza un error, lo pasan al middleware de errores con next(err).
  */
 
 const taskService = require("../services/task.service");

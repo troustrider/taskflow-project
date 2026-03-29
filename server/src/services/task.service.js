@@ -2,19 +2,16 @@
 
 /**
  * @module services/task.service
- * @description Capa de servicio — lógica de negocio pura para la gestión de tareas.
+ * @description Lógica de negocio para la gestión de tareas.
  *
- * Esta capa NO conoce Express, HTTP, req ni res. Trabaja exclusivamente con
- * datos JavaScript (arrays y objetos). Esto permite:
- *   - Escribir tests unitarios sin levantar un servidor.
- *   - Reutilizar la lógica si se cambia el framework web.
- *   - Mantener la separación de preocupaciones (SoC) con la capa de controladores.
+ * Este archivo no sabe nada de Express ni de HTTP. Solo trabaja con
+ * arrays y objetos de JavaScript. Así se puede cambiar el framework
+ * o añadir tests sin tocar los controladores.
  *
- * Persistencia actual: array en memoria (se perderá al reiniciar el servidor).
- * En el futuro se sustituirá por una base de datos real.
+ * Las tareas se guardan en un array en memoria (se pierden al reiniciar).
  */
 
-/** @type {Array<Object>} Array en memoria que simula la base de datos. */
+/** @type {Array<Object>} Array en memoria que almacena las tareas. */
 let tasks = [];
 
 /**

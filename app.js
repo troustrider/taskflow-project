@@ -1,26 +1,14 @@
 "use strict";
 
 /**
- * TaskFlow — App de gestión de tareas con arquitectura modular
+ * TaskFlow — App de gestión de tareas.
  *
- * Flujo principal:
- *   - Operaciones individuales: App.createTask()/patchTask()/deleteTask() → API REST
- *   - Operaciones masivas: App.commitMutation()/commit() → TaskService.save() → PUT /api/v1/tasks
+ * Operaciones individuales (crear, editar, borrar) van directo a la API REST.
+ * Operaciones masivas (reordenar, vaciar completadas, deshacer) usan PUT /api/v1/tasks.
  *
- * Conceptos clave:
- *   - CATEGORÍA (#): Tipo fijo de actividad (Trabajo, Personal, Estudio, Salud, Gestiones).
- *     Son las 5 categorías predefinidas. No se crean ni se borran.
- *   - PROYECTO (/): Agrupación temporal y libre creada por el usuario (/mudanza, /sprint14).
- *     Se crean al asignar, se ocultan del sidebar activo cuando no quedan pendientes,
- *     pero siguen existiendo en tareas completadas y en el autocompletado.
- *   - FECHA LÍMITE (@): Fecha de vencimiento. Tareas vencidas o de hoy → "Ahora".
- *   - NOTAS: Texto libre ampliado, editable desde el panel de detalle inline.
- *
- * Badge hierarchy:
- *   1. Fecha  — rounded-md, font-mono (urgencia temporal, sistema 1)
- *   2. Prioridad — rounded-full, color semáforo (señal cromática)
- *   3. Categoría — rounded-full, dot ● circular + fondo neutro
- *   4. Proyecto — rounded-md, dot ■ cuadrado + color único por proyecto
+ * Sintaxis rápida en el input: @fecha #categoría !prioridad /proyecto
+ * Categorías fijas: Trabajo, Personal, Estudio, Salud, Gestiones.
+ * Proyectos: los crea el usuario libremente (/mudanza, /sprint14).
  */
 
 /* ═══════════════════════════════════════════
@@ -52,11 +40,11 @@ const CATEGORY_COLORS_DARK = Object.freeze({
   Gestiones: "#697384",
 });
 
-/** Clases Tailwind para badges de categoría tintados — cada categoría tiene su propia identidad visual. */
+/** Clases Tailwind para los badges de categoría. */
 const CATEGORY_BADGE_CLASS = "border-stone-200/80 bg-stone-50/90 text-stone-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-200";
 const PRIORITIES = Object.freeze(["Alta", "Media", "Baja"]);
 
-/** Paleta de proyectos — tonos fríos/verdes para no solapar con categorías (cálidas). */
+/** Colores para badges de proyecto (tonos fríos para distinguirlos de las categorías). */
 const PROJECT_COLORS = Object.freeze([
   "#4f46e5", "#0f766e", "#7c3aed", "#b7791f", "#2563eb", "#64748b", "#be185d",
 ]);
@@ -577,20 +565,8 @@ const TaskService = {
    ═══════════════════════════════════════════ */
 
 /**
- * Estado mutable de la UI — fuente única de verdad para flags transitorios de vista.
- * Mutado directamente por event handlers; leído por App.render() para decidir qué mostrar.
- *
- * @property {string}  categoryFilter     — Filtro de categoría activo ("all" | category name)
- * @property {string}  projectFilter      — Filtro de proyecto activo ("all" | project name)
- * @property {string|null} lastAddedTaskId — ID de la tarea recién creada (dispara animación de entrada, se resetea tras render)
- * @property {string|null} editingTaskId   — ID de la tarea en modo edición inline
- * @property {string|null} expandedTaskId  — ID de la tarea cuyo panel de detalle está abierto
- * @property {boolean} doneExpanded        — Si la sección "Completadas" está expandida o colapsada
- * @property {number|null} searchDebounceTimer — Handle de setTimeout para el debounce de búsqueda
- * @property {boolean} focusMode           — Si el overlay de Focus Mode está activo
- * @property {number}  focusIndex          — Índice de la tarea mostrada en Focus Mode
- * @property {boolean} selectorsExpanded   — Si el panel de selectores guiados está abierto
- * @property {object}  visibleTaskIds      — { now: string[], next: string[], done: string[] } — IDs renderizados en cada sección (usado por drag-drop y acciones masivas)
+ * Estado de la UI — lo que está filtrado, expandido, editando, etc.
+ * Los event handlers lo modifican; App.render() lo lee para decidir qué mostrar.
  */
 const UIState = {
   categoryFilter: "all", projectFilter: "all",

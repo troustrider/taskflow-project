@@ -17,7 +17,7 @@ Frontend en vanilla JavaScript + Tailwind CSS v4. Backend en Node.js + Express 5
 ```
 taskflow-project/
 ├── index.html                  # Punto de entrada del frontend
-├── app.js                      # Lógica completa de la aplicación (modular, ~95 KB)
+├── app.js                      # Lógica completa de la aplicación (modular)
 ├── input.css                   # Archivo fuente de Tailwind CSS
 ├── css/
 │   └── output.css              # CSS compilado generado por Tailwind
@@ -68,9 +68,9 @@ taskflow-project/
 
 El frontend gestiona toda la interfaz: formulario con sintaxis rápida (`@viernes #trabajo !alta /proyecto`), filtros por categoría y proyecto, drag-and-drop entre secciones (Ahora / Pendiente / Hecho), Focus Mode, tema claro/oscuro, y ubicación aproximada por IP para contextualizar hora y ciudad.
 
-Al cargar la página, el frontend pide las tareas al backend con `GET /api/v1/tasks`. Las operaciones individuales usan el CRUD real de la API: `POST` para crear, `PATCH` para editar y completar, y `DELETE` para borrar. El endpoint `PUT /api/v1/tasks` se reserva para sincronizaciones masivas como reordenación, vaciado de completadas, deshacer borrados y carga de tareas de ejemplo. En ese sync masivo, el backend valida y normaliza la shape completa de cada tarea (`id`, `text`, `category`, `priority`, `completed`, `createdAt`, `completedAt`, `dueDate`, `notes` y `project`). El backend almacena las tareas en un array en memoria — se pierden al reiniciar el servidor porque aún no hay base de datos.
+Al cargar la página, el frontend pide las tareas al backend con `GET /api/v1/tasks`. Las operaciones individuales usan el CRUD real de la API: `POST` para crear, `PATCH` para editar y completar, y `DELETE` para borrar. El endpoint `PUT /api/v1/tasks` se reserva para sincronizaciones masivas como reordenación, vaciado de completadas, deshacer borrados y carga de tareas de ejemplo. En ese sync masivo, el backend valida y normaliza la shape completa de cada tarea (`id`, `text`, `category`, `priority`, `completed`, `createdAt`, `completedAt`, `dueDate`, `notes` y `project`). El backend almacena las tareas en un array en memoria — se pierden al reiniciar el servidor.
 
-La capa de red (`src/api/client.js`) usa `fetch` con rutas relativas (`/api/v1/tasks`), así funciona igual en `localhost:3000` que en el despliegue de Vercel sin tocar código. La ubicación no usa `navigator.geolocation`: consulta servicios externos de IP como fallback y cachea el resultado en `sessionStorage`.
+La capa de red (`src/api/client.js`) usa `fetch` con rutas relativas (`/api/v1/tasks`), así funciona igual en `localhost:3000` que en el despliegue de Vercel sin tocar código. La ubicación se obtiene consultando servicios externos basados en IP y se cachea en `sessionStorage`.
 
 ## Instalación y ejecución local
 

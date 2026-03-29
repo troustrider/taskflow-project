@@ -39,7 +39,7 @@ const { data: nueva } = await axios.post('http://localhost:3000/api/v1/tasks', {
 
 **Qué problema resuelve:** Cuando desarrollas un backend, necesitas probar los endpoints antes de conectar el frontend. Escribir peticiones HTTP a mano es tedioso. Postman proporciona una interfaz gráfica donde configuras método, URL, headers, body, y ves la respuesta formateada.
 
-**Por qué se usa:** Permite organizar las peticiones en "colecciones" (por ejemplo, una colección "TaskFlow API" con todos los endpoints), guardar variables de entorno (URL base, tokens), ejecutar tests automatizados sobre las respuestas, y generar documentación compartible. Es el estándar de facto para pruebas manuales de APIs.
+**Por qué se usa:** Permite organizar las peticiones en "colecciones" (por ejemplo, una colección "TaskFlow API" con todos los endpoints), guardar variables de entorno (URL base, tokens), ejecutar tests automatizados sobre las respuestas, y generar documentación compartible. Es la herramienta más usada para pruebas manuales de APIs.
 
 **Alternativas:**
 - **Thunder Client** — Extensión de VS Code que hace lo mismo dentro del editor, sin salir.
@@ -52,11 +52,11 @@ const { data: nueva } = await axios.post('http://localhost:3000/api/v1/tasks', {
 
 ## Swagger (OpenAPI)
 
-**Qué es:** Especificación estándar para describir APIs REST de forma legible por máquinas y humanos. Se escribe en YAML o JSON y define los endpoints, parámetros, cuerpos de petición, respuestas y códigos de error de toda la API.
+**Qué es:** Formato para describir APIs REST de forma legible tanto por herramientas como por personas. Se escribe en YAML o JSON y define los endpoints, parámetros, cuerpos de petición, respuestas y códigos de error de toda la API.
 
 **Qué problema resuelve:** La documentación de una API escrita a mano (como nuestro README) se desactualiza fácilmente. Swagger genera documentación interactiva directamente desde la especificación: una página web donde puedes ver todos los endpoints, sus parámetros, y probarlos en vivo desde el navegador.
 
-**Por qué se usa:** Es el estándar de la industria para documentación de APIs. Beneficios principales: documentación siempre sincronizada con el código, interfaz interactiva para probar endpoints ("Try it out"), generación automática de clientes SDK, y validación de que la API cumple su contrato.
+**Por qué se usa:** Es la forma más habitual de documentar APIs REST. Beneficios principales: documentación siempre sincronizada con el código, interfaz interactiva para probar endpoints ("Try it out") y generación automática de clientes SDK.
 
 **Herramientas del ecosistema Swagger:**
 - **swagger-jsdoc** — Genera la especificación OpenAPI a partir de comentarios JSDoc en el código (lo que ya escribimos).
@@ -88,7 +88,7 @@ Con esto, accediendo a `http://localhost:3000/api/docs` se vería la documentaci
 
 **Qué problema resuelve:** Cuando tu aplicación está desplegada y un usuario encuentra un error, ¿cómo te enteras? Los `console.error` del servidor se pierden. Sentry captura automáticamente las excepciones no controladas, las agrupa, te avisa por email/Slack, y te muestra el stack trace completo con contexto (qué petición lo causó, qué usuario, qué navegador).
 
-**Por qué se usa:** En producción no puedes estar mirando los logs 24/7. Sentry te da visibilidad sobre qué errores ocurren, con qué frecuencia, a cuántos usuarios afectan, y si un despliegue nuevo introdujo regresiones. Es la herramienta estándar de observabilidad de errores.
+**Por qué se usa:** En producción no puedes estar mirando los logs 24/7. Sentry te da visibilidad sobre qué errores ocurren, con qué frecuencia, a cuántos usuarios afectan, y si un despliegue nuevo introdujo regresiones. Es una de las herramientas más usadas para monitorizar errores en producción.
 
 **Cómo se integra con Express:**
 ```javascript

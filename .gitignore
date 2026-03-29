@@ -6,3 +6,6 @@ css/output.css
 web-search-mcp/
 .env
 /backup/
+.headless-edge-profile/
+.cursor/
+/tests/

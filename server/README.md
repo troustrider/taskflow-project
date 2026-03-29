@@ -85,7 +85,7 @@ PORT=3000
 NODE_ENV=development
 ```
 
-El módulo `src/config/env.js` carga estas variables con `dotenv` y lanza un error si `PORT` no está definido en entorno local, impidiendo que el servidor arranque sin configuración (principio fail fast). En entornos serverless (Vercel), donde la plataforma gestiona el puerto internamente, se usa un valor por defecto sin lanzar error.
+El módulo `src/config/env.js` carga estas variables con `dotenv` y lanza un error si `PORT` no está definido en entorno local, impidiendo que el servidor arranque sin configuración. En entornos serverless (Vercel), donde la plataforma gestiona el puerto internamente, se usa un valor por defecto sin lanzar error.
 
 ## Documentación Swagger (Bonus)
 
@@ -101,8 +101,6 @@ La API cuenta con documentación interactiva generada automáticamente a partir 
 - `src/index.js` — Monta `swagger-ui-express` en la ruta `/api/docs`.
 
 La documentación incluye "Try it out" para probar cada endpoint directamente desde el navegador.
-
-En la app completa, la ubicación mostrada en cabecera/sidebar no usa `navigator.geolocation`: se obtiene de servicios externos basados en IP y se cachea en `sessionStorage` del navegador.
 
 ## Instalación y ejecución
 

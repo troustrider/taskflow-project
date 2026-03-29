@@ -2,15 +2,9 @@
 
 /**
  * @module index
- * @description Punto de entrada del servidor Express de TaskFlow.
- *
- * Responsabilidades:
- *   - Configura los middlewares globales (CORS, parseo JSON, archivos estáticos, logger).
- *   - Monta las rutas de la API bajo el prefijo /api/v1/tasks.
- *   - Monta la documentación Swagger bajo /api/docs.
- *   - Registra el middleware global de errores como última pieza de la cadena.
- *   - Arranca el servidor HTTP en el puerto definido por variable de entorno.
- *   - Exporta la app Express para despliegues serverless (Vercel).
+ * @description Punto de entrada del servidor Express.
+ * Configura middlewares, monta las rutas de la API y Swagger,
+ * registra el middleware de errores y arranca el servidor.
  */
 
 const path = require("path");
@@ -38,15 +32,8 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, "../..")));
 
 /**
- * Middleware de auditoría: registra cada petición HTTP en consola.
- * Formato: [MÉTODO] /ruta - Estado: código (duración en ms)
- *
- * Se suscribe al evento 'finish' del stream de respuesta para medir
- * el tiempo total entre la llegada de la petición y el envío de la respuesta.
- *
- * @param {import('express').Request} req - Objeto de petición HTTP
- * @param {import('express').Response} res - Objeto de respuesta HTTP
- * @param {import('express').NextFunction} next - Función para ceder el control al siguiente middleware
+ * Logger: escribe en consola cada petición con método, ruta, código y duración.
+ * Usa el evento 'finish' de la respuesta para medir el tiempo total.
  */
 const logger = (req, res, next) => {
   const inicio = performance.now();
@@ -79,20 +66,8 @@ app.use("/api/v1/tasks", taskRoutes);
 // ─── Middleware global de errores ────────────────────────
 
 /**
- * Middleware de manejo global de errores (4 parámetros).
- *
- * Express reconoce esta función como manejador de errores gracias a su
- * firma con 4 parámetros. Recibe cualquier error que los controladores
- * pasen con next(err).
- *
- * Mapeo de errores a códigos HTTP:
- *   - err.message === "NOT_FOUND" → 404 (recurso no encontrado)
- *   - Cualquier otro error        → 500 (error interno, sin filtrar detalles técnicos)
- *
- * @param {Error} err - Error capturado
- * @param {import('express').Request} req - Objeto de petición HTTP
- * @param {import('express').Response} res - Objeto de respuesta HTTP
- * @param {import('express').NextFunction} next - Función next (requerida por la firma de 4 parámetros)
+ * Middleware de errores (4 parámetros — Express lo reconoce como error handler).
+ * Si el error es NOT_FOUND → 404. Cualquier otro → 500 con mensaje genérico.
  */
 function errorHandler(err, req, res, next) {
   if (err.message === "NOT_FOUND") {
@@ -107,10 +82,7 @@ app.use(errorHandler);
 
 // ─── Arrancar servidor (solo en ejecución local) ─────────
 
-/**
- * En Vercel, el servidor NO debe llamar a app.listen() porque la plataforma
- * gestiona el ciclo de vida HTTP. Solo escuchamos en local.
- */
+// En Vercel no se llama a app.listen() — la plataforma gestiona el servidor.
 if (process.env.VERCEL !== "1") {
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
@@ -118,5 +90,5 @@ if (process.env.VERCEL !== "1") {
   });
 }
 
-/** Exporta la app para que Vercel la use como Serverless Function. */
+// Exporta la app para que Vercel la use como Serverless Function.
 module.exports = app;

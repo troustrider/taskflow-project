@@ -1,14 +1,8 @@
 /**
  * @module config/env
- * @description Módulo de configuración de variables de entorno.
- *
- * Carga las variables desde el archivo .env usando dotenv y aplica
- * validación estricta: si PORT no está definido y NO estamos en un
- * entorno serverless (Vercel), el servidor se niega a arrancar
- * (principio fail fast de la metodología 12-Factor App).
- *
- * En Vercel, la plataforma gestiona el puerto internamente, por lo que
- * PORT no es obligatorio y se usa un valor por defecto de 3000.
+ * @description Carga las variables de entorno desde .env con dotenv.
+ * Si PORT no está definido en local, lanza error para que el servidor
+ * no arranque sin configuración. En Vercel, PORT no es necesario.
  */
 
 const dotenv = require("dotenv");
@@ -26,9 +20,6 @@ if (!process.env.PORT && !isServerless) {
 }
 
 module.exports = {
-  /** @type {number} Puerto en el que escucha el servidor HTTP (ignorado en Vercel). */
   PORT: Number(process.env.PORT) || 3000,
-
-  /** @type {string} Entorno de ejecución: "development" | "production" | "test". */
   NODE_ENV: process.env.NODE_ENV || "development",
 };
