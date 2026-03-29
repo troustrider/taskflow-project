@@ -12,16 +12,15 @@
 
 <body>
 <!--
-  Data attributes used by app.js for event delegation and rendering:
-    data-section="now|next|done"  — Identifies each task list for drag-drop and bulk actions.
-    data-id="<uuid>"              — Unique task identifier on each <li>; used by actions and drag-drop.
-    data-action="<verb>"          — Action buttons inside task cards (complete, restore, delete,
-                                    toggle-detail, edit, edit-save, edit-cancel).
-    data-role="edit-text"         — Marks the inline-edit <input> so Keyboard can detect it.
-    data-category-filter="<cat>"  — Category filter pills ("all" | category name).
-    data-sidebar-filter="<cat>"   — Sidebar category filter buttons (mirrors category-filter).
-    data-clear-filter="<key>"     — Active-filter chip removal (query | category | project).
-    data-detail-for="<uuid>"      — Links a detail panel <div> to its parent task.
+  Atributos data-* que usa app.js:
+    data-section="now|next|done"  — Identifica cada lista de tareas (drag-drop y acciones masivas).
+    data-id="<uuid>"              — ID de la tarea en cada <li>.
+    data-action="<verbo>"         — Botones de acción dentro de las tarjetas de tarea.
+    data-role="edit-text"         — Marca el <input> de edición inline.
+    data-category-filter="<cat>"  — Filtros de categoría ("all" o nombre de categoría).
+    data-sidebar-filter="<cat>"   — Filtros de categoría del sidebar.
+    data-clear-filter="<key>"     — Chips para quitar filtros activos.
+    data-detail-for="<uuid>"      — Vincula un panel de detalle con su tarea.
 -->
 
 <header class="sticky top-0 z-30 border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-lg dark:border-neutral-800/70 dark:bg-neutral-950/90">
@@ -64,7 +63,7 @@ dark:hover:border-neutral-500 dark:hover:text-neutral-200 dark:focus:ring-neutra
 </div>
 </header>
 
-<!-- FOCUS MODE OVERLAY -->
+<!-- Overlay de modo focus -->
 <div id="focus-overlay" class="hidden fixed inset-0 z-40 bg-stone-50/98 dark:bg-neutral-950/98 backdrop-blur-lg" role="dialog" aria-modal="true" aria-labelledby="focus-title" tabindex="-1">
   <div class="flex flex-col items-center justify-center min-h-screen px-6">
     <button id="focus-close" type="button" aria-label="Cerrar modo focus" class="absolute top-6 right-6 rounded-lg p-2 text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-200 transition">
@@ -86,7 +85,7 @@ dark:hover:border-neutral-500 dark:hover:text-neutral-200 dark:focus:ring-neutra
 
 <div class="mx-auto max-w-7xl px-3 sm:px-5 xl:px-10 pt-6 sm:pt-10 pb-16 xl:grid xl:grid-cols-[240px_1fr_240px] xl:gap-8">
 
-<!-- SIDEBAR IZQUIERDO -->
+<!-- Sidebar izquierdo (solo escritorio) -->
 <aside id="sidebar-left" class="hidden xl:block">
   <div class="sticky top-20 space-y-6">
     <div class="surface-panel">
@@ -126,7 +125,7 @@ dark:hover:border-neutral-500 dark:hover:text-neutral-200 dark:focus:ring-neutra
   </div>
 </aside>
 
-<!-- CONTENIDO CENTRAL -->
+<!-- Contenido central -->
 <main class="max-w-2xl mx-auto w-full space-y-6 sm:space-y-10">
 
 <section id="greeting-section" class="hidden">
@@ -154,7 +153,7 @@ class="text-xs font-semibold fill-stone-700 dark:fill-neutral-200" style="font-f
 </div>
 </section>
 
-<!-- SMART INPUT -->
+<!-- Formulario de entrada -->
 <section>
 <form id="task-form" class="relative">
 <div class="relative">
@@ -165,7 +164,7 @@ transition duration-200 ease-out hover:border-stone-300 focus:outline-none
 dark:hover:border-neutral-600">
 <span id="enter-hint" class="enter-hint"><kbd class="enter-hint-kbd">↵</kbd></span>
 </div>
-<!-- Preview de parsing -->
+<!-- Vista previa del parsing -->
 <div id="input-preview" class="hidden mt-2 flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200/50 bg-stone-50/70 px-3 py-2 dark:border-neutral-700/40 dark:bg-neutral-900/60">
   <span id="preview-due" class="hidden text-[11px] text-blue-600 dark:text-blue-400 font-medium"></span>
   <span id="preview-project" class="hidden text-[11px] text-indigo-500 dark:text-indigo-400 font-medium"></span>
@@ -186,7 +185,7 @@ dark:hover:border-neutral-600">
     </button>
   </div>
 </div>
-<!-- Tooltip de sintaxis -->
+<!-- Ayuda de sintaxis -->
 <div id="input-help" class="hidden absolute left-0 right-0 top-full mt-2 rounded-xl border p-4 shadow-lg z-10">
   <p class="text-xs font-semibold text-stone-600 dark:text-neutral-300 mb-2">Sintaxis rápida</p>
   <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[11px]">
@@ -210,7 +209,7 @@ dark:hover:border-neutral-600">
   <p class="text-[10px] text-stone-400 dark:text-neutral-600 mt-3">Los proyectos se crean al asignarlos · Categorías y proyectos son independientes</p>
 </div>
 </form>
-<!-- Selectores clásicos (colapsables) -->
+<!-- Selectores de categoría y prioridad (colapsables) -->
 <div id="classic-selectors" class="mt-2">
   <div id="selector-panel" class="hidden mt-3 flex flex-wrap items-center justify-center gap-2 rounded-2xl border p-3 shadow-[0_8px_30px_rgba(28,25,23,0.04)]">
     <div class="relative">
@@ -241,7 +240,7 @@ dark:hover:border-neutral-600">
 </div>
 </section>
 
-<!-- Welcome state -->
+<!-- Estado inicial (sin tareas) -->
 <section id="welcome-section" class="hidden">
   <div class="surface-panel px-6 py-14 text-center">
     <svg class="mx-auto mb-5 text-stone-300 dark:text-neutral-600" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -320,7 +319,7 @@ Hecho <span id="done-count" class="font-mono-ui">0</span>
 
 </main>
 
-<!-- SIDEBAR DERECHO -->
+<!-- Sidebar derecho (solo escritorio) -->
 <aside id="sidebar-right" class="hidden xl:block">
   <div class="sticky top-20 space-y-6">
     <div class="surface-panel">
@@ -362,18 +361,18 @@ Hecho <span id="done-count" class="font-mono-ui">0</span>
   <button id="undo-toast-btn" type="button" class="undo-toast-action">Deshacer</button>
 </div>
 
-<!-- Banner de error de red -->
+<!-- Error de red -->
 <div id="network-error" class="hidden fixed top-0 left-0 right-0 z-50 bg-red-600 text-white text-center text-sm py-2 px-4" role="alert">
   <span id="network-error-msg">Error de conexión con el servidor</span>
   <button id="network-retry" type="button" class="ml-3 underline font-medium hover:text-red-100">Reintentar</button>
 </div>
 
-<!-- Indicador de peticiones en curso -->
+<!-- Indicador de sincronización -->
 <div id="network-pending" class="hidden fixed bottom-4 right-4 z-50 rounded-full border border-stone-200/80 bg-white/95 px-4 py-2 text-xs font-medium text-stone-600 shadow-lg backdrop-blur dark:border-white/10 dark:bg-neutral-900/95 dark:text-stone-200" aria-live="polite">
   <span id="network-pending-msg">Sincronizando cambios...</span>
 </div>
 
-<!-- Indicador de carga inicial -->
+<!-- Carga inicial -->
 <div id="loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-stone-50/95 dark:bg-neutral-950/95">
   <div class="text-center">
     <div class="inline-block h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-amber-500 dark:border-neutral-600 dark:border-t-amber-400"></div>
